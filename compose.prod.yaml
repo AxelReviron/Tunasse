@@ -1,0 +1,50 @@
+services:
+  frankenphp:
+    container_name: tunasse
+    build:
+      context: .
+    entrypoint: php artisan octane:frankenphp --caddyfile=./Caddyfile --workers=1 --max-requests=1
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      - SERVER_NAME=${SERVER_NAME}
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+      - ./storage:/app/storage
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - tunasse_network
+
+  mysql:
+    container_name: tunasse_db
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - tunasse_network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  caddy_data:
+  caddy_config:
+  db_data:
+
+networks:
+  tunasse_network:
+    driver: bridge
