@@ -12,10 +12,10 @@ It allows you to organize your transactions into budgets, manage accounts (check
 
 ## 🗒️ TODO
 ### Back
-- [ ] Migrations
-- [ ] Factories + Seeders
-- [ ] Models
-- [ ] Controllers
+- [x] Migrations
+- [x] Factories + Seeders
+- [x] Models
+- [x] Controllers
 - [ ] API Resources
 - [ ] Form Requests
 - [ ] Role and permissions (policies)
