@@ -3,64 +3,20 @@
 namespace App\Policies;
 
 use App\Models\Account;
+use App\Models\Budget;
 use App\Models\User;
+use App\Utils\HandlesPolicies;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Database\Eloquent\Model;
 
 class AccountPolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
-    public function viewAny(User $user): bool
-    {
-        return false;
-    }
+    use HandlesPolicies;
 
-    /**
-     * Determine whether the user can view the model.
-     */
-    public function view(User $user, Account $account): bool
-    {
-        return false;
-    }
+    protected string $model = Account::class;
 
-    /**
-     * Determine whether the user can create models.
-     */
-    public function create(User $user): bool
+    protected function isOwn(User $user, Model $model): bool
     {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can update the model.
-     */
-    public function update(User $user, Account $account): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user, Account $account): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Account $account): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Account $account): bool
-    {
-        return false;
+        return $model instanceof Account && $user->getKey() === $model->user->getKey();
     }
 }

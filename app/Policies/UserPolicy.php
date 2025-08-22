@@ -2,21 +2,18 @@
 
 namespace App\Policies;
 
-use App\Models\Currency;
-use App\Models\Transaction;
 use App\Models\User;
 use App\Utils\HandlesPolicies;
-use Illuminate\Auth\Access\Response;
 use Illuminate\Database\Eloquent\Model;
 
-class CurrencyPolicy
+class UserPolicy
 {
     use HandlesPolicies;
 
-    protected string $model = Currency::class;
+    protected string $model = User::class;
 
     protected function isOwn(User $user, Model $model): bool
     {
-        return false;
+        return $model instanceof User && $user->getKey() === $model->getKey();
     }
 }

@@ -18,10 +18,10 @@ It allows you to organize your transactions into budgets, manage accounts (check
 - [x] Controllers
 - [ ] API Resources
 - [ ] Form Requests
-- [ ] Role and permissions (policies)
+- [x] Role and permissions (policies)
 - [ ] Routes
 - [ ] Observers / Events
-- [ ] Auth
+- [x] Auth
 - [ ] Filament
 - [ ] Tests
 ### Front
