@@ -18,10 +18,12 @@ class BudgetSeeder extends Seeder
         $user = User::first();
 
         $budgets = [
-            ['name' => 'Alimentation', 'amount' => 300, 'icon' => '🍎'],
-            ['name' => 'Sport', 'amount' => 100, 'icon' => '🏋️‍♂️'],
-            ['name' => 'Loisir', 'amount' => 150, 'icon' => '🎮'],
-            ['name' => 'Factures', 'amount' => 500, 'icon' => '💡'],
+            ['name' => 'Food', 'amount' => 300, 'icon' => 'Utensils'],
+            ['name' => 'Sport', 'amount' => 100, 'icon' => 'Dumbbell'],
+            ['name' => 'Entertainment', 'amount' => 150, 'icon' => 'Clapperboard'],
+            ['name' => 'Bills', 'amount' => 500, 'icon' => 'ReceiptText'],
+            ['name' => 'Car', 'amount' => 100, 'icon' => 'Car'],
+            ['name' => 'Other', 'amount' => 0, 'icon' => 'Other'],
         ];
 
         $startDate = Carbon::now()->startOfMonth();

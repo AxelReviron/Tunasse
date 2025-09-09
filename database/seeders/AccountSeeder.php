@@ -20,33 +20,37 @@ class AccountSeeder extends Seeder
         $btc = Currency::where('code', 'BTC')->first();
 
         Account::factory()->create([
-            'name' => 'Compte courant',
+            'name' => 'Checking',
             'type' => 'checking',
-            'balance' => 1000,
+            'balance' => 2500,
+            'icon' => 'CreditCard',
             'currency_id' => $eur->id,
             'user_id' => $user->id,
         ]);
 
         Account::factory()->create([
-            'name' => 'Compte épargne',
+            'name' => 'Savings',
             'type' => 'savings',
-            'balance' => 5000,
+            'balance' => 42000,
+            'icon' => 'PiggyBank',
             'currency_id' => $eur->id,
             'user_id' => $user->id,
         ]);
 
         Account::factory()->create([
-            'name' => 'Compte investissement crypto',
+            'name' => 'Crypto',
             'type' => 'investment',
-            'balance' => 2000,
+            'balance' => 9000,
+            'icon' => 'Bitcoin',
             'currency_id' => $btc->id,
             'user_id' => $user->id,
         ]);
 
         Account::factory()->create([
-            'name' => 'Compte investissement actions',
+            'name' => 'Stocks',
             'type' => 'investment',
-            'balance' => 3000,
+            'balance' => 16000,
+            'icon' => 'ChartSpline',
             'currency_id' => $eur->id,
             'user_id' => $user->id,
         ]);
