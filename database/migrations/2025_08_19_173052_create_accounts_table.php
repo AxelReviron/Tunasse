@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->enum('type', ['checking', 'savings', 'credits', 'investment']);
             $table->float('balance');
+            $table->string('icon');
             $table->foreignUuid('currency_id')->constrained('currencies');
             $table->foreignUuid('user_id')->constrained('users');
             $table->timestamps();
