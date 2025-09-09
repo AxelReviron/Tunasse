@@ -1,17 +1,18 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Currency;
 
+use App\Models\Currency;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreAccountRequest extends FormRequest
+class StoreCurrencyRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return false;
+        return $this->user()->can('create', Currency::class);
     }
 
     /**
@@ -22,7 +23,9 @@ class StoreAccountRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'code' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
+            'symbol' => ['required', 'string', 'max:255'],
         ];
     }
 }
