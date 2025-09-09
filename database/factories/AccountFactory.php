@@ -22,6 +22,7 @@ class AccountFactory extends Factory
             'name' => $this->faker->name(),
             'type' => $this->faker->name(),
             'balance' => $this->faker->randomFloat(),
+            'icon' => $this->faker->name,
             'currency_id' => Currency::factory(),
             'user_id' => User::factory(),
         ];
