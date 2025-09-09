@@ -2,21 +2,45 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreCurrencyRequest;
-use App\Http\Requests\UpdateCurrencyRequest;
+use App\Http\Api\Controllers\CrudController;
+use App\Http\Requests\Currency\SearchCurrencyRequest;
+use App\Http\Requests\Currency\StoreCurrencyRequest;
+use App\Http\Requests\Currency\UpdateCurrencyRequest;
 use App\Http\Resources\CurrencyResource;
 use App\Models\Currency;
-use App\Utils\CrudController;
 
 class CurrencyController extends CrudController
 {
-    protected function modelClass(): string
+    public function model(): string
     {
         return Currency::class;
     }
 
-    protected function resourceClass(): string
+    public function resource(): string
     {
         return CurrencyResource::class;
+    }
+
+    public function formRequests(): array
+    {
+        return [
+            'store' => StoreCurrencyRequest::class,
+            'update' => UpdateCurrencyRequest::class,
+            'search' => SearchCurrencyRequest::class,
+        ];
+    }
+
+    public function relationships(): array
+    {
+        return [];
+    }
+
+    public function searchable(): array
+    {
+        return [
+            'code',
+            'name',
+            'symbol',
+        ];
     }
 }
