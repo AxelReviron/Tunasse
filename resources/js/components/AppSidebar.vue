@@ -21,13 +21,21 @@ import {
 
 import { usePage } from '@inertiajs/vue3'
 import { onMounted, ref } from 'vue';
-import axios from 'axios';
 import { useIcons } from '@/composables/useIcons';
+import { Account, Budget } from '@/types/models';
+import { AccountService } from '@/services/api/tunasse/AccountService';
+import { BudgetService } from '@/services/api/tunasse/BudgetService';
 
-const page = usePage()
+const page = usePage();
 
-const { getIcon } = useIcons()
+// Services
+const accountService = new AccountService();
+const budgetService = new BudgetService();
 
+// Composables
+const { getIcon } = useIcons();
+
+// Refs
 const items = ref<any[]>([
     {
         title: "Dashboard",
@@ -59,41 +67,11 @@ const items = ref<any[]>([
     },
 ])
 
-
-const accounts = ref();
-const budgets = ref();
-
-// TODO: Refactor this (make a service)
-async function getUserAccounts(): void {
-    await axios.post('/api/accounts/search', {
-        filters: {
-            user_id: {
-                eq: page.props.auth.user.id,
-            }
-        }
-    }).then((response) => {
-        accounts.value = response.data;
-    }).catch((error) => {
-        console.error({error});
-    })
-}
-
-async function getUserBudgets(): void {
-    await axios.post('/api/budgets/search', {
-        filters: {
-            user_id: {
-                eq: page.props.auth.user.id,
-            }
-        }
-    }).then((response) => {
-        budgets.value = response.data;
-    }).catch((error) => {
-        console.error({error});
-    })
-}
+const accounts = ref<Account[]>([]);
+const budgets = ref<Budget[]>([]);
 
 function fillSideBar() {
-    const accountsMenu = accounts.value.data.map((account: any) => ({
+    const accountsMenu = accounts.value.map((account: any) => ({
         title: account.name,
         url: `/accounts/${account.id}`,
         icon: getIcon(account.icon)
@@ -104,7 +82,7 @@ function fillSideBar() {
         accountsItem.subItems = accountsMenu
     }
 
-    const budgetsMenu = budgets.value.data.map((budget: any) => ({
+    const budgetsMenu = budgets.value.map((budget: any) => ({
         title: budget.name,
         url: `/budgets/${budget.id}`,
         icon: getIcon(budget.icon)
@@ -117,8 +95,8 @@ function fillSideBar() {
 }
 
 onMounted(async () => {
-    await getUserAccounts();
-    await getUserBudgets();
+    accounts.value = await accountService.getUserAccounts(page.props.auth.user.id);
+    budgets.value = await budgetService.getUserBudgets(page.props.auth.user.id);
     fillSideBar();
 })
 

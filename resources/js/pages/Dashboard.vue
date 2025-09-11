@@ -4,8 +4,11 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/vue3';
 import ChartLine from '@/components/ChartLine.vue';
 import { onMounted, ref } from 'vue';
-import axios from 'axios';
 import ChartDoughnut from '@/components/ChartDoughnut.vue';
+import { Account, Transaction } from '@/types/models';
+import { TransactionService } from '@/services/api/tunasse/TransactionService';
+import { AccountService } from '@/services/api/tunasse/AccountService';
+import { useTransactions } from '@/composables/useTransactions';
 
 const page = usePage()
 
@@ -16,114 +19,27 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-// TODO: Type this
-const monthlyRecurringTransactions = ref([]);
-const remainingRecurringTransactionsCount = ref();
-const remainingRecurringTransactionsAmount = ref();
+// Services
+const transactionService = new TransactionService();
+const accountService = new AccountService();
 
-const currentMonthTransactions = ref([]);
+// Composables
+const { calculateTotalAmountTransactions } = useTransactions();
 
-const accounts = ref([]);
+// Refs
+const monthlyRecurringTransactions = ref<Transaction[]>([]);
+const remainingRecurringTransactionsAmount = ref<Transaction[]>([]);
+const currentMonthTransactions = ref<Transaction[]>([]);
+const accounts = ref<Account[]>([]);
 
-
-function calculateRemainingRecurringTransactions(): void {
-    const totalAmount = monthlyRecurringTransactions.value.reduce(
-        (sum: number, tx: any) => sum + Number(tx.amount),
-        0
-    );
-
-    remainingRecurringTransactionsCount.value = monthlyRecurringTransactions.value.length;
-    remainingRecurringTransactionsAmount.value = totalAmount;
-}
-
-// TODO: Refactor this (make a service)
-async function getUserMonthlyRecurringExpenseSinceToday(): void {
-    const now = new Date();
-
-    // Date of the current day
-    const today = now.toISOString().split('T')[0];
-
-    // Last day of the month
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-        .toISOString()
-        .split('T')[0];
-
-    try {
-        const response = await axios.post(`/api/transactions/search`, {
-            filters: {
-                is_recurring: { eq: true },
-                recurring_interval: { eq: 1 },
-                recurring_unit: { eq: 'month' },
-                date: {
-                    gte: today,
-                    lte: endOfMonth
-                },
-                type: {
-                    eq: 'expense',
-                },
-            }
-        });
-
-        monthlyRecurringTransactions.value = response.data.data;
-    } catch (error) {
-        console.error({ error });
-    }
-}
-
-async function getUserCurrentMonthTransactions(): Promise<void> {
-    const now = new Date();
-
-    // Start of month (YYYY-MM-DD)
-    const start = new Date(now.getFullYear(), now.getMonth(), 1)
-        .toISOString()
-        .split("T")[0];
-
-    // End of month (YYYY-MM-DD)
-    const today = now.toISOString().split('T')[0];
-
-    try {
-        const response = await axios.post(`/api/transactions/search`, {
-            filters: {
-                date: {
-                    between: [start, today]
-                }
-            },
-            sort: 'date',
-            direction: 'asc',
-        });
-
-        currentMonthTransactions.value = response.data.data;
-    } catch (error) {
-        console.error("Error while fetching transactions:", error);
-    }
-}
-
-async function getUserAccounts() {
-    try {
-        const response = await axios.post(`/api/accounts/search`, {
-            filters: {
-                user_id: {
-                    eq: page.props.auth.user.id
-                }
-            },
-            sort: 'date',
-            direction: 'asc',
-        });
-
-        accounts.value = response.data.data;
-        console.log(accounts.value);
-    } catch (error) {
-        console.error("Error while fetching transactions:", error);
-    }
-}
 
 onMounted(async () => {
-    await getUserMonthlyRecurringExpenseSinceToday();
-    calculateRemainingRecurringTransactions();
+    monthlyRecurringTransactions.value = await transactionService.getUserMonthlyRecurringExpenseSinceToday(page.props.auth.user.id);
+    currentMonthTransactions.value = await transactionService.getUserCurrentMonthTransactions(page.props.auth.user.id);
 
-    await getUserCurrentMonthTransactions();
+    accounts.value = await accountService.getUserAccounts(page.props.auth.user.id);
 
-    await getUserAccounts()
+    remainingRecurringTransactionsAmount.value = calculateTotalAmountTransactions(monthlyRecurringTransactions.value);
 })
 
 </script>
@@ -139,7 +55,7 @@ onMounted(async () => {
                 </div>
                 <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border p-4">
                     <div class="text-gray-500 dark:text-gray-300 mb-2">Remaining Recurring Transactions</div>
-                    <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ remainingRecurringTransactionsCount }}</div>
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ monthlyRecurringTransactions.length }}</div>
                     <div class="text-gray-500 dark:text-gray-300 mt-4">Amount</div>
                     <div class="text-xl font-semibold text-gray-900 dark:text-white">{{ remainingRecurringTransactionsAmount }}</div>
                 </div>
