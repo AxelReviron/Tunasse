@@ -20,6 +20,13 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
         ]);
 
+        $testUser = User::factory()->create([
+            'name' => 'test',
+            'email' => 'test@test.fr',
+            'password' => Hash::make('password'),
+        ]);
+
         $user->assignRole('user');
+        $testUser->assignRole('user');
     }
 }

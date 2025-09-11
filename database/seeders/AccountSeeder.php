@@ -16,8 +16,18 @@ class AccountSeeder extends Seeder
     public function run(): void
     {
         $user = User::first();
+        $testUser = User::where('name', 'test')->first();
         $eur = Currency::where('code', 'EUR')->first();
         $btc = Currency::where('code', 'BTC')->first();
+
+        Account::factory()->create([
+            'name' => 'CheckingTest',
+            'type' => 'checking',
+            'balance' => 2500,
+            'icon' => 'CreditCard',
+            'currency_id' => $eur->id,
+            'user_id' => $testUser->id,
+        ]);
 
         Account::factory()->create([
             'name' => 'Checking',
