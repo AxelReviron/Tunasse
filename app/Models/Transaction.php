@@ -17,7 +17,7 @@ class Transaction extends Model
     /**
      * The attributes that aren't mass assignable.
      *
-     * @var array<string>|bool
+     * @var array<string>
      */
     protected $guarded = ['id', 'created_at', 'updated_at', 'deleted_at'];
 

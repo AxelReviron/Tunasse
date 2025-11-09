@@ -16,7 +16,8 @@ RUN install-php-extensions \
     pcntl \
     pdo_mysql \
     intl \
-    gd
+    gd \
+    zip
     # Add other PHP extensions here...
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
