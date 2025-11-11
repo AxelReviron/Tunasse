@@ -26,9 +26,12 @@ class UsersTable
                     TextColumn::make('email')
                         ->label(__('user.email'))
                         ->searchable(),
+                    TextColumn::make('roles.name')
+                        ->label(__('filament.roles'))
+                        ->columnSpanFull(),
                     TextColumn::make('email_verified_at')
                         ->label(__('user.email_verified_at'))
-                        ->formatStateUsing(fn($state) => DateHelper::formatDate($state))
+                        ->formatStateUsing(fn ($state) => DateHelper::formatDate($state))
                         ->sortable(),
                 ]),
                 MetadataColumnGroup::make(__('filament.metadata')),

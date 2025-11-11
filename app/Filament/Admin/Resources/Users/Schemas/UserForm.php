@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\Users\Schemas;
 
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -54,7 +55,13 @@ class UserForm
                             ->password()
                             ->revealable()
                             ->required(),
-                    ])
+                        Select::make('roles')
+                            ->label(__('filament.roles'))
+                            ->relationship('roles', 'name')
+                            ->multiple()
+                            ->preload()
+                            ->searchable(),
+                    ]),
             ]);
     }
 }

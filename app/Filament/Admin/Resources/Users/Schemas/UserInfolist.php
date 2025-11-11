@@ -26,10 +26,13 @@ class UserInfolist
                             ->columnSpanFull(),
                         TextEntry::make('email_verified_at')
                             ->label(__('user.email_verified_at'))
-                            ->formatStateUsing(fn($state) => DateHelper::formatDate($state))
+                            ->formatStateUsing(fn ($state) => DateHelper::formatDate($state))
                             ->placeholder('-')
                             ->columnSpanFull(),
-                    ])
+                        TextEntry::make('roles.name')
+                            ->label(__('filament.roles'))
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 }

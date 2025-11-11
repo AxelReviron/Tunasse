@@ -9,7 +9,7 @@ use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Model;
 
-class RecordTimestampsWidget extends StatsOverviewWidget
+class RecordMetadataWidget extends StatsOverviewWidget
 {
     public ?Model $record = null;
 
