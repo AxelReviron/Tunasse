@@ -13,10 +13,12 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->create([
-            'name' => 'lexa',
-            'email' => 'contact@axel-reviron.fr',
-            'password' => Hash::make('password'),
-        ]);
+        User::firstOrCreate(
+            ['email' => 'contact@axel-reviron.fr'],
+            [
+                'name' => 'lexa',
+                'password' => Hash::make(config('app.user-seed.password')),
+            ]
+        );
     }
 }

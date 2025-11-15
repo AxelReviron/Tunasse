@@ -2,18 +2,22 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Admin\Resources\Accounts\AccountResource;
+use App\Filament\Admin\Resources\Accounts\Widgets\AccountBalanceBarChart;
+use App\Filament\Admin\Resources\Accounts\Widgets\AccountPieDistribution;
+use App\Models\Account;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -25,18 +29,35 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        $navItems = [];
+        $sort = 2;
+
+        // Accounts
+        foreach (Account::all() as $account) {
+            $navItems[] = NavigationItem::make($account->label)
+                ->url(fn () => AccountResource::getUrl(
+                    'view',
+                    ['record' => $account->getKey()],
+                    panel: 'admin'
+                ))
+                ->isActiveWhen(function () use ($account) {
+                    return request()->route('record') == $account->getKey();
+                })
+                ->sort($sort++)
+                ->group(__('account.accounts'));
+        }
+
         return $panel
             ->id('admin')
             ->path('/')
             ->default()
             ->login()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Green,
             ])
-            ->navigationGroups([
-                NavigationGroup::make()
-                    ->label(__('filament.admin')),
-            ])
+            ->navigationItems($this->getNavigationItems())
+            ->navigationGroups($this->getNavigationGroups())
+            ->collapsibleNavigationGroups(true)
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\Filament\Admin\Pages')
             ->pages([
@@ -44,8 +65,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\Filament\Admin\Widgets')
             ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
+                AccountPieDistribution::class,
+                AccountBalanceBarChart::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -65,5 +86,51 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+    }
+
+    protected function getNavigationItems(): array
+    {
+        return [
+            ...$this->getAccountNavigationItems(),
+            // ...$this->getTransactionNavigationItems(),
+            // ...$this->getBudgetNavigationItems(),
+        ];
+    }
+
+    /**
+     * Get navigation items for accounts
+     */
+    protected function getAccountNavigationItems(): array
+    {
+        $items = [];
+        $sort = 2;
+
+        foreach (Account::all() as $account) {
+            $items[] = NavigationItem::make($account->label)
+                ->url(fn () => AccountResource::getUrl(
+                    'view',
+                    ['record' => $account->getKey()],
+                    panel: 'admin'
+                ))
+                ->isActiveWhen(fn () => request()->route('record') == $account->getKey())
+                ->sort($sort++)
+                ->group(__('account.accounts'));
+        }
+
+        return $items;
+    }
+
+    /**
+     * Get all navigation groups with their configuration
+     */
+    protected function getNavigationGroups(): array
+    {
+        return [
+            NavigationGroup::make()
+                ->label(__('account.accounts'))
+                ->icon(Heroicon::OutlinedWallet),
+            NavigationGroup::make()
+                ->label(__('filament.admin')),
+        ];
     }
 }

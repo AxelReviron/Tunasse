@@ -1,0 +1,21 @@
+<?php
+
+return [
+    'all' => 'Vue globale',
+    'account' => 'Compte',
+    'accounts' => 'Comptes',
+    'balance' => 'Solde',
+    'checking' => 'Compte courant',
+    'credit' => 'Crédit',
+    'color' => 'Couleur',
+    'investment' => 'Investissement',
+    'label' => 'Nom',
+    'savings' => 'Épargne',
+    'type' => 'Type',
+    'widgets' => [
+        'balance_distribution' => 'Balance par comptes',
+        'total_balance' => 'Solde total',
+        'total_stats' => 'Répartition des comptes',
+        'total_stats_no_account' => 'Aucun compte',
+    ],
+];

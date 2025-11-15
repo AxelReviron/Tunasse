@@ -22,7 +22,7 @@ class BudgetFactory extends Factory
             'amount' => $this->faker->randomFloat(),
             'start_date' => $this->faker->date(),
             'end_date' => $this->faker->date(),
-            'icon' => $this->faker->name,
+            'color' => $this->faker->hexColor(),
             'user_id' => User::factory(),
         ];
     }

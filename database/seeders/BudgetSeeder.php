@@ -17,12 +17,12 @@ class BudgetSeeder extends Seeder
         $user = User::first();
 
         $budgets = [
-            ['label' => 'Food', 'amount' => 300, 'icon' => 'Utensils'],
-            ['label' => 'Sport', 'amount' => 100, 'icon' => 'Dumbbell'],
-            ['label' => 'Entertainment', 'amount' => 150, 'icon' => 'Clapperboard'],
-            ['label' => 'Bills', 'amount' => 500, 'icon' => 'ReceiptText'],
-            ['label' => 'Car', 'amount' => 100, 'icon' => 'Car'],
-            ['label' => 'Other', 'amount' => 0, 'icon' => 'Other'],
+            ['label' => 'Food', 'amount' => 300, 'color' => '#8dbf24'],
+            ['label' => 'Sport', 'amount' => 100, 'color' => '#24bf92'],
+            ['label' => 'Entertainment', 'amount' => 150, 'color' => '#bf2460'],
+            ['label' => 'Bills', 'amount' => 500, 'color' => '#9f24bf'],
+            ['label' => 'Car', 'amount' => 100, 'color' => '#bf5b24'],
+            ['label' => 'Other', 'amount' => 0, 'color' => '#bf9b24'],
         ];
 
         $startDate = Carbon::now()->startOfMonth();
@@ -34,7 +34,7 @@ class BudgetSeeder extends Seeder
                 'amount' => $budgetData['amount'],
                 'start_date' => $startDate,
                 'end_date' => $endDate,
-                'icon' => $budgetData['icon'],
+                'color' => $budgetData['color'],
                 'user_id' => $user->id,
             ]);
         }

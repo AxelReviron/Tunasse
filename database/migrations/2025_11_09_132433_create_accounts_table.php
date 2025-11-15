@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('label');
             $table->enum('type', AccountType::cases());
             $table->float('balance')->default(0);
-            $table->string('icon');
+            $table->string('color');
             $table->foreignId('currency_id')->nullable()->constrained('currencies')->nullOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
         });

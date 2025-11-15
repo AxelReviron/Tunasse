@@ -23,7 +23,7 @@ class AccountSeeder extends Seeder
             'label' => 'Checking',
             'type' => AccountType::CHECKING,
             'balance' => 2500,
-            'icon' => 'CreditCard',
+            'color' => '#2596be',
             'currency_id' => $eur->id,
             'user_id' => $user->id,
         ]);
@@ -32,7 +32,7 @@ class AccountSeeder extends Seeder
             'label' => 'Savings',
             'type' => AccountType::SAVINGS,
             'balance' => 42000,
-            'icon' => 'PiggyBank',
+            'color' => '#2596be',
             'currency_id' => $eur->id,
             'user_id' => $user->id,
         ]);
@@ -41,7 +41,7 @@ class AccountSeeder extends Seeder
             'label' => 'Crypto',
             'type' => AccountType::INVESTMENT,
             'balance' => 9000,
-            'icon' => 'Bitcoin',
+            'color' => '#3cbf24',
             'currency_id' => $btc->id,
             'user_id' => $user->id,
         ]);
@@ -50,7 +50,7 @@ class AccountSeeder extends Seeder
             'label' => 'Stocks',
             'type' => AccountType::INVESTMENT,
             'balance' => 16000,
-            'icon' => 'ChartSpline',
+            'color' => '#bf9b24',
             'currency_id' => $eur->id,
             'user_id' => $user->id,
         ]);
