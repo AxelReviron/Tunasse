@@ -5,7 +5,9 @@ namespace App\Providers\Filament;
 use App\Filament\Admin\Resources\Accounts\AccountResource;
 use App\Filament\Admin\Resources\Accounts\Widgets\AccountBalanceBarChart;
 use App\Filament\Admin\Resources\Accounts\Widgets\AccountPieDistribution;
+use App\Filament\Admin\Resources\Budgets\BudgetResource;
 use App\Models\Account;
+use App\Models\Budget;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -92,8 +94,8 @@ class AdminPanelProvider extends PanelProvider
     {
         return [
             ...$this->getAccountNavigationItems(),
+            ...$this->getBudgetNavigationItems(),
             // ...$this->getTransactionNavigationItems(),
-            // ...$this->getBudgetNavigationItems(),
         ];
     }
 
@@ -121,6 +123,29 @@ class AdminPanelProvider extends PanelProvider
     }
 
     /**
+     * Get navigation items for budget
+     */
+    protected function getBudgetNavigationItems(): array
+    {
+        $items = [];
+        $sort = 2;
+
+        foreach (Budget::all() as $budget) {
+            $items[] = NavigationItem::make($budget->label)
+                ->url(fn () => BudgetResource::getUrl(
+                    'view',
+                    ['record' => $budget->getKey()],
+                    panel: 'admin'
+                ))
+                ->isActiveWhen(fn () => request()->route('record') == $budget->getKey())
+                ->sort($sort++)
+                ->group(__('budget.budgets'));
+        }
+
+        return $items;
+    }
+
+    /**
      * Get all navigation groups with their configuration
      */
     protected function getNavigationGroups(): array
@@ -129,6 +154,9 @@ class AdminPanelProvider extends PanelProvider
             NavigationGroup::make()
                 ->label(__('account.accounts'))
                 ->icon(Heroicon::OutlinedWallet),
+            NavigationGroup::make()
+                ->label(__('budget.budgets'))
+                ->icon(Heroicon::OutlinedChartPie),
             NavigationGroup::make()
                 ->label(__('filament.admin')),
         ];
