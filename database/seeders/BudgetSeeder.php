@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Budget;
+use App\Models\Currency;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
@@ -15,6 +16,8 @@ class BudgetSeeder extends Seeder
     public function run(): void
     {
         $user = User::first();
+        $eur = Currency::where('code', 'EUR')->first();
+
 
         $budgets = [
             ['label' => 'Food', 'amount' => 300, 'color' => '#8dbf24'],
@@ -35,6 +38,7 @@ class BudgetSeeder extends Seeder
                 'start_date' => $startDate,
                 'end_date' => $endDate,
                 'color' => $budgetData['color'],
+                'currency_id' => $eur->id,
                 'user_id' => $user->id,
             ]);
         }

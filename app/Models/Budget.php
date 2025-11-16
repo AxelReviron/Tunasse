@@ -20,6 +20,11 @@ class Budget extends Model
      */
     protected $guarded = ['id', 'created_at', 'updated_at', 'deleted_at'];
 
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

@@ -17,9 +17,10 @@ return new class extends Migration
             $table->softDeletes();
             $table->string('label');
             $table->float('amount');
-            $table->date('start_date');
-            $table->date('end_date');
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
             $table->string('color');
+            $table->foreignId('currency_id')->nullable()->constrained('currencies')->nullOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
         });
     }
