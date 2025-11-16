@@ -18,10 +18,12 @@ use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\Resources\Resource;
 use Filament\Support\Colors\Color;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
@@ -31,31 +33,13 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        $navItems = [];
-        $sort = 2;
-
-        // Accounts
-        foreach (Account::all() as $account) {
-            $navItems[] = NavigationItem::make($account->label)
-                ->url(fn () => AccountResource::getUrl(
-                    'view',
-                    ['record' => $account->getKey()],
-                    panel: 'admin'
-                ))
-                ->isActiveWhen(function () use ($account) {
-                    return request()->route('record') == $account->getKey();
-                })
-                ->sort($sort++)
-                ->group(__('account.accounts'));
-        }
-
         return $panel
             ->id('admin')
             ->path('/')
             ->default()
             ->login()
             ->colors([
-                'primary' => Color::Green,
+                'primary' => Color::Zinc,
             ])
             ->navigationItems($this->getNavigationItems())
             ->navigationGroups($this->getNavigationGroups())
@@ -93,53 +77,45 @@ class AdminPanelProvider extends PanelProvider
     protected function getNavigationItems(): array
     {
         return [
-            ...$this->getAccountNavigationItems(),
-            ...$this->getBudgetNavigationItems(),
-            // ...$this->getTransactionNavigationItems(),
+            ...$this->buildNavigationItems(Account::all(), AccountResource::class, __('account.accounts')),
+            ...$this->buildNavigationItems(Budget::all(), BudgetResource::class, __('budget.budgets')),
+            // ...$this->buildNavigationItems(Transaction::all(), TransactionResource::class, __('transaction.transactions')),
         ];
     }
 
     /**
-     * Get navigation items for accounts
+     * Build navigation items for a collection of models
+     *
+     * @param  Collection  $models  Collection of models to create navigation items for
+     * @param  class-string<resource>  $resourceClass  Filament resource class (e.g., AccountResource::class)
+     * @param  string  $groupLabel  Translation key or label for the navigation group
+     * @param  int  $startSort  Starting sort order (default: 2)
+     * @return array Array of NavigationItem instances
      */
-    protected function getAccountNavigationItems(): array
+    protected function buildNavigationItems(Collection $models, string $resourceClass, string $groupLabel, int $startSort = 2): array
     {
         $items = [];
-        $sort = 2;
+        $sort = $startSort;
 
-        foreach (Account::all() as $account) {
-            $items[] = NavigationItem::make($account->label)
-                ->url(fn () => AccountResource::getUrl(
+        foreach ($models as $model) {
+            $items[] = NavigationItem::make($model->label)
+                ->url(fn () => $resourceClass::getUrl(
                     'view',
-                    ['record' => $account->getKey()],
+                    ['record' => $model->getKey()],
                     panel: 'admin'
                 ))
-                ->isActiveWhen(fn () => request()->route('record') == $account->getKey())
+                ->isActiveWhen(function () use ($model, $resourceClass) {
+                    $currentUrl = request()->url();
+                    $modelUrl = $resourceClass::getUrl(
+                        'view',
+                        ['record' => $model->getKey()],
+                        panel: 'admin'
+                    );
+
+                    return $currentUrl === $modelUrl;
+                })
                 ->sort($sort++)
-                ->group(__('account.accounts'));
-        }
-
-        return $items;
-    }
-
-    /**
-     * Get navigation items for budget
-     */
-    protected function getBudgetNavigationItems(): array
-    {
-        $items = [];
-        $sort = 2;
-
-        foreach (Budget::all() as $budget) {
-            $items[] = NavigationItem::make($budget->label)
-                ->url(fn () => BudgetResource::getUrl(
-                    'view',
-                    ['record' => $budget->getKey()],
-                    panel: 'admin'
-                ))
-                ->isActiveWhen(fn () => request()->route('record') == $budget->getKey())
-                ->sort($sort++)
-                ->group(__('budget.budgets'));
+                ->group($groupLabel);
         }
 
         return $items;
