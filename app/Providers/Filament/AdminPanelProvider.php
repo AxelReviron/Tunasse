@@ -38,9 +38,30 @@ class AdminPanelProvider extends PanelProvider
             ->path('/')
             ->default()
             ->login()
-            ->colors([
-                'primary' => Color::Zinc,
-            ])
+            ->colors(function (): array {
+                $colors = [
+                    'primary' => Color::Zinc,
+                ];
+
+                Account::query()
+                    ->select('id', 'color')
+                    ->whereNotNull('color')
+                    ->pluck('color', 'id')
+                    ->each(function (string $hexColor, int $accountId) use (&$colors): void {
+                        $colors["account-{$accountId}"] = $hexColor;
+                    });
+
+                Budget::query()
+                    ->select('id', 'color')
+                    ->whereNotNull('color')
+                    ->pluck('color', 'id')
+                    ->each(function (string $hexColor, int $budgetId) use (&$colors): void {
+                        $colors["budget-{$budgetId}"] = $hexColor;
+                    });
+
+                return $colors;
+            })
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->navigationItems($this->getNavigationItems())
             ->navigationGroups($this->getNavigationGroups())
             ->collapsibleNavigationGroups(true)
@@ -79,7 +100,6 @@ class AdminPanelProvider extends PanelProvider
         return [
             ...$this->buildNavigationItems(Account::all(), AccountResource::class, __('account.accounts')),
             ...$this->buildNavigationItems(Budget::all(), BudgetResource::class, __('budget.budgets')),
-            // ...$this->buildNavigationItems(Transaction::all(), TransactionResource::class, __('transaction.transactions')),
         ];
     }
 

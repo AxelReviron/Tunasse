@@ -48,4 +48,14 @@ class Transaction extends Model
     {
         return $this->belongsTo(Budget::class);
     }
+
+    public function getRecurrenceLabelAttribute(): string
+    {
+        if (! $this->is_recurring) {
+            return '-';
+        }
+
+        return "{$this->recurring_interval} {$this->recurring_unit->getLabel()}";
+    }
+
 }
