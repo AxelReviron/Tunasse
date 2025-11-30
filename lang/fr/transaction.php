@@ -34,7 +34,6 @@ return [
     'user' => 'Utilisateur',
     'widgets' => [
         'current_month' => 'Transactions du mois',
-        'current_month_description' => 'Revenus et dépenses du mois en cours',
         'no_data' => 'Aucune donnée disponible',
     ],
 ];

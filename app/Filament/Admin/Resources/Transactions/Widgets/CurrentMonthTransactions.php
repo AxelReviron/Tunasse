@@ -18,14 +18,9 @@ class CurrentMonthTransactions extends ChartWidget
 
     public ?string $filter = null;
 
-    public function getHeading(): string|Htmlable|null
-    {
-        return __('transaction.widgets.current_month');
-    }
-
     public function getDescription(): string|Htmlable|null
     {
-        return __('transaction.widgets.current_month_description');
+        return __('transaction.widgets.current_month');
     }
 
     protected function getFilters(): ?array

@@ -39,6 +39,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('/')
             ->default()
             ->login()
+            ->unsavedChangesAlerts()
             ->colors($this->registerGlobalColors())
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->navigationItems($this->getNavigationItems())

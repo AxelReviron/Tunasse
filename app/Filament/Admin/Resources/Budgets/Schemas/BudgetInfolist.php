@@ -16,7 +16,7 @@ class BudgetInfolist
         return $schema
             ->components([
                 Section::make()
-                    ->columns(1)
+                    ->columns(2)
                     ->heading(__('budget.infos'))
                     ->icon(Heroicon::OutlinedDocumentText)
                     ->schema([
@@ -32,8 +32,7 @@ class BudgetInfolist
                             ->label(__('currency.currency'))
                             ->placeholder('-'),
                         TextEntry::make('user.name')
-                            ->label(__('user.user'))
-                            ->label('User'),
+                            ->label(__('user.user')),
                     ]),
                 Section::make()
                     ->columns(1)

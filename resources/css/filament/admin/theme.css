@@ -3,3 +3,19 @@
 @source '../../../../app/Filament/Admin/**/*';
 @source '../../../../resources/views/filament/admin/**/*';
 @source '../../../../vendor/bezhansalleh/filament-language-switch/resources/views/**/*.blade.php';
+
+/* Navbar*/
+.fi-sidebar-nav-groups {
+    row-gap: 0.2rem;
+}
+.fi-sidebar-nav {
+    border-right: solid 1px #E4E4E7;
+}
+.fi-sidebar-group.fi-collapsible.fi-collapsed:hover {
+    background-color: var(--gray-100);
+    border-radius: var(--radius-lg);
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+    --tw-duration: 75ms;
+    transition-duration: 75ms;
+}
