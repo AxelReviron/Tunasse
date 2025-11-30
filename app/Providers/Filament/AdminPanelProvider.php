@@ -38,29 +38,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('/')
             ->default()
             ->login()
-            ->colors(function (): array {
-                $colors = [
-                    'primary' => Color::Zinc,
-                ];
-
-                Account::query()
-                    ->select('id', 'color')
-                    ->whereNotNull('color')
-                    ->pluck('color', 'id')
-                    ->each(function (string $hexColor, int $accountId) use (&$colors): void {
-                        $colors["account-{$accountId}"] = $hexColor;
-                    });
-
-                Budget::query()
-                    ->select('id', 'color')
-                    ->whereNotNull('color')
-                    ->pluck('color', 'id')
-                    ->each(function (string $hexColor, int $budgetId) use (&$colors): void {
-                        $colors["budget-{$budgetId}"] = $hexColor;
-                    });
-
-                return $colors;
-            })
+            ->colors($this->registerGlobalColors())
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->navigationItems($this->getNavigationItems())
             ->navigationGroups($this->getNavigationGroups())
@@ -95,11 +73,37 @@ class AdminPanelProvider extends PanelProvider
             ]);
     }
 
+    protected function registerGlobalColors(): array
+    {
+        $colors = [
+            'primary' => Color::Zinc,
+        ];
+
+        Account::query()
+            ->select('id', 'color')
+            ->whereNotNull('color')
+            ->pluck('color', 'id')
+            ->each(function (string $hexColor, int $accountId) use (&$colors): void {
+                $colors["account-{$accountId}"] = $hexColor;
+            });
+
+        Budget::query()
+            ->select('id', 'color')
+            ->whereNotNull('color')
+            ->pluck('color', 'id')
+            ->each(function (string $hexColor, int $budgetId) use (&$colors): void {
+                $colors["budget-{$budgetId}"] = $hexColor;
+            });
+
+        return $colors;
+    }
+
+
     protected function getNavigationItems(): array
     {
         return [
-            ...$this->buildNavigationItems(Account::all(), AccountResource::class, __('account.accounts')),
-            ...$this->buildNavigationItems(Budget::all(), BudgetResource::class, __('budget.budgets')),
+            ...$this->buildNavigationItems(Account::all(), AccountResource::class, 'account.accounts'),
+            ...$this->buildNavigationItems(Budget::all(), BudgetResource::class, 'budget.budgets'),
         ];
     }
 
@@ -108,11 +112,11 @@ class AdminPanelProvider extends PanelProvider
      *
      * @param  Collection  $models  Collection of models to create navigation items for
      * @param  class-string<resource>  $resourceClass  Filament resource class (e.g., AccountResource::class)
-     * @param  string  $groupLabel  Translation key or label for the navigation group
+     * @param  string  $groupTranslationKey  Translation key for the navigation group
      * @param  int  $startSort  Starting sort order (default: 2)
      * @return array Array of NavigationItem instances
      */
-    protected function buildNavigationItems(Collection $models, string $resourceClass, string $groupLabel, int $startSort = 2): array
+    protected function buildNavigationItems(Collection $models, string $resourceClass, string $groupTranslationKey, int $startSort = 2): array
     {
         $items = [];
         $sort = $startSort;
@@ -135,7 +139,7 @@ class AdminPanelProvider extends PanelProvider
                     return $currentUrl === $modelUrl;
                 })
                 ->sort($sort++)
-                ->group($groupLabel);
+                ->group(fn () => __($groupTranslationKey));
         }
 
         return $items;
@@ -148,13 +152,13 @@ class AdminPanelProvider extends PanelProvider
     {
         return [
             NavigationGroup::make()
-                ->label(__('account.accounts'))
+                ->label(fn () => __('account.accounts'))
                 ->icon(Heroicon::OutlinedWallet),
             NavigationGroup::make()
-                ->label(__('budget.budgets'))
+                ->label(fn () => __('budget.budgets'))
                 ->icon(Heroicon::OutlinedChartPie),
             NavigationGroup::make()
-                ->label(__('filament.admin')),
+                ->label(fn () => __('filament.admin')),
         ];
     }
 }

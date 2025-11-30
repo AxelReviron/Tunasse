@@ -13,11 +13,10 @@ return [
     'savings' => 'Savings',
     'type' => 'Type',
     'widgets' => [
-        'pie' => [
-            'balance_distribution' => 'Balance by accounts',
-            'total_balance' => 'Total balance',
-            'total_stats' => 'Accounts distribution',
-            'total_stats_no_account' => 'No accounts',
-        ],
+        'balance_distribution' => 'Balance by accounts',
+        'no_data' => 'no data',
+        'total_balance' => 'Total balance',
+        'total_stats' => 'Accounts distribution',
+        'total_stats_no_account' => 'No accounts',
     ],
 ];

@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'all' => 'Global view',
     'amount' => 'Amount',
     'budget' => 'Budget',
     'budgets' => 'Budgets',

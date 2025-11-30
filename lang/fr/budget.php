@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'all' => 'Vue globale',
     'amount' => 'Montant',
     'budget' => 'Budget',
     'budgets' => 'Budgets',

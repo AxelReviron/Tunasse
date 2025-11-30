@@ -67,7 +67,7 @@ class BudgetResource extends Resource
 
     public static function getPluralLabel(): ?string
     {
-        return __('account.all');
+        return __('budget.all');
     }
 
     public static function getLabel(): ?string

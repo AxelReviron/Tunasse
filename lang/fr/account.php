@@ -14,6 +14,7 @@ return [
     'type' => 'Type',
     'widgets' => [
         'balance_distribution' => 'Balance par comptes',
+        'no_data' => 'Pas de données',
         'total_balance' => 'Solde total',
         'total_stats' => 'Répartition des comptes',
         'total_stats_no_account' => 'Aucun compte',
