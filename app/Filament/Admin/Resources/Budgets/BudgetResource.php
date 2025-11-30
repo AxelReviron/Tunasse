@@ -6,6 +6,7 @@ use App\Filament\Admin\Resources\Budgets\Pages\CreateBudget;
 use App\Filament\Admin\Resources\Budgets\Pages\EditBudget;
 use App\Filament\Admin\Resources\Budgets\Pages\ListBudgets;
 use App\Filament\Admin\Resources\Budgets\Pages\ViewBudget;
+use App\Filament\Admin\Resources\Budgets\RelationManagers\TransactionsRelationManager;
 use App\Filament\Admin\Resources\Budgets\Schemas\BudgetForm;
 use App\Filament\Admin\Resources\Budgets\Schemas\BudgetInfolist;
 use App\Filament\Admin\Resources\Budgets\Tables\BudgetsTable;
@@ -43,7 +44,7 @@ class BudgetResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            TransactionsRelationManager::class,
         ];
     }
 

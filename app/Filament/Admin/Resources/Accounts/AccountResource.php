@@ -6,6 +6,7 @@ use App\Filament\Admin\Resources\Accounts\Pages\CreateAccount;
 use App\Filament\Admin\Resources\Accounts\Pages\EditAccount;
 use App\Filament\Admin\Resources\Accounts\Pages\ListAccounts;
 use App\Filament\Admin\Resources\Accounts\Pages\ViewAccount;
+use App\Filament\Admin\Resources\Accounts\RelationManagers\TransactionsRelationManager;
 use App\Filament\Admin\Resources\Accounts\Schemas\AccountForm;
 use App\Filament\Admin\Resources\Accounts\Schemas\AccountInfolist;
 use App\Filament\Admin\Resources\Accounts\Tables\AccountsTable;
@@ -44,7 +45,7 @@ class AccountResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            TransactionsRelationManager::class,
         ];
     }
 
