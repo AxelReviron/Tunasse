@@ -32,4 +32,9 @@ return [
     ],
     'updated_at' => 'Updated at',
     'user' => 'User',
+    'widgets' => [
+        'current_month' => 'Current Month Transactions',
+        'current_month_description' => 'Income and expenses for the current month',
+        'no_data' => 'No data available',
+    ],
 ];

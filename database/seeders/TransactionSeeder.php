@@ -22,11 +22,14 @@ class TransactionSeeder extends Seeder
 
         $checkingAccount = $accounts->firstWhere('label', 'Checking');
 
+        $currentMonth = Carbon::now()->month;
+        $currentYear = Carbon::now()->year;
+
         $transactionsByBudget = [
             'Bills' => [
                 [
                     'label' => 'Rent',
-                    'date' => '01/10/2025',
+                    'date' => "01/$currentMonth/$currentYear",
                     'is_recurring' => true,
                     'recurring_interval' => 1,
                     'recurring_unit' => RecurringTransactionUnit::MONTH,
@@ -35,7 +38,7 @@ class TransactionSeeder extends Seeder
                 ],
                 [
                     'label' => 'Electricity',
-                    'date' => '05/10/2025',
+                    'date' => "05/$currentMonth/$currentYear",
                     'is_recurring' => true,
                     'recurring_interval' => 1,
                     'recurring_unit' => RecurringTransactionUnit::MONTH,
@@ -44,7 +47,7 @@ class TransactionSeeder extends Seeder
                 ],
                 [
                     'label' => 'Internet',
-                    'date' => '07/10/2025',
+                    'date' => "07/$currentMonth/$currentYear",
                     'is_recurring' => true,
                     'recurring_interval' => 1,
                     'recurring_unit' => RecurringTransactionUnit::MONTH,
@@ -53,7 +56,7 @@ class TransactionSeeder extends Seeder
                 ],
                 [
                     'label' => 'Home insurance',
-                    'date' => '10/10/2025',
+                    'date' => "10/$currentMonth/$currentYear",
                     'is_recurring' => true,
                     'recurring_interval' => 1,
                     'recurring_unit' => RecurringTransactionUnit::MONTH,
@@ -62,7 +65,7 @@ class TransactionSeeder extends Seeder
                 ],
                 [
                     'label' => 'Car insurance',
-                    'date' => '10/10/2025',
+                    'date' => "10/$currentMonth/$currentYear",
                     'is_recurring' => true,
                     'recurring_interval' => 1,
                     'recurring_unit' => RecurringTransactionUnit::MONTH,
@@ -73,14 +76,14 @@ class TransactionSeeder extends Seeder
             'Food' => [
                 [
                     'label' => 'Gasoline',
-                    'date' => '04/10/2025',
+                    'date' => "04/$currentMonth/$currentYear",
                     'is_recurring' => false,
                     'amount' => 90,
                     'type' => TransactionType::EXPENSE,
                 ],
                 [
                     'label' => 'Restaurant',
-                    'date' => '17/10/2025',
+                    'date' => "17/$currentMonth/$currentYear",
                     'is_recurring' => false,
                     'amount' => 30,
                     'type' => TransactionType::EXPENSE,
@@ -89,14 +92,14 @@ class TransactionSeeder extends Seeder
             'Entertainment' => [
                 [
                     'label' => 'Movie tickets',
-                    'date' => '12/10/2025',
+                    'date' => "12/$currentMonth/$currentYear",
                     'is_recurring' => false,
                     'amount' => 25,
                     'type' => TransactionType::EXPENSE,
                 ],
                 [
                     'label' => 'Concert',
-                    'date' => '20/10/2025',
+                    'date' => "20/$currentMonth/$currentYear",
                     'is_recurring' => false,
                     'amount' => 60,
                     'type' => TransactionType::EXPENSE,
@@ -105,7 +108,7 @@ class TransactionSeeder extends Seeder
             'Sport' => [
                 [
                     'label' => 'Gym membership',
-                    'date' => '01/10/2025',
+                    'date' => "01/$currentMonth/$currentYear",
                     'is_recurring' => true,
                     'recurring_interval' => 1,
                     'recurring_unit' => RecurringTransactionUnit::MONTH,
@@ -114,7 +117,7 @@ class TransactionSeeder extends Seeder
                 ],
                 [
                     'label' => 'Sports equipment',
-                    'date' => '15/10/2025',
+                    'date' => "15/$currentMonth/$currentYear",
                     'is_recurring' => false,
                     'amount' => 120,
                     'type' => TransactionType::EXPENSE,
@@ -123,7 +126,7 @@ class TransactionSeeder extends Seeder
             'Car' => [
                 [
                     'label' => 'Gasoline',
-                    'date' => '04/10/2025',
+                    'date' => "04/$currentMonth/$currentYear",
                     'is_recurring' => false,
                     'amount' => 90,
                     'type' => TransactionType::EXPENSE,
@@ -132,7 +135,7 @@ class TransactionSeeder extends Seeder
             'Other' => [
                 [
                     'label' => 'Salary',
-                    'date' => '01/10/2025',
+                    'date' => "01/$currentMonth/$currentYear",
                     'is_recurring' => false,
                     'amount' => 2500,
                     'type' => TransactionType::INCOME,

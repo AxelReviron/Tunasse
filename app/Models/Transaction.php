@@ -4,14 +4,23 @@ namespace App\Models;
 
 use App\Enums\RecurringTransactionUnit;
 use App\Enums\TransactionType;
+use Database\Factories\TransactionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property string $date
+ * @property float $amount
+ * @property TransactionType $type
+ * @property RecurringTransactionUnit|null $recurring_unit
+ * @property bool $is_recurring
+ * @property int|null $recurring_interval
+ */
 class Transaction extends Model
 {
-    /** @use HasFactory<\Database\Factories\TransactionFactory> */
+    /** @use HasFactory<TransactionFactory> */
     use HasFactory, SoftDeletes;
 
     /**
@@ -51,11 +60,10 @@ class Transaction extends Model
 
     public function getRecurrenceLabelAttribute(): string
     {
-        if (! $this->is_recurring) {
+        if (! $this->is_recurring || ! $this->recurring_unit) {
             return '-';
         }
 
         return "{$this->recurring_interval} {$this->recurring_unit->getLabel()}";
     }
-
 }

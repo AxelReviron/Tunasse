@@ -31,7 +31,7 @@ class TransactionInfolist
                             ->columnSpanFull(),
                         TextEntry::make('date')
                             ->label(__('transaction.date'))
-                            ->formatStateUsing(fn($state) => DateHelper::formatDate($state, false)),
+                            ->formatStateUsing(fn ($state) => DateHelper::formatDate($state, false)),
                         TextEntry::make('location')
                             ->label(__('transaction.location'))
                             ->placeholder('-'),

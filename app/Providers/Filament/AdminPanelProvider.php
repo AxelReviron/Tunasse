@@ -6,6 +6,7 @@ use App\Filament\Admin\Resources\Accounts\AccountResource;
 use App\Filament\Admin\Resources\Accounts\Widgets\AccountBalanceBarChart;
 use App\Filament\Admin\Resources\Accounts\Widgets\AccountPieDistribution;
 use App\Filament\Admin\Resources\Budgets\BudgetResource;
+use App\Filament\Admin\Resources\Transactions\Widgets\CurrentMonthTransactions;
 use App\Models\Account;
 use App\Models\Budget;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
@@ -52,6 +53,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 AccountPieDistribution::class,
                 AccountBalanceBarChart::class,
+                CurrentMonthTransactions::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -98,7 +100,6 @@ class AdminPanelProvider extends PanelProvider
         return $colors;
     }
 
-
     protected function getNavigationItems(): array
     {
         return [
@@ -110,7 +111,9 @@ class AdminPanelProvider extends PanelProvider
     /**
      * Build navigation items for a collection of models
      *
-     * @param  Collection  $models  Collection of models to create navigation items for
+     * @template TModel of Account|Budget
+     *
+     * @param  Collection<int, TModel>  $models  Collection of models to create navigation items for
      * @param  class-string<resource>  $resourceClass  Filament resource class (e.g., AccountResource::class)
      * @param  string  $groupTranslationKey  Translation key for the navigation group
      * @param  int  $startSort  Starting sort order (default: 2)
@@ -121,6 +124,7 @@ class AdminPanelProvider extends PanelProvider
         $items = [];
         $sort = $startSort;
 
+        /** @var Account|Budget $model */
         foreach ($models as $model) {
             $items[] = NavigationItem::make($model->label)
                 ->url(fn () => $resourceClass::getUrl(

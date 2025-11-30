@@ -18,7 +18,6 @@ class BudgetSeeder extends Seeder
         $user = User::first();
         $eur = Currency::where('code', 'EUR')->first();
 
-
         $budgets = [
             ['label' => 'Food', 'amount' => 300, 'color' => '#8dbf24'],
             ['label' => 'Sport', 'amount' => 100, 'color' => '#24bf92'],

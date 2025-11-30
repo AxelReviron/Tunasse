@@ -65,15 +65,13 @@ class TransactionForm
                                     ->numeric(),
                                 Select::make('account_id')
                                     ->label(__('transaction.account'))
-                                    ->relationship('account', 'label', fn ($query) =>
-                                    $query->whereBelongsTo(auth()->user()))
+                                    ->relationship('account', 'label', fn ($query) => $query->whereBelongsTo(auth()->user()))
                                     ->searchable()
                                     ->preload()
                                     ->required(),
                                 Select::make('budget_id')
                                     ->label(__('transaction.budget'))
-                                    ->relationship('budget', 'label', fn ($query) =>
-                                    $query->whereBelongsTo(auth()->user()))
+                                    ->relationship('budget', 'label', fn ($query) => $query->whereBelongsTo(auth()->user()))
                                     ->searchable()
                                     ->preload(),
                             ]),
