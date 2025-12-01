@@ -7,6 +7,7 @@ use App\Filament\Admin\Resources\Accounts\Widgets\AccountBalanceBarChart;
 use App\Filament\Admin\Resources\Accounts\Widgets\AccountPieDistribution;
 use App\Filament\Admin\Resources\Budgets\BudgetResource;
 use App\Filament\Admin\Resources\Transactions\Widgets\CurrentMonthTransactions;
+use App\Filament\Admin\Resources\Transactions\Widgets\RecurringIncomingExpensesOverview;
 use App\Models\Account;
 use App\Models\Budget;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
@@ -52,9 +53,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\Filament\Admin\Widgets')
             ->widgets([
+                RecurringIncomingExpensesOverview::class,
+                CurrentMonthTransactions::class,
                 AccountPieDistribution::class,
                 AccountBalanceBarChart::class,
-                CurrentMonthTransactions::class,
             ])
             ->middleware([
                 EncryptCookies::class,

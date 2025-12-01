@@ -35,5 +35,11 @@ return [
     'widgets' => [
         'current_month' => 'Transactions du mois',
         'no_data' => 'Aucune donnée disponible',
+        'recurring_expenses' => [
+            'title' => 'Transactions (:month)',
+            'remaining_amount' => 'À payer (:percentage)',
+            'paid_amount' => 'Déjà payé (:daily_percentages)',
+            'total_amount' => 'Montant total prévu',
+        ],
     ],
 ];
