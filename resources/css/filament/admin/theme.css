@@ -19,3 +19,29 @@
     --tw-duration: 75ms;
     transition-duration: 75ms;
 }
+
+
+
+/* Success Widget */
+.fi-wi-stats-overview-stat.success .fi-wi-stats-overview-stat-content .fi-wi-stats-overview-stat-label {
+    color: var(--color-success-500);/* Description */
+}
+.fi-wi-stats-overview-stat.success .fi-wi-stats-overview-stat-content svg.fi-icon.fi-size-md {
+    stroke: var(--color-success-500);/* Icon */
+}
+
+/* Danger Widget */
+.fi-wi-stats-overview-stat.danger .fi-wi-stats-overview-stat-content .fi-wi-stats-overview-stat-label {
+    color: var(--color-danger-500);/* Description */
+}
+.fi-wi-stats-overview-stat.danger .fi-wi-stats-overview-stat-content svg.fi-icon.fi-size-md {
+    stroke: var(--color-danger-500);
+}
+
+/* Warning Widget */
+.fi-wi-stats-overview-stat.warning .fi-wi-stats-overview-stat-content .fi-wi-stats-overview-stat-label {
+    color: var(--color-warning-500);/* Description */
+}
+.fi-wi-stats-overview-stat.warning .fi-wi-stats-overview-stat-content svg.fi-icon.fi-size-md {
+    stroke: var(--color-warning-500);
+}

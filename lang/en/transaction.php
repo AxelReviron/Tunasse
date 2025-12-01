@@ -36,5 +36,11 @@ return [
         'current_month' => 'Current Month Transactions',
         'current_month_description' => 'Income and expenses for the current month',
         'no_data' => 'No data available',
+        'recurring_expenses' => [
+            'title' => 'Transactions (:month)',
+            'remaining_amount' => 'To pay (:percentage)',
+            'paid_amount' => 'Already paid (:daily_percentages)',
+            'total_amount' => 'Total expected amount',
+        ],
     ],
 ];

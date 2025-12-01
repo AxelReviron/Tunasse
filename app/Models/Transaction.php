@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\RecurringTransactionUnit;
 use App\Enums\TransactionType;
+use Carbon\Carbon;
 use Database\Factories\TransactionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -65,5 +66,51 @@ class Transaction extends Model
         }
 
         return "{$this->recurring_interval} {$this->recurring_unit->getLabel()}";
+    }
+
+    /**
+     * Calculate occurrences of this recurring transaction within a date range.
+     *
+     * @return int Number of occurrences in the given range
+     */
+    public function getOccurrencesInRange(Carbon $startRange, Carbon $endRange): int
+    {
+        if (! $this->is_recurring || ! $this->recurring_unit || ! $this->recurring_interval) {
+            return 0;
+        }
+
+        $occurrences = 0;
+        $currentOccurrence = Carbon::parse($this->date);
+
+        // If the reference date is after the range, no occurrences
+        if ($currentOccurrence->isAfter($endRange)) {
+            return 0;
+        }
+
+        // Move forward to the first occurrence within or after the start range
+        while ($currentOccurrence->isBefore($startRange)) {
+            $currentOccurrence = $this->addInterval($currentOccurrence);
+        }
+
+        // Count all occurrences within the range
+        while ($currentOccurrence->isBetween($startRange, $endRange, true)) {
+            $occurrences++;
+            $currentOccurrence = $this->addInterval($currentOccurrence);
+        }
+
+        return $occurrences;
+    }
+
+    /**
+     * Add the recurring interval to a date.
+     */
+    private function addInterval(Carbon $date): Carbon
+    {
+        return match ($this->recurring_unit) {
+            RecurringTransactionUnit::DAY => $date->copy()->addDays($this->recurring_interval),
+            RecurringTransactionUnit::WEEK => $date->copy()->addWeeks($this->recurring_interval),
+            RecurringTransactionUnit::MONTH => $date->copy()->addMonths($this->recurring_interval),
+            RecurringTransactionUnit::YEAR => $date->copy()->addYears($this->recurring_interval),
+        };
     }
 }
