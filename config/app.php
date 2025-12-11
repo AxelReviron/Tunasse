@@ -123,8 +123,10 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    'user-seed' => [
-        'password' => env('APP_USER_SEED_PASSWORD', ''),
+    'user-seeder' => [
+        'name' => env('APP_USER_SEEDER_PASSWORD'),
+        'email' => env('APP_USER_SEEDER_EMAIL'),
+        'password' => env('APP_USER_SEEDER_PASSWORD'),
     ],
 
 ];

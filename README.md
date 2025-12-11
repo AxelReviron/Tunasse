@@ -1,59 +1,126 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+> **⚠️ Under Active Development** - Expect bugs, features may evolve.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+<h1 style="text-align: center">Tunasse</h1>
+<div style="text-align: center">
+<img src="https://img.shields.io/badge/Laravel-12-FF2D20?style=flat&logo=laravel&logoColor=white)" />
+<img src="https://img.shields.io/badge/Filament-4-F59E0B?style=flat&logo=filament" />
+<img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker&logoColor=white" />
+</div>
 
-## About Laravel
+A personal finance management application designed to help you take control of your financial life. Built with Laravel
+and Filament, it provides a modern, intuitive interface for tracking your finances across multiple accounts and budgets.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### ✨ Features
+- **Transaction Management** - Track all your income and expenses with detailed categorization
+- **Multi-Account Support** - Manage multiple bank accounts, savings, credits, and investment accounts
+- **Multi-Budget System** - Create and monitor multiple budgets to stay on top of your spending goals
+- **Recurring Transactions** - Automate tracking of regular income and expenses
+- **Dashboard & Widgets** - Visualize your financial health at a glance
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🖼️ Screenshots
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+*TODO*
 
-## Learning Laravel
+## 🚩 Roadmap
+### High Priority
+- [ ] Implement tests
+- [ ] Budget widgets and analytics
+- [ ] User settings page
+- [ ] Additional translations (Spanish, Italian, German, Portuguese, Dutch)
+- [ ] Docker configuration for easy deployment
+- [ ] Stock market price tracking integration
+- [ ] Cryptocurrency price tracking
+- [ ] Two-factor authentication (2FA)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Feature Ideas
+- [ ] Import transactions from CSV
+- [ ] Export data to PDF/Excel
+- [ ] Shared budgets for families/couples
+- [ ] Receipt scanning and attachment
+- [ ] API for third-party integrations
+- [ ] Investment portfolio tracking with performance metrics
+- [ ] MCP Server (AI)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🚀 Getting Started
+### Prerequisites
+- Docker & Docker Compose
+- Git
 
-## Laravel Sponsors
+### Local Development with Docker
+1. **Clone the repository**
+```bash
+  git clone https://github.com/AxelReviron/Tunasse.git
+  cd tunasse
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+2. **Setup environment variables**
+```bash
+  cp .env.example .env
+```
 
-### Premium Partners
+3. **Start the Docker containers**
+```bash
+  docker compose -f compose.dev.yaml up -d
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+This will start:
+- **FrankenPHP** (Laravel Octane) - Application server on `http://localhost:8000`
+- **MySQL** - Main database on port `3306`
+- **MySQL Test** - Test database on port `3307`
 
-## Contributing
+4. **Install dependencies inside the container**
+```bash
+  docker exec -it tunasse composer install
+  docker exec -it tunasse npm install
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+5. **Install and configure Laravel Octane with FrankenPHP**
 
-## Code of Conduct
+Laravel Octane with FrankenPHP provides superior performance for your application. Install it with:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+  docker exec -it tunasse php artisan octane:install --server=frankenphp
+```
 
-## Security Vulnerabilities
+> **Note:** This project uses FrankenPHP as the application server. The container automatically runs `php artisan octane:frankenphp` to serve your application with high performance and modern features.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+6. **Generate application key**
+```bash
+  docker exec -it tunasse php artisan key:generate
+```
 
-## License
+7. **Run migrations and seeders**
+```bash
+  docker exec -it tunasse php artisan migrate --seed
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+8. **Build frontend assets**
+```bash
+  docker exec -it tunasse npm run build
+  # Or for development with hot reload:
+  docker exec -it tunasse npm run dev
+```
+
+9. **Access the application**
+
+Open your browser and navigate to [localhost:8000](http://localhost:8000)
+
+### Deployment with Docker
+*TODO*
+
+### 🧾 Useful Commands
+#### Access container shell (makefile)
+```bash
+  make tunasse-docker
+```
+##### Run Pint and PHPStan
+```bash
+  make laraclean
+```
+##### Clear caches
+```bash
+  docker exec -it tunasse php artisan optimize:clear
+```
+
+## 🤝 Contributing
+*TODO*

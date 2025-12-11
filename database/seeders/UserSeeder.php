@@ -14,10 +14,10 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::firstOrCreate(
-            ['email' => 'contact@axel-reviron.fr'],
+            ['email' => config('app.user-seeder.email')],
             [
-                'name' => 'lexa',
-                'password' => Hash::make(config('app.user-seed.password')),
+                'name' => config('app.user-seeder.name'),
+                'password' => Hash::make(config('app.user-seeder.password')),
             ]
         );
     }
