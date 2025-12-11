@@ -9,6 +9,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\ColumnGroup;
 use Filament\Tables\Columns\TextColumn;
@@ -22,6 +23,8 @@ class BudgetsTable
     {
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->whereBelongsTo(auth()->user()))
+            ->emptyStateHeading(__('budget.no_budgets_yet'))
+            ->emptyStateIcon(Heroicon::OutlinedChartPie)
             ->columns([
                 ColumnGroup::make(__('filament.infos'), [
                     TextColumn::make('label')

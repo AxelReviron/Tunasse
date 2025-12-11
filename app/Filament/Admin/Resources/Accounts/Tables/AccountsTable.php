@@ -8,6 +8,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\ColumnGroup;
 use Filament\Tables\Columns\TextColumn;
@@ -21,6 +22,8 @@ class AccountsTable
     {
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->whereBelongsTo(auth()->user()))
+            ->emptyStateHeading(__('account.no_accounts_yet'))
+            ->emptyStateIcon(Heroicon::OutlinedWallet)
             ->columns([
                 ColumnGroup::make(__('filament.infos'), [
                     TextColumn::make('label')
@@ -28,6 +31,7 @@ class AccountsTable
                         ->searchable(),
                     TextColumn::make('type')
                         ->label(__('account.type'))
+                        ->color(fn ($record) => "account-{$record->getKey()}")
                         ->badge(),
                     TextColumn::make('balance')
                         ->label(__('account.balance'))

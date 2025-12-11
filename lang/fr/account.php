@@ -10,6 +10,7 @@ return [
     'color' => 'Couleur',
     'investment' => 'Investissement',
     'label' => 'Nom',
+    'no_accounts_yet' => 'Aucun compte',
     'savings' => 'Épargne',
     'type' => 'Type',
     'widgets' => [

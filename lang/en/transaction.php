@@ -17,6 +17,7 @@ return [
     'income' => 'Income',
     'label' => 'Label',
     'location' => 'Location',
+    'no_transactions_yet' => 'No transaction',
     'recurrence' => 'Recurrence',
     'recurring_interval' => 'Frequency',
     'recurring_unit' => 'Frequency (unit)',

@@ -10,6 +10,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ColumnGroup;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
@@ -23,6 +24,8 @@ class TransactionsTable
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->whereBelongsTo(auth()->user()))
             ->defaultSort('date')
+            ->emptyStateHeading(__('transaction.no_transactions_yet'))
+            ->emptyStateIcon(Heroicon::OutlinedBanknotes)
             ->columns([
                 ColumnGroup::make(__('filament.infos'), [
                     TextColumn::make('label')
@@ -52,7 +55,7 @@ class TransactionsTable
                         ->limit(20)
                         ->searchable()
                         ->sortable(),
-                    TextColumn::make('account.label')
+                    TextColumn::make('account.type')
                         ->label(__('transaction.account'))
                         ->color(fn ($record) => $record->account ? "account-{$record->account->getKey()}" : null)
                         ->badge()
