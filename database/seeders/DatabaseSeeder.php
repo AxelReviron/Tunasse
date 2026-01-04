@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // TODO: Ajouter demo_mode pour les seeders
         $this->call([
             UserSeeder::class,
             CurrencySeeder::class,

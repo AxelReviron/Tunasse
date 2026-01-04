@@ -26,6 +26,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
@@ -84,31 +85,40 @@ class AdminPanelProvider extends PanelProvider
             'primary' => Color::Zinc,
         ];
 
-        Account::query()
-            ->select('id', 'color')
-            ->whereNotNull('color')
-            ->pluck('color', 'id')
-            ->each(function (string $hexColor, int $accountId) use (&$colors): void {
-                $colors["account-{$accountId}"] = $hexColor;
-            });
+        try {
+            Account::query()
+                ->select('id', 'color')
+                ->whereNotNull('color')
+                ->pluck('color', 'id')
+                ->each(function (string $hexColor, int $accountId) use (&$colors): void {
+                    $colors["account-{$accountId}"] = $hexColor;
+                });
 
-        Budget::query()
-            ->select('id', 'color')
-            ->whereNotNull('color')
-            ->pluck('color', 'id')
-            ->each(function (string $hexColor, int $budgetId) use (&$colors): void {
-                $colors["budget-{$budgetId}"] = $hexColor;
-            });
+            Budget::query()
+                ->select('id', 'color')
+                ->whereNotNull('color')
+                ->pluck('color', 'id')
+                ->each(function (string $hexColor, int $budgetId) use (&$colors): void {
+                    $colors["budget-{$budgetId}"] = $hexColor;
+                });
+        } catch(QueryException $e) {
+            // Tables don't exist yet, skip
+        }
 
         return $colors;
     }
 
     protected function getNavigationItems(): array
     {
-        return [
-            ...$this->buildNavigationItems(Account::all(), AccountResource::class, 'account.accounts'),
-            ...$this->buildNavigationItems(Budget::all(), BudgetResource::class, 'budget.budgets'),
-        ];
+        try {
+            return [
+                ...$this->buildNavigationItems(Account::all(), AccountResource::class, 'account.accounts'),
+                ...$this->buildNavigationItems(Budget::all(), BudgetResource::class, 'budget.budgets'),
+            ];
+        } catch(QueryException $e) {
+            // Tables don't exist yet, skip
+            return [];
+        }
     }
 
     /**

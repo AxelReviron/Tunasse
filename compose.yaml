@@ -1,0 +1,82 @@
+services:
+    setup:
+        container_name: tunasse_setup
+        build:
+            context: .
+            dockerfile: Dockerfile
+        command: /scripts/setup.sh
+        volumes:
+            - ./setup.sh:/scripts/setup.sh:ro
+            - app_storage:/app/storage
+            - app_cache:/app/bootstrap/cache
+        networks:
+            - tunasse_network
+        depends_on:
+            db:
+                condition: service_healthy
+
+    app:
+        container_name: tunasse_app
+        build:
+            context: .
+            dockerfile: Dockerfile
+        command: php artisan octane:frankenphp --port=8080
+        ports:
+            - "8080:8080"
+        volumes:
+            - app_storage:/app/storage
+            - app_cache:/app/bootstrap/cache
+            - caddy_data:/data
+            - caddy_config:/config
+        networks:
+            - tunasse_network
+        cap_drop: # Remove all capabilities
+            - ALL
+        security_opt: # Prevents privilege escalation
+            - no-new-privileges:true
+        read_only: true
+        tmpfs:
+            - /tmp
+        depends_on:
+            setup:
+                condition: service_completed_successfully
+            db:
+                condition: service_healthy
+
+    db:
+        container_name: tunasse_db
+        image: mysql:8.0
+        environment:
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+        volumes:
+            - db_data:/var/lib/mysql
+        networks:
+            - tunasse_network
+        cap_drop: # Remove all capabilities
+            - ALL
+        cap_add: # Add only necessary capabilities
+            - CHOWN
+            - DAC_OVERRIDE
+            - SETGID
+            - SETUID
+        security_opt: # Prevents privilege escalation
+            - no-new-privileges:true
+        healthcheck:
+            test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+            interval: 5s
+            timeout: 3s
+            retries: 5
+
+volumes:
+    app_storage:
+    app_cache:
+    caddy_data:
+    caddy_config:
+    db_data:
+
+networks:
+    tunasse_network:
+        driver: bridge

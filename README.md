@@ -19,15 +19,35 @@ and Filament, it provides a modern, intuitive interface for tracking your financ
 
 ## 🖼️ Screenshots
 
-*TODO*
+<img src="resources/assets/images/screenshot.png" />
+
+## 🚀 Getting Started
+### Deploy with Docker
+1. **Clone the repository**
+```bash
+  git clone https://github.com/AxelReviron/Tunasse.git
+  cd tunasse
+```
+
+2. **Setup environment variables** 
+```bash
+  cp .env.example .env
+```
+
+
+3. **Start the Docker containers**
+```bash
+  docker compose -f up -d
+```
+Application listen on `${APP_URL}:8080`
 
 ## 🚩 Roadmap
 ### High Priority
+- [x] Docker configuration for easy deployment
 - [ ] Implement tests
 - [ ] Budget widgets and analytics
 - [ ] User settings page
 - [ ] Additional translations (Spanish, Italian, German, Portuguese, Dutch)
-- [ ] Docker configuration for easy deployment
 - [ ] Stock market price tracking integration
 - [ ] Cryptocurrency price tracking
 - [ ] Two-factor authentication (2FA)
@@ -35,17 +55,13 @@ and Filament, it provides a modern, intuitive interface for tracking your financ
 ### Feature Ideas
 - [ ] Import transactions from CSV
 - [ ] Export data to PDF/Excel
-- [ ] Shared budgets for families/couples
+- [ ] Shared budgets
 - [ ] Receipt scanning and attachment
 - [ ] API for third-party integrations
 - [ ] Investment portfolio tracking with performance metrics
 - [ ] MCP Server (AI)
 
-## 🚀 Getting Started
-### Prerequisites
-- Docker & Docker Compose
-- Git
-
+## 🤝 Contributing
 ### Local Development with Docker
 1. **Clone the repository**
 ```bash
@@ -105,9 +121,6 @@ Laravel Octane with FrankenPHP provides superior performance for your applicatio
 
 Open your browser and navigate to [localhost:8000](http://localhost:8000)
 
-### Deployment with Docker
-*TODO*
-
 ### 🧾 Useful Commands
 #### Access container shell (makefile)
 ```bash
@@ -121,6 +134,3 @@ Open your browser and navigate to [localhost:8000](http://localhost:8000)
 ```bash
   docker exec -it tunasse php artisan optimize:clear
 ```
-
-## 🤝 Contributing
-*TODO*
