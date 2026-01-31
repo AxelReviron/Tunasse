@@ -1,29 +1,15 @@
 services:
-    setup:
-        container_name: tunasse_setup
-        build:
-            context: .
-            dockerfile: Dockerfile
-        command: /scripts/setup.sh
-        volumes:
-            - ./setup.sh:/scripts/setup.sh:ro
-            - app_storage:/app/storage
-            - app_cache:/app/bootstrap/cache
-        networks:
-            - tunasse_network
-        depends_on:
-            db:
-                condition: service_healthy
-
     app:
         container_name: tunasse_app
         build:
             context: .
             dockerfile: Dockerfile
-        command: php artisan octane:frankenphp --port=8080
+        command: [ "/bin/bash", "/scripts/setup.sh" ]
         ports:
-            - "8080:8080"
+            - "80:80"
+            - "443:443"
         volumes:
+            - ./setup.sh:/scripts/setup.sh
             - app_storage:/app/storage
             - app_cache:/app/bootstrap/cache
             - caddy_data:/data
@@ -32,20 +18,26 @@ services:
             - tunasse_network
         cap_drop: # Remove all capabilities
             - ALL
+        cap_add:
+            - DAC_OVERRIDE
+            - NET_BIND_SERVICE
         security_opt: # Prevents privilege escalation
             - no-new-privileges:true
-        read_only: true
         tmpfs:
             - /tmp
         depends_on:
-            setup:
-                condition: service_completed_successfully
             db:
                 condition: service_healthy
+        healthcheck:
+            test: [ "CMD", "curl", "-f", "https://tunasse.fr/up" ]
+            interval: 10s
+            timeout: 3s
+            retries: 3
+            start_period: 30s
 
     db:
         container_name: tunasse_db
-        image: mysql:8.0
+        image: mariadb:11.8
         environment:
             MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
             MYSQL_DATABASE: ${DB_DATABASE}
@@ -65,7 +57,7 @@ services:
         security_opt: # Prevents privilege escalation
             - no-new-privileges:true
         healthcheck:
-            test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+            test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
             interval: 5s
             timeout: 3s
             retries: 5

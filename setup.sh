@@ -16,3 +16,4 @@ echo "Optimize application..."
 php artisan optimize:clear
 php artisan optimize
 
+php artisan octane:frankenphp --port=443 --caddyfile=Caddyfile
