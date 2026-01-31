@@ -31,7 +31,7 @@ class BudgetSeeder extends Seeder
         $endDate = Carbon::now()->endOfMonth();
 
         foreach ($budgets as $budgetData) {
-            Budget::factory()->create([
+            Budget::create([
                 'label' => $budgetData['label'],
                 'amount' => $budgetData['amount'],
                 'start_date' => $startDate,

@@ -29,11 +29,7 @@ class CurrencySeeder extends Seeder
         ];
 
         foreach ($currencies as $currency) {
-            Currency::factory()->create([
-                'code' => $currency['code'],
-                'name' => $currency['name'],
-                'symbol' => $currency['symbol'],
-            ]);
+            Currency::create($currency);
         }
     }
 }

@@ -19,7 +19,7 @@ class AccountSeeder extends Seeder
         $eur = Currency::where('code', 'EUR')->first();
         $btc = Currency::where('code', 'BTC')->first();
 
-        Account::factory()->create([
+        Account::create([
             'label' => 'Checking',
             'type' => AccountType::CHECKING,
             'balance' => 2500,
@@ -28,7 +28,7 @@ class AccountSeeder extends Seeder
             'user_id' => $user->id,
         ]);
 
-        Account::factory()->create([
+        Account::create([
             'label' => 'Savings',
             'type' => AccountType::SAVINGS,
             'balance' => 42000,
@@ -37,7 +37,7 @@ class AccountSeeder extends Seeder
             'user_id' => $user->id,
         ]);
 
-        Account::factory()->create([
+        Account::create([
             'label' => 'Crypto',
             'type' => AccountType::INVESTMENT,
             'balance' => 9000,
@@ -46,7 +46,7 @@ class AccountSeeder extends Seeder
             'user_id' => $user->id,
         ]);
 
-        Account::factory()->create([
+        Account::create([
             'label' => 'Stocks',
             'type' => AccountType::INVESTMENT,
             'balance' => 16000,

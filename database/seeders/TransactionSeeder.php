@@ -152,13 +152,12 @@ class TransactionSeeder extends Seeder
     private function createTransactions($user, $account, $budget, array $transactions): void
     {
         foreach ($transactions as $transaction) {
-            Transaction::factory()
-                ->for($user, 'user')
-                ->for($account, 'account')
-                ->when($budget, fn ($q) => $q->for($budget, 'budget'))
-                ->create(array_merge($transaction, [
-                    'date' => Carbon::createFromFormat('d/m/Y', $transaction['date'])->format('Y-m-d'),
-                ]));
+            Transaction::create(array_merge($transaction, [
+                'date' => Carbon::createFromFormat('d/m/Y', $transaction['date'])->format('Y-m-d'),
+                'user_id' => $user->id,
+                'account_id' => $account->id,
+                'budget_id' => $budget?->id,
+            ]));
         }
     }
 }

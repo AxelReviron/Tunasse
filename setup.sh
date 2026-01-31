@@ -4,7 +4,8 @@ set -e
 # TODO: Check if migrations have already been run
 
 echo "Running migrations..."
-php artisan migrate --force --seed
+php artisan migrate --force
+php artisan db:seed --class=ProdSeeder
 
 echo "Generating permissions..."
 php artisan shield:generate --all --panel=admin --option=permissions
