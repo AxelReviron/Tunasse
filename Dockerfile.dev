@@ -1,4 +1,4 @@
-FROM dunglas/frankenphp
+FROM dunglas/frankenphp:1.11.1-php8.4
 
 ARG USER=appuser
 ARG USER_ID=1000
@@ -20,7 +20,8 @@ RUN install-php-extensions \
     pdo_mysql \
     intl \
     gd \
-    zip
+    zip \
+    exif
     # Add other PHP extensions here...
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -31,4 +32,4 @@ USER ${USER}
 
 WORKDIR /app
 
-COPY . /app
+COPY --chown=${USER}:${USER} . .
