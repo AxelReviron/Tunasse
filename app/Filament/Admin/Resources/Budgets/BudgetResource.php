@@ -58,6 +58,13 @@ class BudgetResource extends Resource
         ];
     }
 
+    // Get only user related records
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('user_id', auth()->user()->getKey());
+    }
+
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
         return parent::getRecordRouteBindingEloquentQuery()
