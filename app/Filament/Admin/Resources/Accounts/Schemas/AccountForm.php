@@ -38,14 +38,6 @@ class AccountForm
                         Select::make('currency_id')
                             ->label(__('currency.currency'))
                             ->relationship('currency', 'name'),
-                        Select::make('user_id')
-                            ->label(__('user.user'))
-                            ->relationship('user', 'name')
-                            ->hidden()
-                            ->dehydrated()
-                            ->dehydrateStateUsing(fn () => auth()->user()->getKey())
-                            ->default(fn () => auth()->id())
-                            ->required(),
                     ]),
             ]);
     }

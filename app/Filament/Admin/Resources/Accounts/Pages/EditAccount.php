@@ -30,4 +30,11 @@ class EditAccount extends EditRecord
             RecordMetadataWidget::class,
         ];
     }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $data['user_id'] = auth()->user()->getKey();
+
+        return $data;
+    }
 }

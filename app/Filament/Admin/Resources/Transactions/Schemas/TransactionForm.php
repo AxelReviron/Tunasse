@@ -96,14 +96,6 @@ class TransactionForm
                                     ->visible(fn ($get) => $get('is_recurring')),
                             ]),
                     ]),
-                Select::make('user_id')
-                    ->label(__('transaction.user'))
-                    ->relationship('user', 'name')
-                    ->hidden()
-                    ->dehydrated()
-                    ->dehydrateStateUsing(fn () => auth()->user()->getKey())
-                    ->default(fn () => auth()->id())
-                    ->required(),
             ]);
     }
 }
