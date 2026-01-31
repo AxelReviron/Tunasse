@@ -24,6 +24,7 @@ class TransactionForm
          *  - Widget pour voir le total des dépenses/revenus du mois
          *  - Graphique des transactions par catégorie/budget
          *  - Solde total de tous les comptes
+         *  - Empecher la création si il n'y a aucun compte
          */
         return $schema
             ->components([
@@ -99,6 +100,8 @@ class TransactionForm
                     ->label(__('transaction.user'))
                     ->relationship('user', 'name')
                     ->hidden()
+                    ->dehydrated()
+                    ->dehydrateStateUsing(fn () => auth()->user()->getKey())
                     ->default(fn () => auth()->id())
                     ->required(),
             ]);

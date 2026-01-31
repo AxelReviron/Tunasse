@@ -42,6 +42,8 @@ class AccountForm
                             ->label(__('user.user'))
                             ->relationship('user', 'name')
                             ->hidden()
+                            ->dehydrated()
+                            ->dehydrateStateUsing(fn () => auth()->user()->getKey())
                             ->default(fn () => auth()->id())
                             ->required(),
                     ]),
