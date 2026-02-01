@@ -23,7 +23,7 @@ class AccountSeeder extends Seeder
             'label' => 'Checking',
             'type' => AccountType::CHECKING,
             'balance' => 2500,
-            'color' => '#2596be',
+            'color' => '#2924bf',
             'currency_id' => $eur->id,
             'user_id' => $user->id,
         ]);
