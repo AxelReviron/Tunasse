@@ -13,4 +13,10 @@ return [
     'no_budgets_yet' => 'No Budget',
     'user' => 'User',
     'start_date' => 'Start date',
+    'widgets' => [
+        'amount_distribution' => 'Amount by budget',
+        'no_data' => 'No data',
+        'total_stats' => 'Budgets distribution',
+        'total_stats_no_budget' => 'No budgets',
+    ],
 ];
