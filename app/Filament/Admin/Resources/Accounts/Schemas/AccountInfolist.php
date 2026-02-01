@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\Accounts\Schemas;
 
+use App\Filament\Infolists\Components\ColoredBadgeEntry;
 use Filament\Infolists\Components\ColorEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -18,9 +19,8 @@ class AccountInfolist
                     ->schema([
                         TextEntry::make('label')
                             ->label(__('account.label')),
-                        TextEntry::make('type')
+                        ColoredBadgeEntry::make('type')
                             ->label(__('account.type'))
-                            ->badge(),
                     ]),
                 Section::make()
                     ->columns(1)

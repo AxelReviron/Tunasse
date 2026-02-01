@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\Transactions\Schemas;
 
 use App\Enums\TransactionType;
+use App\Filament\Infolists\Components\ColoredBadgeEntry;
 use App\Helper\DateHelper;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -54,14 +55,12 @@ class TransactionInfolist
                                     ->suffix(fn ($record) => ' '.$record->account?->currency?->symbol)
                                     ->prefix(fn ($record) => $record->type === TransactionType::EXPENSE ? '- ' : '+ ')
                                     ->color(fn ($record) => $record->type === TransactionType::EXPENSE ? 'danger' : 'success'),
-                                TextEntry::make('account.label')
+                                ColoredBadgeEntry::make('account.label')
                                     ->label(__('transaction.account'))
-                                    ->color(fn ($record) => $record->account ? "account-{$record->account->getKey()}" : null)
-                                    ->badge(),
-                                TextEntry::make('budget.label')
+                                    ->color(fn ($record) => $record->account ? $record->account->color : null),
+                                ColoredBadgeEntry::make('budget.label')
                                     ->label(__('transaction.budget'))
-                                    ->color(fn ($record) => $record->budget ? "budget-{$record->budget->getKey()}" : null)
-                                    ->badge()
+                                    ->color(fn ($record) => $record->budget ? $record->budget->color : null)
                                     ->placeholder('-'),
                             ]),
                         Section::make()

@@ -6,6 +6,7 @@ use App\Enums\TransactionType;
 use App\Filament\Admin\Actions\RecordActionsGroup;
 use App\Filament\Admin\Columns\MetadataColumnGroup;
 use App\Filament\Admin\Resources\Accounts\AccountResource;
+use App\Filament\Tables\Columns\ColoredBadgeColumn;
 use App\Helper\DateHelper;
 use App\Models\Account;
 use Filament\Actions\Action;
@@ -74,17 +75,16 @@ class TransactionsTable
                         ->limit(20)
                         ->searchable()
                         ->sortable(),
-                    TextColumn::make('account.type')
+                    ColoredBadgeColumn::make('account.type')
                         ->label(__('transaction.account'))
-                        ->color(fn ($record) => $record->account ? "account-{$record->account->getKey()}" : null)
-                        ->badge()
+                        ->color(fn ($record) => $record->account ? $record->account->color : null)
                         ->searchable()
                         ->sortable(),
-                    TextColumn::make('budget.label')
+                    ColoredBadgeColumn::make('budget.label')
                         ->label(__('transaction.budget'))
-                        ->color(fn ($record) => $record->budget ? "budget-{$record->budget->getKey()}" : null)
-                        ->badge()
-                        ->searchable(),
+                        ->color(fn ($record) => $record->budget ? $record->budget->color : null)
+                        ->searchable()
+                        ->sortable(),
                     TextColumn::make('type')
                         ->label(__('transaction.type'))
                         ->color(fn ($state) => $state === TransactionType::EXPENSE ? 'danger' : 'success')

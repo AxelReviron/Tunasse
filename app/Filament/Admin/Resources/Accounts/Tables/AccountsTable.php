@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\Accounts\Tables;
 
 use App\Filament\Admin\Actions\RecordActionsGroup;
 use App\Filament\Admin\Columns\MetadataColumnGroup;
+use App\Filament\Tables\Columns\ColoredBadgeColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ForceDeleteBulkAction;
@@ -29,10 +30,8 @@ class AccountsTable
                     TextColumn::make('label')
                         ->label(__('account.label'))
                         ->searchable(),
-                    TextColumn::make('type')
-                        ->label(__('account.type'))
-                        ->color(fn ($record) => "account-{$record->getKey()}")
-                        ->badge(),
+                    ColoredBadgeColumn::make('type')
+                        ->label(__('account.type')),
                     TextColumn::make('balance')
                         ->label(__('account.balance'))
                         ->suffix(fn ($record) => ' '.$record->currency?->symbol)
