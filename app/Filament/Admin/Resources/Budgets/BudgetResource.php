@@ -11,9 +11,10 @@ use App\Filament\Admin\Resources\Budgets\Schemas\BudgetForm;
 use App\Filament\Admin\Resources\Budgets\Schemas\BudgetInfolist;
 use App\Filament\Admin\Resources\Budgets\Tables\BudgetsTable;
 use App\Models\Budget;
-use Filament\Navigation\NavigationItem;
+use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -22,7 +23,7 @@ class BudgetResource extends Resource
 {
     protected static ?string $model = Budget::class;
 
-    protected static ?int $navigationSort = 1;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartPie;
 
     protected static ?string $recordTitleAttribute = 'label';
 
@@ -75,32 +76,11 @@ class BudgetResource extends Resource
 
     public static function getPluralLabel(): ?string
     {
-        return __('budget.all');
+        return __('budget.budgets');
     }
 
     public static function getLabel(): ?string
     {
         return __('budget.budget');
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return __('budget.budgets');
-    }
-
-    public static function getNavigationItems(): array
-    {
-        return [
-            NavigationItem::make(static::getNavigationLabel())
-                ->group(static::getNavigationGroup())
-                ->icon(static::getNavigationIcon())
-                ->activeIcon(static::getActiveNavigationIcon())
-                ->url(static::getNavigationUrl())
-                ->badge(static::getNavigationBadge(), color: static::getNavigationBadgeColor())
-                ->sort(static::getNavigationSort())
-                ->isActiveWhen(function () {
-                    return request()->routeIs('filament.admin.resources.budgets.index');
-                }),
-        ];
     }
 }

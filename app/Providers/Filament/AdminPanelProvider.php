@@ -2,33 +2,23 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Admin\Resources\Accounts\AccountResource;
 use App\Filament\Admin\Resources\Accounts\Widgets\AccountBalanceBarChart;
 use App\Filament\Admin\Resources\Accounts\Widgets\AccountPieDistribution;
-use App\Filament\Admin\Resources\Budgets\BudgetResource;
 use App\Filament\Admin\Resources\Budgets\Widgets\BudgetAmountBarChart;
 use App\Filament\Admin\Resources\Budgets\Widgets\BudgetPieDistribution;
 use App\Filament\Admin\Resources\Transactions\Widgets\CurrentMonthTransactions;
 use App\Filament\Admin\Resources\Transactions\Widgets\RecurringIncomingExpensesOverview;
-use App\Models\Account;
-use App\Models\Budget;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\NavigationGroup;
-use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Resources\Resource;
 use Filament\Support\Colors\Color;
-use Filament\Support\Icons\Heroicon;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
@@ -44,10 +34,10 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->login()
             ->unsavedChangesAlerts()
-            ->colors($this->registerGlobalColors())
+            ->colors([
+                'primary' => Color::Zinc,
+            ])
             ->viteTheme('resources/css/filament/admin/theme.css')
-            ->navigationItems($this->getNavigationItems())
-            ->navigationGroups($this->getNavigationGroups())
             ->collapsibleNavigationGroups(true)
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\Filament\Admin\Pages')
@@ -81,105 +71,5 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
-    }
-
-    protected function registerGlobalColors(): array
-    {
-        $colors = [
-            'primary' => Color::Zinc,
-        ];
-
-        try {
-            Account::query()
-                ->select('id', 'color')
-                ->whereNotNull('color')
-                ->pluck('color', 'id')
-                ->each(function (string $hexColor, int $accountId) use (&$colors): void {
-                    $colors["account-{$accountId}"] = $hexColor;
-                });
-
-            Budget::query()
-                ->select('id', 'color')
-                ->whereNotNull('color')
-                ->pluck('color', 'id')
-                ->each(function (string $hexColor, int $budgetId) use (&$colors): void {
-                    $colors["budget-{$budgetId}"] = $hexColor;
-                });
-        } catch(QueryException $e) {
-            // Tables don't exist yet, skip
-        }
-
-        return $colors;
-    }
-
-    protected function getNavigationItems(): array
-    {
-        try {
-            return [
-                ...$this->buildNavigationItems(Account::all(), AccountResource::class, 'account.accounts'),
-                ...$this->buildNavigationItems(Budget::all(), BudgetResource::class, 'budget.budgets'),
-            ];
-        } catch(QueryException $e) {
-            // Tables don't exist yet, skip
-            return [];
-        }
-    }
-
-    /**
-     * Build navigation items for a collection of models
-     *
-     * @template TModel of Account|Budget
-     *
-     * @param  Collection<int, TModel>  $models  Collection of models to create navigation items for
-     * @param  class-string<resource>  $resourceClass  Filament resource class (e.g., AccountResource::class)
-     * @param  string  $groupTranslationKey  Translation key for the navigation group
-     * @param  int  $startSort  Starting sort order (default: 2)
-     * @return array Array of NavigationItem instances
-     */
-    protected function buildNavigationItems(Collection $models, string $resourceClass, string $groupTranslationKey, int $startSort = 2): array
-    {
-        $items = [];
-        $sort = $startSort;
-
-        /** @var Account|Budget $model */
-        foreach ($models as $model) {
-            $items[] = NavigationItem::make($model->label)
-                ->url(fn () => $resourceClass::getUrl(
-                    'view',
-                    ['record' => $model->getKey()],
-                    panel: 'admin'
-                ))
-                ->isActiveWhen(function () use ($model, $resourceClass) {
-                    $currentUrl = request()->url();
-                    $modelUrl = $resourceClass::getUrl(
-                        'view',
-                        ['record' => $model->getKey()],
-                        panel: 'admin'
-                    );
-
-                    return $currentUrl === $modelUrl;
-                })
-                ->sort($sort++)
-                ->group(fn () => __($groupTranslationKey));
-        }
-
-        return $items;
-    }
-
-    /**
-     * Get all navigation groups with their configuration
-     */
-    protected function getNavigationGroups(): array
-    {
-        return [
-            NavigationGroup::make()
-                ->label(fn () => __('account.accounts'))
-                ->icon(Heroicon::OutlinedWallet),
-            NavigationGroup::make()
-                ->label(fn () => __('budget.budgets'))
-                ->icon(Heroicon::OutlinedChartPie),
-            NavigationGroup::make()
-                ->label(fn () => __('filament.admin')),
-        ];
     }
 }

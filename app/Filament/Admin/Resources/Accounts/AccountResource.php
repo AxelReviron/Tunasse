@@ -11,19 +11,19 @@ use App\Filament\Admin\Resources\Accounts\Schemas\AccountForm;
 use App\Filament\Admin\Resources\Accounts\Schemas\AccountInfolist;
 use App\Filament\Admin\Resources\Accounts\Tables\AccountsTable;
 use App\Models\Account;
-use Filament\Navigation\NavigationItem;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
+use BackedEnum;
 
 class AccountResource extends Resource
 {
     protected static ?string $model = Account::class;
 
-    protected static ?int $navigationSort = 1;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedWallet;
 
     protected static ?string $recordTitleAttribute = 'label';
 
@@ -76,32 +76,11 @@ class AccountResource extends Resource
 
     public static function getPluralLabel(): ?string
     {
-        return __('account.all');
+        return __('account.accounts');
     }
 
     public static function getLabel(): ?string
     {
         return __('account.account');
-    }
-
-    public static function getNavigationGroup(): string|UnitEnum|null
-    {
-        return __('account.accounts');
-    }
-
-    public static function getNavigationItems(): array
-    {
-        return [
-            NavigationItem::make(static::getNavigationLabel())
-                ->group(static::getNavigationGroup())
-                ->icon(static::getNavigationIcon())
-                ->activeIcon(static::getActiveNavigationIcon())
-                ->url(static::getNavigationUrl())
-                ->badge(static::getNavigationBadge(), color: static::getNavigationBadgeColor())
-                ->sort(static::getNavigationSort())
-                ->isActiveWhen(function () {
-                    return request()->routeIs('filament.admin.resources.accounts.index');
-                }),
-        ];
     }
 }
