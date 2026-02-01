@@ -8,6 +8,7 @@ return [
     'checking' => 'Checking',
     'credit' => 'Credit',
     'color' => 'Color',
+    'create' => 'Créer an account',
     'investment' => 'Investment',
     'label' => 'Label',
     'no_accounts_yet' => 'No accounts',

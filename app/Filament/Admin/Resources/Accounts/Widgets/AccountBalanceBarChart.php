@@ -2,72 +2,37 @@
 
 namespace App\Filament\Admin\Resources\Accounts\Widgets;
 
-use Filament\Widgets\ChartWidget;
-use Illuminate\Contracts\Support\Htmlable;
+use App\Filament\Admin\Widgets\BarChartWidget;
 
-class AccountBalanceBarChart extends ChartWidget
+class AccountBalanceBarChart extends BarChartWidget
 {
-    protected int|string|array $columnSpan = 1;
-
-    protected ?string $maxHeight = '150px';
-
-    public function getDescription(): string|Htmlable|null
+    protected function getRelationName(): string
     {
-        return __('account.widgets.balance_distribution');
+        return 'accounts';
     }
 
-    protected function getData(): array
+    protected function getValueField(): string
     {
-        $accounts = auth()->user()->accounts()
-            ->with('currency')
-            ->get();
-
-        if ($accounts->isEmpty()) {
-            return [
-                'datasets' => [
-                    [
-                        'label' => __('account.widgets.no_data'),
-                        'data' => [0],
-                        'backgroundColor' => ['#9ca3af'], // gris
-                    ],
-                ],
-                'labels' => [__('account.widgets.total_stats_no_account')],
-            ];
-        }
-
-        return [
-            'datasets' => [
-                [
-                    'label' => __('account.balance'),
-                    'data' => $accounts->pluck('balance')->toArray(),
-                    'backgroundColor' => $accounts->pluck('color')->toArray(),
-                    'borderRadius' => 6,
-                ],
-            ],
-            'labels' => $accounts->pluck('label')->toArray(),
-        ];
+        return 'balance';
     }
 
-    protected function getOptions(): array
+    protected function getDescriptionKey(): string
     {
-        return [
-            'responsive' => true,
-            'maintainAspectRatio' => false,
-            'scales' => [
-                'y' => [
-                    'beginAtZero' => true,
-                ],
-            ],
-            'plugins' => [
-                'legend' => [
-                    'display' => false,
-                ],
-            ],
-        ];
+        return 'account.widgets.balance_distribution';
     }
 
-    protected function getType(): string
+    protected function getDataLabelKey(): string
     {
-        return 'bar';
+        return 'account.balance';
+    }
+
+    protected function getEmptyStateKey(): string
+    {
+        return 'account.widgets.total_stats_no_account';
+    }
+
+    protected function getEmptyStateLabelKey(): string
+    {
+        return 'account.widgets.no_data';
     }
 }

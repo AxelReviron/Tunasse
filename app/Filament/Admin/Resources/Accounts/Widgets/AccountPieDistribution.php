@@ -2,67 +2,27 @@
 
 namespace App\Filament\Admin\Resources\Accounts\Widgets;
 
-use Filament\Widgets\ChartWidget;
-use Illuminate\Contracts\Support\Htmlable;
+use App\Filament\Admin\Widgets\PieDistributionWidget;
 
-class AccountPieDistribution extends ChartWidget
+class AccountPieDistribution extends PieDistributionWidget
 {
-    protected int|string|array $columnSpan = 1;
-
-    protected ?string $maxHeight = '150px';
-
-    public function getDescription(): string|Htmlable|null
+    protected function getRelationName(): string
     {
-        return __('account.widgets.total_stats');
+        return 'accounts';
     }
 
-    protected function getData(): array
+    protected function getValueField(): string
     {
-        $accounts = auth()->user()->accounts()
-            ->with('currency')
-            ->get();
-
-        if ($accounts->isEmpty()) {
-            return [
-                'datasets' => [
-                    [
-                        'data' => [0],
-                    ],
-                ],
-                'labels' => [__('account.widgets.total_stats_no_account')],
-            ];
-        }
-
-        // TODO: Ajouter les devises
-        return [
-            'datasets' => [
-                [
-                    'data' => $accounts->pluck('balance')->toArray(),
-                    'backgroundColor' => $accounts->pluck('color')->toArray(),
-                ],
-            ],
-            'labels' => $accounts->pluck('label')->toArray(),
-        ];
+        return 'balance';
     }
 
-    protected function getOptions(): array
+    protected function getDescriptionKey(): string
     {
-        return [
-            'responsive' => true,
-            'maintainAspectRatio' => false,
-            'plugins' => [
-                'legend' => [
-                    'position' => 'right',
-                    'labels' => [
-                        'padding' => 20,
-                    ],
-                ],
-            ],
-        ];
+        return 'account.widgets.total_stats';
     }
 
-    protected function getType(): string
+    protected function getEmptyStateKey(): string
     {
-        return 'pie';
+        return 'account.widgets.total_stats_no_account';
     }
 }

@@ -8,6 +8,7 @@ return [
     'checking' => 'Compte courant',
     'credit' => 'Crédit',
     'color' => 'Couleur',
+    'create' => 'Créer un compte',
     'investment' => 'Investissement',
     'label' => 'Nom',
     'no_accounts_yet' => 'Aucun compte',
