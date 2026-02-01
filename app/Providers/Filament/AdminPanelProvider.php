@@ -6,6 +6,8 @@ use App\Filament\Admin\Resources\Accounts\AccountResource;
 use App\Filament\Admin\Resources\Accounts\Widgets\AccountBalanceBarChart;
 use App\Filament\Admin\Resources\Accounts\Widgets\AccountPieDistribution;
 use App\Filament\Admin\Resources\Budgets\BudgetResource;
+use App\Filament\Admin\Resources\Budgets\Widgets\BudgetAmountBarChart;
+use App\Filament\Admin\Resources\Budgets\Widgets\BudgetPieDistribution;
 use App\Filament\Admin\Resources\Transactions\Widgets\CurrentMonthTransactions;
 use App\Filament\Admin\Resources\Transactions\Widgets\RecurringIncomingExpensesOverview;
 use App\Models\Account;
@@ -57,7 +59,9 @@ class AdminPanelProvider extends PanelProvider
                 RecurringIncomingExpensesOverview::class,
                 CurrentMonthTransactions::class,
                 AccountPieDistribution::class,
+                BudgetPieDistribution::class,
                 AccountBalanceBarChart::class,
+                BudgetAmountBarChart::class,
             ])
             ->middleware([
                 EncryptCookies::class,
