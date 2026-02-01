@@ -4,8 +4,10 @@ namespace App\Models;
 
 use App\Enums\RecurringTransactionUnit;
 use App\Enums\TransactionType;
+use App\Models\Scopes\OwnerScope;
 use Carbon\Carbon;
 use Database\Factories\TransactionFactory;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,6 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property bool $is_recurring
  * @property int|null $recurring_interval
  */
+#[ScopedBy([OwnerScope::class])]
 class Transaction extends Model
 {
     /** @use HasFactory<TransactionFactory> */
