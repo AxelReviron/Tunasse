@@ -5,7 +5,10 @@ namespace App\Filament\Admin\Resources\Transactions\Tables;
 use App\Enums\TransactionType;
 use App\Filament\Admin\Actions\RecordActionsGroup;
 use App\Filament\Admin\Columns\MetadataColumnGroup;
+use App\Filament\Admin\Resources\Accounts\AccountResource;
 use App\Helper\DateHelper;
+use App\Models\Account;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ForceDeleteBulkAction;
@@ -21,11 +24,27 @@ class TransactionsTable
 {
     public static function configure(Table $table): Table
     {
+        $hasAccounts = Account::query()
+            ->whereBelongsTo(auth()->user())
+            ->exists();
+
+        if (! $hasAccounts) {
+            return $table
+                ->columns([])
+                ->emptyStateHeading(__('transaction.no_account_title'))
+                ->emptyStateDescription(__('transaction.no_account_description'))
+                ->emptyStateIcon(Heroicon::OutlinedWallet)
+                ->emptyStateActions([
+                    Action::make('createAccount')
+                        ->label(__('account.create'))
+                        ->icon(Heroicon::Plus)
+                        ->url(AccountResource::getUrl('create')),
+                ]);
+        }
+
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->whereBelongsTo(auth()->user()))
             ->defaultSort('date')
-            ->emptyStateHeading(__('transaction.no_transactions_yet'))
-            ->emptyStateIcon(Heroicon::OutlinedBanknotes)
             ->columns([
                 ColumnGroup::make(__('filament.infos'), [
                     TextColumn::make('label')
