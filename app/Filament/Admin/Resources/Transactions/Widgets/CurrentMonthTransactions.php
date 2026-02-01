@@ -61,7 +61,7 @@ class CurrentMonthTransactions extends ChartWidget
             ];
         }
 
-        $account = Account::find($accountId);
+        $account = auth()->user()->accounts()->find($accountId);
 
         if (! $account) {
             return [

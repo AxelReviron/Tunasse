@@ -20,7 +20,8 @@ class RecurringIncomingExpensesOverview extends StatsOverviewWidget
         $today = Carbon::now();
         $actualMonth = Carbon::now()->translatedFormat('F');
 
-        $recurringExpenses = Transaction::whereIsRecurring(true)
+        $recurringExpenses = auth()->user()->transactions()
+            ->whereIsRecurring(true)
             ->whereType(TransactionType::EXPENSE)
             ->get();
 
