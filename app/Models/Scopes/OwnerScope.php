@@ -15,7 +15,7 @@ class OwnerScope implements Scope
     public function apply(Builder $builder, Model $model): void
     {
         if (Auth::check()) {
-            $builder->where($model->getTable() . '.user_id', auth()->user()->getKey());
+            $builder->where($model->getTable().'.user_id', auth()->user()->getKey());
         }
     }
 }

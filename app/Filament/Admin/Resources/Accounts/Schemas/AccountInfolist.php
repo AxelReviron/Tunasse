@@ -20,7 +20,7 @@ class AccountInfolist
                         TextEntry::make('label')
                             ->label(__('account.label')),
                         ColoredBadgeEntry::make('type')
-                            ->label(__('account.type'))
+                            ->label(__('account.type')),
                     ]),
                 Section::make()
                     ->columns(1)

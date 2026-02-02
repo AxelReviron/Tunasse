@@ -11,13 +11,13 @@ use App\Filament\Admin\Resources\Accounts\Schemas\AccountForm;
 use App\Filament\Admin\Resources\Accounts\Schemas\AccountInfolist;
 use App\Filament\Admin\Resources\Accounts\Tables\AccountsTable;
 use App\Models\Account;
+use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use BackedEnum;
 
 class AccountResource extends Resource
 {

@@ -15,6 +15,7 @@ class ColoredBadgeEntry extends Entry
     public function color(Closure|string|null $color): static
     {
         $this->customColor = $color;
+
         return $this;
     }
 

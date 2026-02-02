@@ -2,18 +2,19 @@
 
 namespace App\Filament\Tables\Columns;
 
-use Filament\Tables\Columns\Column;
 use Closure;
+use Filament\Tables\Columns\Column;
 
 class ColoredBadgeColumn extends Column
 {
     protected string $view = 'filament.tables.columns.colored-badge-column';
 
-    protected float | Closure | null $customColor = null;
+    protected float|Closure|null $customColor = null;
 
-    public function color(string | Closure | null $color): static
+    public function color(string|Closure|null $color): static
     {
         $this->customColor = $color;
+
         return $this;
     }
 

@@ -3,7 +3,6 @@
 namespace App\Filament\Admin\Resources\Transactions\Widgets;
 
 use App\Enums\TransactionType;
-use App\Models\Transaction;
 use Carbon\Carbon;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget;

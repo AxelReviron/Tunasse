@@ -12,8 +12,8 @@ class AccountBalanceCalculator
     /**
      * Calculate the account balance, optionally at a specific date.
      *
-     * @param Account $account The account to calculate balance for
-     * @param Carbon|null $atDate If provided, calculate balance up to and including this date
+     * @param  Account  $account  The account to calculate balance for
+     * @param  Carbon|null  $atDate  If provided, calculate balance up to and including this date
      * @return float Balance in major currency units
      */
     public function getBalance(Account $account, ?Carbon $atDate = null): float
@@ -61,7 +61,6 @@ class AccountBalanceCalculator
     }
 
     /**
-     * @param Collection $transactions
      * @return Collection<string, Collection>
      */
     private function groupTransactionsByDay(Collection $transactions): Collection

@@ -21,9 +21,9 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        #************************#
-        #   Transaction events   #
-        #************************#
+        // ************************#
+        //   Transaction events    #
+        // ************************#
         $listener = app(UpdateAccountBalanceOnTransactionChange::class);
 
         Transaction::created(fn (Transaction $transaction) => $listener->handleCreated($transaction));

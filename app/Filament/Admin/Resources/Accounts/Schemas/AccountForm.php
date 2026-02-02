@@ -19,10 +19,10 @@ class AccountForm
         $defaultCurrency = Currency::where('code', 'EUR')->first() ?
             Currency::where('code', 'EUR')->first()->getKey() :
             Currency::first() ?? new Currency([
-            'code' => 'EUR',
-            'name' => 'Euro',
-            'symbol' => '€',
-        ]);
+                'code' => 'EUR',
+                'name' => 'Euro',
+                'symbol' => '€',
+            ]);
 
         return $schema
             ->components([
@@ -41,7 +41,7 @@ class AccountForm
                             ->label(__('account.balance'))
                             ->belowContent([
                                 Icon::make(Heroicon::OutlinedQuestionMarkCircle),
-                                __('account.balance_helper')
+                                __('account.balance_helper'),
                             ])
                             ->disabled()
                             ->required()
@@ -51,7 +51,7 @@ class AccountForm
                             ->label(__('account.color'))
                             ->belowContent([
                                 Icon::make(Heroicon::OutlinedQuestionMarkCircle),
-                                __('account.color_helper')
+                                __('account.color_helper'),
                             ])
                             ->hexColor()
                             ->required(),
