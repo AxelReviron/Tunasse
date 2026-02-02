@@ -3,10 +3,10 @@
 namespace App\Filament\Admin\Resources\Transactions\Widgets;
 
 use App\Enums\AccountType;
-use App\Enums\TransactionType;
 use App\Models\Account;
-use App\Models\Transaction;
+use App\Services\AccountBalanceCalculator;
 use Carbon\Carbon;
+use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Contracts\Support\Htmlable;
 
@@ -17,6 +17,11 @@ class CurrentMonthTransactions extends ChartWidget
     protected ?string $maxHeight = '300px';
 
     public ?string $filter = null;
+
+    /**
+     * @var array<array<string>>
+     */
+    public array $transactionLabels = [];
 
     public function getDescription(): string|Htmlable|null
     {
@@ -47,122 +52,127 @@ class CurrentMonthTransactions extends ChartWidget
 
     protected function getData(): array
     {
-        $accountId = $this->getFilter();
-
-        if (! $accountId) {
-            return [
-                'datasets' => [
-                    [
-                        'label' => __('transaction.widgets.no_data'),
-                        'data' => [],
-                    ],
-                ],
-                'labels' => [],
-            ];
-        }
-
-        $account = auth()->user()->accounts()->find($accountId);
+        $account = $this->getSelectedAccount();
 
         if (! $account) {
-            return [
-                'datasets' => [
-                    [
-                        'label' => __('transaction.widgets.no_data'),
-                        'data' => [],
-                    ],
-                ],
-                'labels' => [],
-            ];
+            return $this->getEmptyDataset();
         }
 
+        $calculator = app(AccountBalanceCalculator::class);
         $startOfMonth = Carbon::now()->startOfMonth();
         $endOfMonth = Carbon::now()->endOfMonth();
 
-        $transactions = $account->transactions()
-            ->whereBetween('date', [$startOfMonth, $endOfMonth])
-            ->orderBy('date')
-            ->get();
+        $balanceEvolution = $calculator->getBalanceEvolution($account, $startOfMonth, $endOfMonth);
 
-        $incomeByDay = [];
-        $expenseByDay = [];
-        $incomePointRadius = [];
-        $expensePointRadius = [];
-        $labels = [];
+        $this->transactionLabels = $balanceEvolution['transactions'];
 
-        for ($date = $startOfMonth->copy(); $date <= $endOfMonth; $date->addDay()) {
-            $dayKey = $date->format('Y-m-d');
-            $labels[] = $date->format('d');
-            $incomeByDay[$dayKey] = 0;
-            $expenseByDay[$dayKey] = 0;
-        }
+        $color = $account->color ?? '#3b82f6';
+        $currencySymbol = $account->currency?->symbol ?? '€';
 
-        /** @var Transaction $transaction */
-        foreach ($transactions as $transaction) {
-            $dayKey = Carbon::parse($transaction->date)->format('Y-m-d');
-
-            if ($transaction->type === TransactionType::INCOME) {
-                $incomeByDay[$dayKey] = ($incomeByDay[$dayKey] ?? 0) + abs($transaction->amount);
-            } else {
-                $expenseByDay[$dayKey] = ($expenseByDay[$dayKey] ?? 0) + abs($transaction->amount);
-            }
-        }
-
-        foreach ($incomeByDay as $amount) {
-            $incomePointRadius[] = $amount > 0.0 ? 4 : 0;
-        }
-
-        foreach ($expenseByDay as $amount) {
-            $expensePointRadius[] = $amount > 0.0 ? 4 : 0;
-        }
+        $pointRadius = array_map(
+            fn (array $transactions) => count($transactions) > 0 ? 4 : 0,
+            $balanceEvolution['transactions']
+        );
 
         return [
             'datasets' => [
                 [
-                    'label' => __('transaction.income'),
-                    'data' => array_values($incomeByDay),
-                    'borderColor' => '#10b981',
-                    'backgroundColor' => 'rgba(16, 185, 129, 0.1)',
+                    'label' => __('account.balance'),
+                    'data' => $balanceEvolution['values'],
+                    'borderColor' => $color,
+                    'backgroundColor' => $this->hexToRgba($color, 0.1),
                     'fill' => true,
                     'tension' => 0.4,
-                    'pointRadius' => $incomePointRadius,
+                    'pointRadius' => $pointRadius,
                     'pointHoverRadius' => 6,
-                ],
-                [
-                    'label' => __('transaction.expense'),
-                    'data' => array_values($expenseByDay),
-                    'borderColor' => '#ef4444',
-                    'backgroundColor' => 'rgba(239, 68, 68, 0.1)',
-                    'fill' => true,
-                    'tension' => 0.4,
-                    'pointRadius' => $expensePointRadius,
-                    'pointHoverRadius' => 6,
+                    'transactions' => $balanceEvolution['transactions'],
                 ],
             ],
-            'labels' => $labels,
+            'labels' => $balanceEvolution['labels'],
+            'currencySymbol' => $currencySymbol,
         ];
     }
 
-    protected function getOptions(): array
+    protected function getOptions(): RawJs
     {
-        return [
-            'responsive' => true,
-            'maintainAspectRatio' => false,
-            'scales' => [
-                'y' => [
-                    'beginAtZero' => true,
-                ],
-            ],
-            'plugins' => [
-                'legend' => [
-                    'display' => true,
-                    'position' => 'top',
-                ],
-            ],
-        ];
+        return RawJs::make(<<<'JS'
+            {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                    },
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            afterBody: function(context) {
+                                const dataIndex = context[0].dataIndex;
+                                const transactions = context[0].dataset.transactions;
+                                if (transactions && transactions[dataIndex] && transactions[dataIndex].length > 0) {
+                                    return ['', 'Transactions:', ...transactions[dataIndex]];
+                                }
+                                return [];
+                            },
+                        },
+                    },
+                },
+            }
+        JS);
     }
 
     protected function getType(): string
     {
         return 'line';
+    }
+
+    private function getSelectedAccount(): ?Account
+    {
+        $accountId = $this->getFilter();
+
+        if (! $accountId) {
+            return null;
+        }
+
+        return auth()->user()->accounts()->with('currency')->find($accountId);
+    }
+
+    /**
+     * @return array{datasets: array, labels: array}
+     */
+    private function getEmptyDataset(): array
+    {
+        return [
+            'datasets' => [
+                [
+                    'label' => __('transaction.widgets.no_data'),
+                    'data' => [],
+                ],
+            ],
+            'labels' => [],
+        ];
+    }
+
+    /**
+     * Convert hex color to rgba string.
+     */
+    private function hexToRgba(string $hex, float $alpha): string
+    {
+        $hex = ltrim($hex, '#');
+
+        if (strlen($hex) === 3) {
+            $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2];
+        }
+
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+
+        return "rgba({$r}, {$g}, {$b}, {$alpha})";
     }
 }
