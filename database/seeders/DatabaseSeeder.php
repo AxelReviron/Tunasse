@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             AccountSeeder::class,
             BudgetSeeder::class,
             TransactionSeeder::class,
+            RecalculateAccountBalancesSeeder::class,
         ]);
     }
 }
