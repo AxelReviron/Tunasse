@@ -18,10 +18,12 @@ return new class extends Migration
             $table->softDeletes();
             $table->string('label');
             $table->enum('type', AccountType::cases());
-            $table->float('balance')->default(0);
+            $table->bigInteger('balance')->default(0);
             $table->string('color');
-            $table->foreignId('currency_id')->nullable()->constrained('currencies')->nullOnDelete();
+            $table->foreignId('currency_id')->constrained('currencies')->nullOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+
+            $table->index(['account_id', 'date']);
         });
     }
 

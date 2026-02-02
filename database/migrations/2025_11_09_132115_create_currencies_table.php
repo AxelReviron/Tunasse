@@ -15,9 +15,10 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->softDeletes();
-            $table->string('code');
+            $table->string('code')->unique();
             $table->string('name');
             $table->string('symbol');
+            $table->unsignedTinyInteger('decimal_places')->default(2);
         });
     }
 

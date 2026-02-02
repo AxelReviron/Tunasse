@@ -21,29 +21,30 @@ class UpdateAccountBalanceOnTransactionChange
      */
     public function handleUpdated(Transaction $transaction): void
     {
-        // Revert the old values
-        $oldAmount = $transaction->getOriginal('amount');
+        // getRawOriginal returns raw database value (minor units) without accessor transformation
+        $oldAmountMinor = $transaction->getRawOriginal('amount');
         $oldType = $transaction->getOriginal('type');
-        $oldAccountId = $transaction->getOriginal('account_id');
+        $oldAccountId = $transaction->getRawOriginal('account_id');
 
         // If account changed, update both accounts
         if ($oldAccountId !== $transaction->account_id) {
             // Revert from old account
             $oldAccount = Account::find($oldAccountId);
             if ($oldAccount) {
-                $adjustment = $oldType === TransactionType::INCOME ? -$oldAmount : $oldAmount;
+                $adjustment = $oldType === TransactionType::INCOME ? -$oldAmountMinor : $oldAmountMinor;
                 $oldAccount->increment('balance', $adjustment);
             }
 
             // Add to new account
             $this->updateAccountBalance($transaction, 'add');
         } else {
-            // Same account, calculate the difference
-            $oldEffect = $oldType === TransactionType::INCOME ? $oldAmount : -$oldAmount;
-            $newEffect = $transaction->type === TransactionType::INCOME ? $transaction->amount : -$transaction->amount;
+            // Same account, calculate the difference (all in minor units)
+            $newAmountMinor = $transaction->getAttributes()['amount'];
+            $oldEffect = $oldType === TransactionType::INCOME ? $oldAmountMinor : -$oldAmountMinor;
+            $newEffect = $transaction->type === TransactionType::INCOME ? $newAmountMinor : -$newAmountMinor;
             $difference = $newEffect - $oldEffect;
 
-            if ($difference !== 0.0) {
+            if ($difference !== 0) {
                 $transaction->account->increment('balance', $difference);
             }
         }
@@ -78,6 +79,7 @@ class UpdateAccountBalanceOnTransactionChange
 
     /**
      * Update account balance based on transaction.
+     * Uses minor units for direct database operations.
      */
     private function updateAccountBalance(Transaction $transaction, string $operation): void
     {
@@ -87,12 +89,12 @@ class UpdateAccountBalanceOnTransactionChange
             return;
         }
 
-        $amount = $transaction->amount;
+        $amountMinor = $transaction->getAttributes()['amount'];
 
         if ($operation === 'add') {
-            $adjustment = $transaction->type === TransactionType::INCOME ? $amount : -$amount;
+            $adjustment = $transaction->type === TransactionType::INCOME ? $amountMinor : -$amountMinor;
         } else {
-            $adjustment = $transaction->type === TransactionType::INCOME ? -$amount : $amount;
+            $adjustment = $transaction->type === TransactionType::INCOME ? -$amountMinor : $amountMinor;
         }
 
         $account->increment('balance', $adjustment);

@@ -24,7 +24,7 @@ return new class extends Migration
             $table->integer('recurring_interval')->nullable();
             $table->enum('recurring_unit', RecurringTransactionUnit::cases())->nullable();
             $table->string('location')->nullable();
-            $table->float('amount');
+            $table->bigInteger('amount');
             $table->enum('type', TransactionType::cases());
             $table->foreignId('account_id')->constrained('accounts')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();

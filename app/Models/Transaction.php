@@ -8,6 +8,7 @@ use App\Models\Scopes\OwnerScope;
 use Carbon\Carbon;
 use Database\Factories\TransactionFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property string $date
- * @property float $amount
+ * @property float $amount Amount in major currency unit (stored as minor units in database)
  * @property TransactionType $type
  * @property RecurringTransactionUnit|null $recurring_unit
  * @property bool $is_recurring
@@ -45,6 +46,50 @@ class Transaction extends Model
             'recurring_unit' => RecurringTransactionUnit::class,
             'type' => TransactionType::class,
         ];
+    }
+
+    /**
+     * Amount in major currency unit (converts from minor units stored in database).
+     */
+    protected function amount(): Attribute
+    {
+        return Attribute::make(
+            get: function (int $value) {
+                $decimals = $this->getDecimalPlaces();
+
+                return $value / (10 ** $decimals);
+            },
+            set: function (float $value) {
+                $decimals = $this->getDecimalPlaces();
+
+                return (int) round($value * (10 ** $decimals));
+            },
+        );
+    }
+
+    /**
+     * Get decimal places from account's currency, loading account if needed.
+     */
+    private function getDecimalPlaces(): int
+    {
+        if ($this->relationLoaded('account') && $this->account?->relationLoaded('currency')) {
+            $decimals = $this->account->currency?->decimal_places;
+
+            if ($decimals !== null) {
+                return $decimals;
+            }
+        }
+
+        if ($this->account_id) {
+            $account = Account::with('currency')->find($this->account_id);
+            $decimals = $account?->currency?->decimal_places;
+
+            if ($decimals !== null) {
+                return $decimals;
+            }
+        }
+
+        throw new \LogicException("Impossible to determine decimal : Account #{$this->account_id} has no currency associated.");
     }
 
     public function account(): BelongsTo
