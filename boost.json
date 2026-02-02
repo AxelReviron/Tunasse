@@ -6,5 +6,7 @@
         "claude_code",
         "phpstorm"
     ],
-    "guidelines": []
+    "guidelines": [
+        "filament/filament"
+    ]
 }

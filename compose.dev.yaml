@@ -18,6 +18,9 @@ services:
       tunasse_db_test:
         condition: service_healthy
     tty: true
+    stdin_open: true
+    environment:
+      - XDG_CONFIG_HOME=/tmp
     networks:
       - laraken_network
     healthcheck:
