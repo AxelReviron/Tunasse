@@ -62,7 +62,11 @@ class TransactionsTable
                         ->prefix(fn ($record) => $record->type === TransactionType::EXPENSE ? '- ' : '+ ')
                         ->color(fn ($record) => $record->type === TransactionType::EXPENSE ? 'danger' : 'success')
                         ->numeric()
-                        ->sortable(),
+                        ->sortable()
+                        ->formatStateUsing(function ($state, $record) {
+                            $decimals = $record->account?->currency?->decimal_places;
+                            return $state / (10 ** $decimals);
+                        }),
                     TextColumn::make('recurrence_label')
                         ->label(__('transaction.is_recurring'))
                         ->sortable(),

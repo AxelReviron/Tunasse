@@ -25,8 +25,8 @@ class AccountSeeder extends Seeder
             'type' => AccountType::CHECKING,
             'balance' => 0,
             'color' => '#2924bf',
-            'currency_id' => $eur->id,
-            'user_id' => $user->id,
+            'currency_id' => $eur->getKey(),
+            'user_id' => $user->getKey(),
         ]);
 
         Account::create([
@@ -34,8 +34,8 @@ class AccountSeeder extends Seeder
             'type' => AccountType::SAVINGS,
             'balance' => 0,
             'color' => '#2596be',
-            'currency_id' => $eur->id,
-            'user_id' => $user->id,
+            'currency_id' => $eur->getKey(),
+            'user_id' => $user->getKey(),
         ]);
 
         Account::create([
@@ -43,8 +43,8 @@ class AccountSeeder extends Seeder
             'type' => AccountType::INVESTMENT,
             'balance' => 0,
             'color' => '#3cbf24',
-            'currency_id' => $btc->id,
-            'user_id' => $user->id,
+            'currency_id' => $btc->getKey(),
+            'user_id' => $user->getKey(),
         ]);
 
         Account::create([
@@ -52,8 +52,8 @@ class AccountSeeder extends Seeder
             'type' => AccountType::INVESTMENT,
             'balance' => 0,
             'color' => '#bf9b24',
-            'currency_id' => $eur->id,
-            'user_id' => $user->id,
+            'currency_id' => $eur->getKey(),
+            'user_id' => $user->getKey(),
         ]);
     }
 }

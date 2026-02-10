@@ -53,7 +53,7 @@ class AccountBalanceCalculator
         $transactions = $account->transactions()
             ->whereBetween('date', [$start, $end])
             ->orderBy('date')
-            ->get(['date', 'amount', 'type', 'label']);
+            ->get(['date', 'amount', 'type', 'label', 'account_id']);
 
         $transactionsByDay = $this->groupTransactionsByDay($transactions);
 

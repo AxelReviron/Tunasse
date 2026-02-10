@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\Budgets\Schemas;
 
+use App\Models\Currency;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -50,6 +51,14 @@ class BudgetForm
      */
     public static function getInfosComponents(): array
     {
+        $defaultCurrency = Currency::where('code', 'EUR')->first() ?
+            Currency::where('code', 'EUR')->first()->getKey() :
+            Currency::first() ?? new Currency([
+            'code' => 'EUR',
+            'name' => 'Euro',
+            'symbol' => '€',
+        ]);
+
         return [
             TextInput::make('label')
                 ->label(__('budget.label'))
@@ -69,7 +78,9 @@ class BudgetForm
                     ->required(),
                 Select::make('currency_id')
                     ->label(__('currency.currency'))
-                    ->relationship('currency', 'name'),
+                    ->relationship('currency', 'name')
+                    ->default($defaultCurrency)
+                    ->required(),
             ]),
         ];
     }

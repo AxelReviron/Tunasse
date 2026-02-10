@@ -20,10 +20,8 @@ return new class extends Migration
             $table->enum('type', AccountType::cases());
             $table->bigInteger('balance')->default(0);
             $table->string('color');
-            $table->foreignId('currency_id')->constrained('currencies')->nullOnDelete();
+            $table->foreignId('currency_id')->nullable()->constrained('currencies')->nullOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-
-            $table->index(['account_id', 'date']);
         });
     }
 

@@ -34,6 +34,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->login()
             ->unsavedChangesAlerts()
+            ->readOnlyRelationManagersOnResourceViewPagesByDefault(false)
             ->colors([
                 'primary' => Color::Zinc,
             ])

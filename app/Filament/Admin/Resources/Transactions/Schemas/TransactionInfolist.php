@@ -54,7 +54,11 @@ class TransactionInfolist
                                     ->numeric()
                                     ->suffix(fn ($record) => ' '.$record->account?->currency?->symbol)
                                     ->prefix(fn ($record) => $record->type === TransactionType::EXPENSE ? '- ' : '+ ')
-                                    ->color(fn ($record) => $record->type === TransactionType::EXPENSE ? 'danger' : 'success'),
+                                    ->color(fn ($record) => $record->type === TransactionType::EXPENSE ? 'danger' : 'success')
+                                    ->formatStateUsing(function ($state, $record) {// TODO: Use this for budget and account?
+                                        $decimals = $record->account?->currency?->decimal_places;
+                                        return $state / (10 ** $decimals);
+                                    }),
                                 ColoredBadgeEntry::make('account.label')
                                     ->label(__('transaction.account'))
                                     ->color(fn ($record) => $record->account ? $record->account->color : null),

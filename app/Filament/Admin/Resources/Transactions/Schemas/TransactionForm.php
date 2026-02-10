@@ -89,7 +89,15 @@ class TransactionForm
                                 ->numeric()
                                 ->minValue(0.01)
                                 ->step(0.01)
-                                ->autofocus(),
+                                ->autofocus()
+                                ->formatStateUsing(function ($state, $get) {
+                                    $decimals = Account::find($get('account_id'))?->currency?->decimal_places;
+                                    return $state / (10 ** $decimals);
+                                })
+                                ->dehydrateStateUsing(function ($state, $get) {
+                                    $decimals = Account::find($get('account_id'))?->currency?->decimal_places;
+                                    return (int) round($state * (10 ** $decimals));
+                                }),
                             Select::make('account_id')
                                 ->label(__('transaction.account'))
                                 ->relationship('account', 'label', fn ($query) => $query->whereBelongsTo(auth()->user()))
