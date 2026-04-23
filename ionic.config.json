@@ -1,0 +1,7 @@
+{
+  "name": "Tunasse",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite"
+}
