@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { useFormat } from '../../composables/useFormat.js';
+import { useFormat } from '@/composables/useFormat.ts';
 const { fmt, fmtDateShort } = useFormat();
 
 defineProps({

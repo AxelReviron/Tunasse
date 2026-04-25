@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import type { Account, Budget, Transaction } from '@/types';
 import { IonPage, IonContent, IonIcon } from '@ionic/vue';
 import {
   cartOutline, restaurantOutline, arrowDownOutline,
@@ -12,24 +13,24 @@ import TnsFilterChips      from '@/components/ui/TnsFilterChips.vue';
 import TnsSectionHeader    from '@/components/ui/TnsSectionHeader.vue';
 import TnsList             from '@/components/ui/TnsList.vue';
 import TnsTransactionRow   from '@/components/ui/TnsTransactionRow.vue';
-import { useTransactionFilters } from '@/composables/useTransactionFilters.js';
+import { useTransactionFilters } from '@/composables/useTransactionFilters';
 
 const { t } = useI18n();
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
-const accounts = ref([
+const accounts = ref<Account[]>([
   { id: 1, label: 'Compte courant', currency: 'EUR', iban: '****1234', type: 'checking', balance: 3200, color: '#4F46E5' },
   { id: 2, label: 'Livret A',       currency: 'EUR', iban: '****5678', type: 'savings',  balance: 8000, color: '#16A34A' },
 ]);
 
-const budgets = ref([
+const budgets = ref<Budget[]>([
   { id: 1, label: 'Courses',    color: '#EA580C', amount: 400, spent: 230, currency: 'EUR' },
   { id: 2, label: 'Restaurant', color: '#DC2626', amount: 150, spent: 90,  currency: 'EUR' },
   { id: 3, label: 'Logement',   color: '#4F46E5', amount: 900, spent: 900, currency: 'EUR' },
   { id: 4, label: 'Transport',  color: '#0EA5E9', amount: 100, spent: 60,  currency: 'EUR' },
 ]);
 
-const transactions = ref([
+const transactions = ref<Transaction[]>([
   { id: 1, label: 'Carrefour',        amount: 54.30, type: 'expense', date: '2026-04-23', account_id: 1, budget_id: 1, category: 'Courses' },
   { id: 2, label: 'Salaire avril',    amount: 2800,  type: 'income',  date: '2026-04-23', account_id: 1 },
   { id: 3, label: 'Sushi Shop',       amount: 32.00, type: 'expense', date: '2026-04-22', account_id: 1, budget_id: 2, category: 'Restaurant' },

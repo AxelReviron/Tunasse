@@ -15,7 +15,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { useFormat } from '../../composables/useFormat.js';
+import { useFormat } from '@/composables/useFormat.ts';
 const { fmtShort } = useFormat();
 
 const props = defineProps({

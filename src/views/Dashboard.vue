@@ -18,7 +18,7 @@ import TnsBudgetProgress from '@/components/ui/TnsBudgetProgress.vue';
 import BarChart          from '@/components/BarChart.vue';
 import PieChart          from '@/components/PieChart.vue';
 import LineChart         from '@/components/LineChart.vue';
-import { useFormat }     from '@/composables/useFormat.js';
+import { useFormat }     from '@/composables/useFormat';
 
 const { t } = useI18n();
 const { fmt, fmtShort } = useFormat();
