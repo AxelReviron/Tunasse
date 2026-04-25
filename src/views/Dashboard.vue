@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { IonPage, IonContent, IonIcon } from '@ionic/vue';
 import {
   checkmarkCircleOutline, alertCircleOutline, trendingUpOutline,
@@ -19,9 +20,10 @@ import PieChart          from '@/components/PieChart.vue';
 import LineChart         from '@/components/LineChart.vue';
 import { useFormat }     from '@/composables/useFormat.js';
 
+const { t } = useI18n();
 const { fmt, fmtShort } = useFormat();
 
-// ─── Mock data — remplace par axios.get('/api/…') dans onMounted ─────────────
+// ─── Mock data ────────────────────────────────────────────────────────────────
 const accounts = ref([
   { id: 1, label: 'Compte courant', currency: 'EUR', iban: '****1234', type: 'checking', balance: 3200, color: '#4F46E5' },
   { id: 2, label: 'Livret A',       currency: 'EUR', iban: '****5678', type: 'savings',  balance: 8000, color: '#16A34A' },
@@ -45,7 +47,6 @@ const transactions = ref([
 ]);
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ─── KPI ─────────────────────────────────────────────────────────────────────
 const totalBalance = computed(() =>
   accounts.value.reduce((sum, a) => sum + a.balance, 0)
 );
@@ -66,16 +67,15 @@ const ICON_MAP: Record<string, unknown> = {
   Courses: cartOutline, Restaurant: restaurantOutline,
   Logement: homeOutline, Transport: carOutline,
 };
-function iconFor(t: { type: string; category?: string; is_recurring?: boolean }) {
-  if (t.type === 'income') return trendingUpOutline;
-  if (t.is_recurring)      return repeatOutline;
-  return ICON_MAP[t.category ?? ''] ?? cartOutline;
+function iconFor(tx: { type: string; category?: string; is_recurring?: boolean }) {
+  if (tx.type === 'income') return trendingUpOutline;
+  if (tx.is_recurring)      return repeatOutline;
+  return ICON_MAP[tx.category ?? ''] ?? cartOutline;
 }
 
-// ─── Chart data ──────────────────────────────────────────────────────────────
 const barLabels   = computed(() => accounts.value.map(a => a.label));
 const barDatasets = computed(() => [{
-  label: 'Solde',
+  label: t('accounts.balance'),
   data:  accounts.value.map(a => a.balance),
   backgroundColor: accounts.value.map(a => a.color + 'CC'),
   borderColor:     accounts.value.map(a => a.color),
@@ -87,7 +87,7 @@ const pieLabels = computed(() => budgets.value.map(b => b.label));
 const pieData   = computed(() => budgets.value.map(b => b.spent));
 const pieColors = computed(() => budgets.value.map(b => b.color));
 
-const lineLabels   = computed(() => {
+const lineLabels = computed(() => {
   const now = new Date();
   const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   return Array.from({ length: days }, (_, i) => String(i + 1).padStart(2, '0'));
@@ -99,10 +99,10 @@ const lineDatasets = computed(() => {
   const days  = new Date(year, month + 1, 0).getDate();
   const daily = new Array(days).fill(0);
 
-  transactions.value.forEach(t => {
-    const d = new Date(t.date);
+  transactions.value.forEach(tx => {
+    const d = new Date(tx.date);
     if (d.getFullYear() === year && d.getMonth() === month) {
-      daily[d.getDate() - 1] += t.type === 'income' ? t.amount : -t.amount;
+      daily[d.getDate() - 1] += tx.type === 'income' ? tx.amount : -tx.amount;
     }
   });
 
@@ -112,7 +112,7 @@ const lineDatasets = computed(() => {
   }, []);
 
   return [{
-    label: 'Balance cumulée',
+    label: t('dashboard.cumulativeBalance'),
     data: cumul,
     borderColor: '#4F46E5',
     backgroundColor: 'rgba(79,70,229,0.12)',
@@ -127,52 +127,46 @@ const lineDatasets = computed(() => {
 <template>
   <ion-page>
     <ion-content :fullscreen="true" :style="{ '--background': 'var(--tns-bg)' }">
-      <TnsLargeTitle title="Dashboard" />
+      <TnsLargeTitle :title="t('dashboard.title')" />
 
-      <!-- Balance totale -->
       <div class="tns-balance">
-        <div class="tns-balance-label">Solde total</div>
+        <div class="tns-balance-label">{{ t('dashboard.totalBalance') }}</div>
         <div class="tns-balance-amount">{{ fmt(totalBalance, 'EUR') }}</div>
       </div>
 
-      <!-- KPI ce mois -->
-      <TnsSectionTitle title="Ce mois" />
+      <TnsSectionTitle :title="t('dashboard.monthlyOverview')" />
       <div class="tns-kpi-grid">
-        <TnsKpiCard label="Revenus" :value="fmtShort(monthIncome, 'EUR')" tone="green">
+        <TnsKpiCard :label="t('transactions.income')" :value="fmtShort(monthIncome, 'EUR')" tone="green">
           <template #icon><ion-icon :icon="trendingUpOutline" /></template>
         </TnsKpiCard>
-        <TnsKpiCard label="Dépenses" :value="fmtShort(monthExpense, 'EUR')" tone="red">
+        <TnsKpiCard :label="t('transactions.expense')" :value="fmtShort(monthExpense, 'EUR')" tone="red">
           <template #icon><ion-icon :icon="trendingDownOutline" /></template>
         </TnsKpiCard>
-        <TnsKpiCard label="Déjà payé" :value="fmtShort(monthExpense, 'EUR')" tone="neutral">
+        <TnsKpiCard :label="t('dashboard.alreadyPaid')" :value="fmtShort(monthExpense, 'EUR')" tone="neutral">
           <template #icon><ion-icon :icon="checkmarkCircleOutline" /></template>
         </TnsKpiCard>
-        <TnsKpiCard label="Restant" :value="fmtShort(monthIncome - monthExpense, 'EUR')" tone="orange">
+        <TnsKpiCard :label="t('budgets.remaining')" :value="fmtShort(monthIncome - monthExpense, 'EUR')" tone="orange">
           <template #icon><ion-icon :icon="alertCircleOutline" /></template>
         </TnsKpiCard>
       </div>
 
-      <!-- Chart bar — balance par compte -->
       <div class="tns-chart-card">
-        <TnsSectionTitle title="Balance par compte" />
+        <TnsSectionTitle :title="t('dashboard.balanceByAccount')" />
         <BarChart :labels="barLabels" :datasets="barDatasets" y-tick-suffix=" €" />
       </div>
 
-      <!-- Chart pie — répartition budgets -->
       <div class="tns-chart-card tns-chart-card--pie">
-        <TnsSectionTitle title="Répartition des dépenses" />
+        <TnsSectionTitle :title="t('dashboard.expenseBreakdown')" />
         <PieChart :labels="pieLabels" :data="pieData" :colors="pieColors" :height="200" />
       </div>
 
-      <!-- Chart line — flux du mois -->
       <div class="tns-chart-card">
-        <TnsSectionTitle title="Flux du mois" />
+        <TnsSectionTitle :title="t('dashboard.monthlyFlow')" />
         <LineChart :labels="lineLabels" :datasets="lineDatasets" y-tick-suffix=" €" />
       </div>
 
-      <!-- Budgets -->
-      <TnsSectionHeader label="Budgets">
-        <template #action>Voir tout</template>
+      <TnsSectionHeader :label="t('nav.budgets')">
+        <template #action>{{ t('common.seeAll') }}</template>
       </TnsSectionHeader>
       <TnsList>
         <div v-for="b in budgets" :key="b.id" class="tns-budget-row">
@@ -186,22 +180,21 @@ const lineDatasets = computed(() => {
         </div>
       </TnsList>
 
-      <!-- Transactions récentes -->
-      <TnsSectionHeader label="Récentes">
-        <template #action>Voir tout</template>
+      <TnsSectionHeader :label="t('dashboard.recentTransactions')">
+        <template #action>{{ t('common.seeAll') }}</template>
       </TnsSectionHeader>
       <TnsList>
         <TnsTransactionRow
-          v-for="t in recentTx"
-          :key="t.id"
-          :transaction="t"
-          :currency="accountOf(t.account_id)?.currency || 'EUR'"
-          :icon-color="budgetOf(t.budget_id)?.color || '#6B7280'"
-          :account-label="accountOf(t.account_id)?.label || ''"
+          v-for="tx in recentTx"
+          :key="tx.id"
+          :transaction="tx"
+          :currency="accountOf(tx.account_id)?.currency || 'EUR'"
+          :icon-color="budgetOf(tx.budget_id)?.color || '#6B7280'"
+          :account-label="accountOf(tx.account_id)?.label || ''"
           :show-date="true"
         >
           <template #icon>
-            <ion-icon :icon="iconFor(t)" />
+            <ion-icon :icon="iconFor(tx)" />
           </template>
         </TnsTransactionRow>
       </TnsList>

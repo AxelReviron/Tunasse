@@ -1,23 +1,25 @@
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
+import ExploreContainer from '@/components/ExploreContainer.vue';
+
+const { t } = useI18n();
+</script>
+
 <template>
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Budget</ion-title>
+        <ion-title>{{ t('budgets.title') }}</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
       <ion-header collapse="condense">
         <ion-toolbar>
-          <ion-title size="large">Budget</ion-title>
+          <ion-title size="large">{{ t('budgets.title') }}</ion-title>
         </ion-toolbar>
       </ion-header>
-
-      <ExploreContainer name="Budget" />
+      <ExploreContainer :name="t('budgets.title')" />
     </ion-content>
   </ion-page>
 </template>
-
-<script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
-import ExploreContainer from '@/components/ExploreContainer.vue';
-</script>

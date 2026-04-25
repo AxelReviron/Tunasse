@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { IonPage, IonContent, IonIcon } from '@ionic/vue';
 import {
   cartOutline, restaurantOutline, arrowDownOutline,
@@ -13,7 +14,9 @@ import TnsList             from '@/components/ui/TnsList.vue';
 import TnsTransactionRow   from '@/components/ui/TnsTransactionRow.vue';
 import { useTransactionFilters } from '@/composables/useTransactionFilters.js';
 
-// ─── Mock data — remplace par axios.get('/api/…') dans onMounted ─────────────
+const { t } = useI18n();
+
+// ─── Mock data ────────────────────────────────────────────────────────────────
 const accounts = ref([
   { id: 1, label: 'Compte courant', currency: 'EUR', iban: '****1234', type: 'checking', balance: 3200, color: '#4F46E5' },
   { id: 2, label: 'Livret A',       currency: 'EUR', iban: '****5678', type: 'savings',  balance: 8000, color: '#16A34A' },
@@ -49,25 +52,25 @@ const ICON_MAP: Record<string, unknown> = {
   Transport:  carOutline,
 };
 
-function iconFor(t: { type: string; category?: string; is_recurring?: boolean }) {
-  if (t.type === 'income') return arrowDownOutline;
-  if (t.is_recurring)      return repeatOutline;
-  return ICON_MAP[t.category ?? ''] ?? cartOutline;
+function iconFor(tx: { type: string; category?: string; is_recurring?: boolean }) {
+  if (tx.type === 'income') return arrowDownOutline;
+  if (tx.is_recurring)      return repeatOutline;
+  return ICON_MAP[tx.category ?? ''] ?? cartOutline;
 }
 </script>
 
 <template>
   <ion-page>
     <ion-content :fullscreen="true" :style="{ '--background': 'var(--tns-bg)' }">
-      <TnsLargeTitle title="Transactions" />
+      <TnsLargeTitle :title="t('transactions.title')" />
 
       <TnsFilterChips
         v-model="filter"
         :chips="[
-          { value: 'all',       label: 'Toutes' },
-          { value: 'income',    label: 'Revenus' },
-          { value: 'expense',   label: 'Dépenses' },
-          { value: 'recurring', label: 'Récurrentes' },
+          { value: 'all',       label: t('transactions.all') },
+          { value: 'income',    label: t('transactions.income') },
+          { value: 'expense',   label: t('transactions.expense') },
+          { value: 'recurring', label: t('transactions.recurring') },
         ]"
       />
 
@@ -76,23 +79,23 @@ function iconFor(t: { type: string; category?: string; is_recurring?: boolean })
           <TnsSectionHeader :label="day" />
           <TnsList>
             <TnsTransactionRow
-              v-for="t in txs"
-              :key="t.id"
-              :transaction="t"
-              :currency="accountOf(t.account_id)?.currency || 'EUR'"
-              :icon-color="budgetOf(t.budget_id)?.color || '#6B7280'"
-              :account-label="accountOf(t.account_id)?.label || ''"
+              v-for="tx in txs"
+              :key="tx.id"
+              :transaction="tx"
+              :currency="accountOf(tx.account_id)?.currency || 'EUR'"
+              :icon-color="budgetOf(tx.budget_id)?.color || '#6B7280'"
+              :account-label="accountOf(tx.account_id)?.label || ''"
               :show-date="false"
             >
               <template #icon>
-                <ion-icon :icon="iconFor(t)" />
+                <ion-icon :icon="iconFor(tx)" />
               </template>
             </TnsTransactionRow>
           </TnsList>
         </template>
       </template>
 
-      <div v-else class="tns-empty">Aucune transaction</div>
+      <div v-else class="tns-empty">{{ t('transactions.empty') }}</div>
     </ion-content>
   </ion-page>
 </template>
