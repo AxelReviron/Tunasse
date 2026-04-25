@@ -14,7 +14,7 @@
       </div>
     </div>
     <div class="tns-row-amt" :class="transaction.type === 'income' ? 'pos' : 'neg'">
-      {{ transaction.type === 'income' ? '+' : '' }}{{ fmt(transaction.amount, currency) }}
+      {{ transaction.type === 'income' ? '+' : '-' }}{{ fmt(transaction.amount, currency) }}
     </div>
   </div>
 </template>
