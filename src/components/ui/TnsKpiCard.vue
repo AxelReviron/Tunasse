@@ -4,7 +4,7 @@
   <div class="tns-kpi" :class="tone">
     <div class="tns-kpi-head">
       <slot name="icon"/>
-      <span>{{ label }}</span>
+      <span class="tns-kpi-heading">{{ label }}</span>
     </div>
     <div class="tns-kpi-val">{{ value }}</div>
   </div>
@@ -30,6 +30,9 @@ defineProps({
   display: flex; align-items: center; gap: 6px;
   font-size: 11.5px; font-weight: 600; color: var(--tns-fg2);
   letter-spacing: -0.1px;
+}
+.tns-kpi-heading {
+  font-size: 14px; font-weight: 600;
 }
 .tns-kpi-head :deep(svg) { width: 14px; height: 14px; flex-shrink: 0; }
 .tns-kpi-val {

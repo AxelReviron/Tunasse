@@ -25,7 +25,7 @@ export default {
     totalBalance: 'Solde total',
     alreadyPaid: 'Déjà payé',
     toPay: 'À payer',
-    recentTransactions: 'Récentes',
+    recentTransactions: 'Transactions récentes',
     monthlyOverview: 'Ce mois',
     balanceByAccount: 'Balance par compte',
     expenseBreakdown: 'Répartition des dépenses',

@@ -10,7 +10,6 @@ import {
 
 import TnsLargeTitle     from '@/components/ui/TnsLargeTitle.vue';
 import TnsKpiCard        from '@/components/ui/TnsKpiCard.vue';
-import TnsSectionHeader  from '@/components/ui/TnsSectionHeader.vue';
 import TnsSectionTitle   from '@/components/ui/TnsSectionTitle.vue';
 import TnsList           from '@/components/ui/TnsList.vue';
 import TnsTransactionRow from '@/components/ui/TnsTransactionRow.vue';
@@ -132,48 +131,59 @@ const lineDatasets = computed(() => {
 
         <TnsLargeTitle :title="t('dashboard.title')" />
 
+        <!-- Balance hero — titre en label interne -->
         <div class="tns-balance">
           <div class="tns-balance-label">{{ t('dashboard.totalBalance') }}</div>
           <div class="tns-balance-amount">{{ fmt(totalBalance, 'EUR') }}</div>
         </div>
 
-        <TnsSectionTitle :title="t('dashboard.monthlyOverview')" />
-        <div class="tns-kpi-grid">
-          <TnsKpiCard :label="t('transactions.income')" :value="fmtShort(monthIncome, 'EUR')" tone="green">
-            <template #icon><ion-icon :icon="trendingUpOutline" /></template>
-          </TnsKpiCard>
-          <TnsKpiCard :label="t('transactions.expense')" :value="fmtShort(monthExpense, 'EUR')" tone="red">
-            <template #icon><ion-icon :icon="trendingDownOutline" /></template>
-          </TnsKpiCard>
-          <TnsKpiCard :label="t('dashboard.alreadyPaid')" :value="fmtShort(monthExpense, 'EUR')" tone="neutral">
-            <template #icon><ion-icon :icon="checkmarkCircleOutline" /></template>
-          </TnsKpiCard>
-          <TnsKpiCard :label="t('budgets.remaining')" :value="fmtShort(monthIncome - monthExpense, 'EUR')" tone="orange">
-            <template #icon><ion-icon :icon="alertCircleOutline" /></template>
-          </TnsKpiCard>
+        <!-- KPI — titre au-dessus (exception : pas de card englobante) -->
+        <div class="tns-section">
+          <TnsSectionTitle :title="t('dashboard.monthlyOverview')" />
+          <div class="tns-kpi-grid">
+            <TnsKpiCard :label="t('transactions.income')" :value="fmtShort(monthIncome, 'EUR')" tone="green">
+              <template #icon><ion-icon :icon="trendingUpOutline" /></template>
+            </TnsKpiCard>
+            <TnsKpiCard :label="t('transactions.expense')" :value="fmtShort(monthExpense, 'EUR')" tone="red">
+              <template #icon><ion-icon :icon="trendingDownOutline" /></template>
+            </TnsKpiCard>
+            <TnsKpiCard :label="t('dashboard.alreadyPaid')" :value="fmtShort(monthExpense, 'EUR')" tone="neutral">
+              <template #icon><ion-icon :icon="checkmarkCircleOutline" /></template>
+            </TnsKpiCard>
+            <TnsKpiCard :label="t('budgets.remaining')" :value="fmtShort(monthIncome - monthExpense, 'EUR')" tone="orange">
+              <template #icon><ion-icon :icon="alertCircleOutline" /></template>
+            </TnsKpiCard>
+          </div>
         </div>
 
-        <!-- Charts : Bar + Pie côte à côte sur desktop -->
+        <!-- Bar + Pie côte à côte — titre au-dessus de chaque card -->
         <div class="tns-charts-row">
-          <div class="tns-chart-card">
+          <div class="tns-chart-section">
             <TnsSectionTitle :title="t('dashboard.balanceByAccount')" />
-            <BarChart :labels="barLabels" :datasets="barDatasets" y-tick-suffix=" €" />
+            <div class="tns-chart-card">
+              <BarChart :labels="barLabels" :datasets="barDatasets" y-tick-suffix=" €" />
+            </div>
           </div>
-          <div class="tns-chart-card">
+          <div class="tns-chart-section">
             <TnsSectionTitle :title="t('dashboard.expenseBreakdown')" />
-            <PieChart :labels="pieLabels" :data="pieData" :colors="pieColors" :height="200" />
+            <div class="tns-chart-card">
+              <PieChart :labels="pieLabels" :data="pieData" :colors="pieColors" :height="200" />
+            </div>
           </div>
         </div>
 
-        <!-- Line chart pleine largeur -->
-        <div class="tns-chart-card">
+        <!-- Line chart — titre au-dessus -->
+        <div class="tns-chart-section">
           <TnsSectionTitle :title="t('dashboard.monthlyFlow')" />
-          <LineChart :labels="lineLabels" :datasets="lineDatasets" y-tick-suffix=" €" />
+          <div class="tns-chart-card">
+            <LineChart :labels="lineLabels" :datasets="lineDatasets" y-tick-suffix=" €" />
+          </div>
         </div>
 
-        <TnsSectionHeader :label="t('nav.budgets')">
-          <template #action>{{ t('common.seeAll') }}</template>
-        </TnsSectionHeader>
+        <div class="tns-list-hdr">
+          <span class="tns-list-hdr-title">{{ t('nav.budgets') }}</span>
+          <span class="tns-list-hdr-action">{{ t('common.seeAll') }}</span>
+        </div>
         <TnsList>
           <div v-for="b in budgets" :key="b.id" class="tns-budget-row">
             <div class="tns-budget-icon" :style="{ background: b.color }">
@@ -186,9 +196,10 @@ const lineDatasets = computed(() => {
           </div>
         </TnsList>
 
-        <TnsSectionHeader :label="t('dashboard.recentTransactions')">
-          <template #action>{{ t('common.seeAll') }}</template>
-        </TnsSectionHeader>
+        <div class="tns-list-hdr">
+          <span class="tns-list-hdr-title">{{ t('dashboard.recentTransactions') }}</span>
+          <span class="tns-list-hdr-action">{{ t('common.seeAll') }}</span>
+        </div>
         <TnsList>
           <TnsTransactionRow
             v-for="tx in recentTx"
@@ -213,7 +224,7 @@ const lineDatasets = computed(() => {
 <style scoped>
 /* ── Balance hero ─────────────────────────────────────────────────────────── */
 .tns-balance {
-  margin: 0 16px 20px;
+  margin: 0 16px 24px;
   background: linear-gradient(135deg, var(--tns-accent), var(--tns-accent-soft));
   border-radius: var(--tns-radius-xl);
   padding: 24px;
@@ -229,12 +240,16 @@ const lineDatasets = computed(() => {
 }
 
 /* ── KPI grid ─────────────────────���───────────────────────��──────────────── */
+/* ── KPI section ──────────────────────────────────────────────────────────── */
+.tns-section {
+  padding: 0 16px;
+  margin-bottom: 24px;
+}
+
 .tns-kpi-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--tns-gap);
-  padding: 0 16px;
-  margin-bottom: 14px;
 }
 
 @media (min-width: 768px) {
@@ -244,8 +259,11 @@ const lineDatasets = computed(() => {
 }
 
 /* ── Charts ──────────────────────────────────────────────────────────────── */
+.tns-chart-section {
+  margin: 0 16px 24px;
+}
+
 .tns-chart-card {
-  margin: 0 16px 14px;
   background: var(--tns-card);
   border-radius: var(--tns-radius-lg);
   padding: 16px 16px 12px;
@@ -254,22 +272,42 @@ const lineDatasets = computed(() => {
 .tns-charts-row {
   display: flex;
   flex-direction: column;
-  margin: 0 16px 14px;
+  margin: 0 16px 24px;
   gap: 14px;
 }
 
-.tns-charts-row .tns-chart-card {
+.tns-charts-row .tns-chart-section {
   margin: 0;
+  flex: 1;
 }
 
 @media (min-width: 768px) {
   .tns-charts-row {
     flex-direction: row;
   }
+}
 
-  .tns-charts-row .tns-chart-card {
-    flex: 1;
-  }
+/* ── List section headers ────────────────────────────────────────────────── */
+.tns-list-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0 16px;
+  margin-bottom: 8px;
+}
+.tns-list-hdr-title {
+  font-family: var(--tns-font);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--tns-fg);
+  letter-spacing: -0.2px;
+}
+.tns-list-hdr-action {
+  font-family: var(--tns-font);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tns-accent);
+  cursor: pointer;
 }
 
 /* ── Budget rows ─────────────────────────────────────────────────────────── */
