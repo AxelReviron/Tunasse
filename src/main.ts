@@ -24,7 +24,7 @@ import '@ionic/vue/css/display.css'
 import './theme/variables.css'
 
 const app = createApp(App)
-  .use(IonicVue)
+  .use(IonicVue, { animated: window.innerWidth < 768 })
   .use(router)
   .use(i18n)
 
