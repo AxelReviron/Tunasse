@@ -1,0 +1,257 @@
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+import { IonPage, IonContent, IonIcon } from '@ionic/vue';
+import {
+  checkmarkCircleOutline, alertCircleOutline, trendingUpOutline,
+  trendingDownOutline, cartOutline, homeOutline, carOutline,
+  restaurantOutline, repeatOutline,
+} from 'ionicons/icons';
+
+import TnsLargeTitle     from '@/components/ui/TnsLargeTitle.vue';
+import TnsKpiCard        from '@/components/ui/TnsKpiCard.vue';
+import TnsSectionHeader  from '@/components/ui/TnsSectionHeader.vue';
+import TnsSectionTitle   from '@/components/ui/TnsSectionTitle.vue';
+import TnsList           from '@/components/ui/TnsList.vue';
+import TnsTransactionRow from '@/components/ui/TnsTransactionRow.vue';
+import TnsBudgetProgress from '@/components/ui/TnsBudgetProgress.vue';
+import BarChart          from '@/components/BarChart.vue';
+import PieChart          from '@/components/PieChart.vue';
+import LineChart         from '@/components/LineChart.vue';
+import { useFormat }     from '@/composables/useFormat.js';
+
+const { fmt, fmtShort } = useFormat();
+
+// ─── Mock data — remplace par axios.get('/api/…') dans onMounted ─────────────
+const accounts = ref([
+  { id: 1, label: 'Compte courant', currency: 'EUR', iban: '****1234', type: 'checking', balance: 3200, color: '#4F46E5' },
+  { id: 2, label: 'Livret A',       currency: 'EUR', iban: '****5678', type: 'savings',  balance: 8000, color: '#16A34A' },
+]);
+
+const budgets = ref([
+  { id: 1, label: 'Courses',    color: '#EA580C', amount: 400, spent: 230, currency: 'EUR' },
+  { id: 2, label: 'Restaurant', color: '#DC2626', amount: 150, spent: 90,  currency: 'EUR' },
+  { id: 3, label: 'Logement',   color: '#4F46E5', amount: 900, spent: 900, currency: 'EUR' },
+  { id: 4, label: 'Transport',  color: '#0EA5E9', amount: 100, spent: 60,  currency: 'EUR' },
+]);
+
+const transactions = ref([
+  { id: 1, label: 'Carrefour',        amount: 54.30, type: 'expense', date: '2026-04-23', account_id: 1, budget_id: 1, category: 'Courses' },
+  { id: 2, label: 'Salaire avril',    amount: 2800,  type: 'income',  date: '2026-04-23', account_id: 1 },
+  { id: 3, label: 'Sushi Shop',       amount: 32.00, type: 'expense', date: '2026-04-22', account_id: 1, budget_id: 2, category: 'Restaurant' },
+  { id: 4, label: 'Loyer',            amount: 900,   type: 'expense', date: '2026-04-22', account_id: 1, budget_id: 3, category: 'Logement', is_recurring: true, recurring_unit: 'month' },
+  { id: 5, label: 'Lidl',             amount: 38.10, type: 'expense', date: '2026-04-21', account_id: 1, budget_id: 1, category: 'Courses' },
+  { id: 6, label: 'Navigo mensuel',   amount: 86.40, type: 'expense', date: '2026-04-20', account_id: 1, budget_id: 4, category: 'Transport', is_recurring: true, recurring_unit: 'month' },
+  { id: 7, label: 'Virement épargne', amount: 200,   type: 'expense', date: '2026-04-20', account_id: 1 },
+]);
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─── KPI ─────────────────────────────────────────────────────────────────────
+const totalBalance = computed(() =>
+  accounts.value.reduce((sum, a) => sum + a.balance, 0)
+);
+const monthIncome = computed(() =>
+  transactions.value.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0)
+);
+const monthExpense = computed(() =>
+  transactions.value.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
+);
+const recentTx = computed(() =>
+  [...transactions.value].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 4)
+);
+
+function accountOf(id: number) { return accounts.value.find(a => a.id === id); }
+function budgetOf(id?: number) { return id ? budgets.value.find(b => b.id === id) : undefined; }
+
+const ICON_MAP: Record<string, unknown> = {
+  Courses: cartOutline, Restaurant: restaurantOutline,
+  Logement: homeOutline, Transport: carOutline,
+};
+function iconFor(t: { type: string; category?: string; is_recurring?: boolean }) {
+  if (t.type === 'income') return trendingUpOutline;
+  if (t.is_recurring)      return repeatOutline;
+  return ICON_MAP[t.category ?? ''] ?? cartOutline;
+}
+
+// ─── Chart data ──────────────────────────────────────────────────────────────
+const barLabels   = computed(() => accounts.value.map(a => a.label));
+const barDatasets = computed(() => [{
+  label: 'Solde',
+  data:  accounts.value.map(a => a.balance),
+  backgroundColor: accounts.value.map(a => a.color + 'CC'),
+  borderColor:     accounts.value.map(a => a.color),
+  borderRadius: 8,
+  borderWidth: 1.5,
+}]);
+
+const pieLabels = computed(() => budgets.value.map(b => b.label));
+const pieData   = computed(() => budgets.value.map(b => b.spent));
+const pieColors = computed(() => budgets.value.map(b => b.color));
+
+const lineLabels   = computed(() => {
+  const now = new Date();
+  const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  return Array.from({ length: days }, (_, i) => String(i + 1).padStart(2, '0'));
+});
+const lineDatasets = computed(() => {
+  const now   = new Date();
+  const year  = now.getFullYear();
+  const month = now.getMonth();
+  const days  = new Date(year, month + 1, 0).getDate();
+  const daily = new Array(days).fill(0);
+
+  transactions.value.forEach(t => {
+    const d = new Date(t.date);
+    if (d.getFullYear() === year && d.getMonth() === month) {
+      daily[d.getDate() - 1] += t.type === 'income' ? t.amount : -t.amount;
+    }
+  });
+
+  const cumul = daily.reduce<number[]>((acc, v, i) => {
+    acc.push((acc[i - 1] ?? 0) + v);
+    return acc;
+  }, []);
+
+  return [{
+    label: 'Balance cumulée',
+    data: cumul,
+    borderColor: '#4F46E5',
+    backgroundColor: 'rgba(79,70,229,0.12)',
+    fill: true,
+    tension: 0.4,
+    pointRadius: 3,
+    pointBackgroundColor: '#4F46E5',
+  }];
+});
+</script>
+
+<template>
+  <ion-page>
+    <ion-content :fullscreen="true" :style="{ '--background': 'var(--tns-bg)' }">
+      <TnsLargeTitle title="Dashboard" />
+
+      <!-- Balance totale -->
+      <div class="tns-balance">
+        <div class="tns-balance-label">Solde total</div>
+        <div class="tns-balance-amount">{{ fmt(totalBalance, 'EUR') }}</div>
+      </div>
+
+      <!-- KPI ce mois -->
+      <TnsSectionTitle title="Ce mois" />
+      <div class="tns-kpi-grid">
+        <TnsKpiCard label="Revenus" :value="fmtShort(monthIncome, 'EUR')" tone="green">
+          <template #icon><ion-icon :icon="trendingUpOutline" /></template>
+        </TnsKpiCard>
+        <TnsKpiCard label="Dépenses" :value="fmtShort(monthExpense, 'EUR')" tone="red">
+          <template #icon><ion-icon :icon="trendingDownOutline" /></template>
+        </TnsKpiCard>
+        <TnsKpiCard label="Déjà payé" :value="fmtShort(monthExpense, 'EUR')" tone="neutral">
+          <template #icon><ion-icon :icon="checkmarkCircleOutline" /></template>
+        </TnsKpiCard>
+        <TnsKpiCard label="Restant" :value="fmtShort(monthIncome - monthExpense, 'EUR')" tone="orange">
+          <template #icon><ion-icon :icon="alertCircleOutline" /></template>
+        </TnsKpiCard>
+      </div>
+
+      <!-- Chart bar — balance par compte -->
+      <div class="tns-chart-card">
+        <TnsSectionTitle title="Balance par compte" />
+        <BarChart :labels="barLabels" :datasets="barDatasets" y-tick-suffix=" €" />
+      </div>
+
+      <!-- Chart pie — répartition budgets -->
+      <div class="tns-chart-card tns-chart-card--pie">
+        <TnsSectionTitle title="Répartition des dépenses" />
+        <PieChart :labels="pieLabels" :data="pieData" :colors="pieColors" :height="200" />
+      </div>
+
+      <!-- Chart line — flux du mois -->
+      <div class="tns-chart-card">
+        <TnsSectionTitle title="Flux du mois" />
+        <LineChart :labels="lineLabels" :datasets="lineDatasets" y-tick-suffix=" €" />
+      </div>
+
+      <!-- Budgets -->
+      <TnsSectionHeader label="Budgets">
+        <template #action>Voir tout</template>
+      </TnsSectionHeader>
+      <TnsList>
+        <div v-for="b in budgets" :key="b.id" class="tns-budget-row">
+          <div class="tns-budget-icon" :style="{ background: b.color }">
+            <ion-icon :icon="ICON_MAP[b.label] ?? cartOutline" />
+          </div>
+          <div class="tns-budget-body">
+            <div class="tns-budget-label">{{ b.label }}</div>
+            <TnsBudgetProgress :spent="b.spent" :amount="b.amount" :color="b.color" :currency="b.currency" />
+          </div>
+        </div>
+      </TnsList>
+
+      <!-- Transactions récentes -->
+      <TnsSectionHeader label="Récentes">
+        <template #action>Voir tout</template>
+      </TnsSectionHeader>
+      <TnsList>
+        <TnsTransactionRow
+          v-for="t in recentTx"
+          :key="t.id"
+          :transaction="t"
+          :currency="accountOf(t.account_id)?.currency || 'EUR'"
+          :icon-color="budgetOf(t.budget_id)?.color || '#6B7280'"
+          :account-label="accountOf(t.account_id)?.label || ''"
+          :show-date="true"
+        >
+          <template #icon>
+            <ion-icon :icon="iconFor(t)" />
+          </template>
+        </TnsTransactionRow>
+      </TnsList>
+    </ion-content>
+  </ion-page>
+</template>
+
+<style scoped>
+.tns-balance {
+  margin: 0 16px 20px;
+  background: var(--tns-accent);
+  border-radius: var(--tns-radius-xl);
+  padding: 20px;
+  font-family: var(--tns-font);
+}
+.tns-balance-label {
+  font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.75);
+}
+.tns-balance-amount {
+  font-size: 32px; font-weight: 700; color: #fff;
+  letter-spacing: -0.5px; margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tns-kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--tns-gap);
+  padding: 0 16px;
+  margin-bottom: 14px;
+}
+
+.tns-chart-card {
+  margin: 0 16px 14px;
+  background: var(--tns-card);
+  border-radius: var(--tns-radius-lg);
+  padding: 16px 16px 12px;
+}
+.tns-chart-card--pie { /* pie gère sa propre hauteur via prop */ }
+
+.tns-budget-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px;
+}
+.tns-budget-row + .tns-budget-row { border-top: 0.5px solid var(--tns-sep); }
+.tns-budget-icon {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; color: #fff;
+}
+.tns-budget-icon :deep(svg) { width: 18px; height: 18px; }
+.tns-budget-body { flex: 1; min-width: 0; }
+.tns-budget-label { font-size: 15px; font-weight: 500; color: var(--tns-fg); font-family: var(--tns-font); }
+</style>

@@ -1,2 +1,40 @@
 /* For information on how to create your own theme, please refer to:
 http://ionicframework.com/docs/theming/ */
+
+:root {
+    /* Accent — primary brand colour */
+    --tns-accent: #4F46E5;
+    --tns-accent-soft: #6366F1;
+
+    /* Semantic */
+    --tns-green: #16A34A;   /* income, positive */
+    --tns-red:   #DC2626;   /* expense, over-budget */
+    --tns-orange:#EA580C;   /* warning, to-pay */
+
+    /* Surfaces — iOS grouped-list palette */
+    --tns-bg:    #F2F2F7;   /* page background */
+    --tns-card:  #FFFFFF;   /* card, list row background */
+    --tns-fg:    #111113;   /* primary text */
+    --tns-fg2:   #6B7280;   /* secondary text */
+    --tns-fg3:   #9CA3AF;   /* tertiary (hints, chevrons) */
+    --tns-sep:   rgba(60, 60, 67, 0.12); /* hairline separator */
+
+    /* Radii */
+    --tns-radius-sm: 8px;
+    --tns-radius-md: 12px;
+    --tns-radius-lg: 14px;
+    --tns-radius-xl: 20px;
+
+    /* Spacing scale */
+    --tns-pad: 16px;
+    --tns-gap: 10px;
+
+    /* Type */
+    --tns-font: -apple-system, "SF Pro", BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+/* Optional compact density — add data-density="compact" on a parent. */
+[data-density="compact"] {
+    --tns-pad: 12px;
+    --tns-gap: 8px;
+}
