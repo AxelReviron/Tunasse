@@ -3,27 +3,27 @@ http://ionicframework.com/docs/theming/ */
 
 :root {
     /* Accent — primary brand colour */
-    --tns-accent: #4F46E5;
-    --tns-accent-soft: #6366F1;
+    --tns-accent:      #6366F1;
+    --tns-accent-soft: #818CF8;
 
     /* Semantic */
-    --tns-green: #16A34A;   /* income, positive */
-    --tns-red:   #DC2626;   /* expense, over-budget */
-    --tns-orange:#EA580C;   /* warning, to-pay */
+    --tns-green:  #22C55E;   /* income, positive */
+    --tns-red:    #F43F5E;   /* expense, over-budget */
+    --tns-orange: #F97316;   /* warning, to-pay */
 
-    /* Surfaces — iOS grouped-list palette */
-    --tns-bg:    #F2F2F7;   /* page background */
-    --tns-card:  #FFFFFF;   /* card, list row background */
-    --tns-fg:    #111113;   /* primary text */
-    --tns-fg2:   #6B7280;   /* secondary text */
-    --tns-fg3:   #9CA3AF;   /* tertiary (hints, chevrons) */
-    --tns-sep:   rgba(60, 60, 67, 0.12); /* hairline separator */
+    /* Surfaces */
+    --tns-bg:   #111114;                      /* page background */
+    --tns-card: #1C1C21;                      /* card, list row background */
+    --tns-fg:   #ECECF0;                      /* primary text */
+    --tns-fg2:  #8E8E9A;                      /* secondary text */
+    --tns-fg3:  #5A5A68;                      /* tertiary (hints, chevrons) */
+    --tns-sep:  rgba(255, 255, 255, 0.07);    /* hairline separator */
 
-    /* Radii */
-    --tns-radius-sm: 8px;
-    --tns-radius-md: 12px;
-    --tns-radius-lg: 14px;
-    --tns-radius-xl: 20px;
+    /* Radius */
+    --tns-radius-sm: 4px;
+    --tns-radius-md: 6px;
+    --tns-radius-lg: 8px;
+    --tns-radius-xl: 10px;
 
     /* Spacing scale */
     --tns-pad: 16px;
@@ -31,10 +31,49 @@ http://ionicframework.com/docs/theming/ */
 
     /* Type */
     --tns-font: -apple-system, "SF Pro", BlinkMacSystemFont, system-ui, sans-serif;
+
+    /* ── Ionic overrides ─────────────���────────────────────────────────────── */
+    --ion-background-color:     var(--tns-bg);
+    --ion-background-color-rgb: 18, 18, 30;
+    --ion-text-color:           var(--tns-fg);
+    --ion-text-color-rgb:       232, 232, 240;
+
+    --ion-toolbar-background:   var(--tns-card);
+    --ion-toolbar-color:        var(--tns-fg);
+
+    --ion-tab-bar-background:   var(--tns-card);
+    --ion-tab-bar-border-color: var(--tns-sep);
+    --ion-tab-bar-color:        var(--tns-fg3);
+    --ion-tab-bar-color-selected: var(--tns-accent);
+
+    --ion-item-background:      var(--tns-card);
+    --ion-item-border-color:    var(--tns-sep);
+    --ion-card-background:      var(--tns-card);
+
+    --ion-color-primary:        var(--tns-accent);
+    --ion-color-primary-rgb:    99, 102, 241;
+    --ion-color-primary-contrast:     #ffffff;
+    --ion-color-primary-contrast-rgb: 255, 255, 255;
+    --ion-color-primary-shade:  #5558d4;
+    --ion-color-primary-tint:   #7577f3;
 }
 
 /* Optional compact density — add data-density="compact" on a parent. */
 [data-density="compact"] {
     --tns-pad: 12px;
     --tns-gap: 8px;
+}
+
+/* ── Page container — centre le contenu sur desktop ─────────────────────── */
+/* Utilisé dans toutes les vues : <div class="tns-page"> */
+.tns-page {
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    .tns-page {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
 }

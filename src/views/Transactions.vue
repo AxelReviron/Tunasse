@@ -63,6 +63,7 @@ function iconFor(tx: { type: string; category?: string; is_recurring?: boolean }
 <template>
   <ion-page>
     <ion-content :fullscreen="true" :style="{ '--background': 'var(--tns-bg)' }">
+      <div class="tns-page">
       <TnsLargeTitle :title="t('transactions.title')" />
 
       <TnsFilterChips
@@ -97,6 +98,7 @@ function iconFor(tx: { type: string; category?: string; is_recurring?: boolean }
       </template>
 
       <div v-else class="tns-empty">{{ t('transactions.empty') }}</div>
+      </div>
     </ion-content>
   </ion-page>
 </template>

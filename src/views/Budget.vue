@@ -19,7 +19,9 @@ const { t } = useI18n();
           <ion-title size="large">{{ t('budgets.title') }}</ion-title>
         </ion-toolbar>
       </ion-header>
-      <ExploreContainer :name="t('budgets.title')" />
+      <div class="tns-page">
+        <ExploreContainer :name="t('budgets.title')" />
+      </div>
     </ion-content>
   </ion-page>
 </template>
