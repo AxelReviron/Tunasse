@@ -55,6 +55,8 @@ export default {
       month: 'Month',
       year: 'Year',
     },
+    icon:  'Icon',
+    color: 'Color',
     empty: 'No transactions',
     emptyFiltered: 'No results for this filter',
   },

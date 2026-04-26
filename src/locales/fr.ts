@@ -48,6 +48,8 @@ export default {
     date: 'Date',
     location: 'Lieu',
     category: 'Catégorie',
+    color: 'Couleur',
+    icon: 'Icône',
     isRecurring: 'Transaction récurrente',
     recurringUnit: {
       day: 'Jour',
