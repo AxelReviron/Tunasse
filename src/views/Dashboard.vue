@@ -28,7 +28,7 @@ const { t } = useI18n();
 const { fmt, fmtShort } = useFormat();
 const router = useRouter();
 
-const { accounts, totalBalance, getById: accountOf } = useAccounts();
+const { accounts, totalBalance, realBalances, getById: accountOf } = useAccounts();
 const { transactions, monthIncome, monthExpense, recent: recentTx } = useTransactions();
 const { budgets, getById: budgetOf } = useBudgets();
 
@@ -45,11 +45,12 @@ function iconFor(tx: { type: string; category?: string; is_recurring?: boolean }
 const barLabels   = computed(() => accounts.value.map(a => a.label));
 const barDatasets = computed(() => [{
   label: t('accounts.balance'),
-  data:  accounts.value.map(a => a.balance),
+  data:  accounts.value.map(a => realBalances.value[a.id] ?? 0),
   backgroundColor: accounts.value.map(a => a.color + '99'),
   borderColor:     accounts.value.map(a => a.color),
   borderRadius: 8,
   borderWidth: 1.5,
+  maxBarThickness: 56,
 }]);
 
 const pieLabels = computed(() => budgets.value.map(b => b.label));
@@ -207,7 +208,7 @@ const lineDatasets = computed(() => lineChart.value.datasets);
               :key="tx.id"
               :transaction="tx"
               :currency="accountOf(tx.account_id)?.currency || 'EUR'"
-              :icon-color="budgetOf(tx.budget_id)?.color || '#6B7280'"
+              :icon-color="tx.color || budgetOf(tx.budget_id)?.color || '#6B7280'"
               :account-label="accountOf(tx.account_id)?.label || ''"
               :show-date="true"
             >
@@ -295,6 +296,12 @@ const lineDatasets = computed(() => lineChart.value.datasets);
 .tns-charts-row .tns-chart-section {
   margin: 0;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.tns-charts-row .tns-chart-card {
+  flex: 1;
 }
 
 @media (min-width: 768px) {
@@ -348,10 +355,21 @@ const lineDatasets = computed(() => lineChart.value.datasets);
   font-size: 22px; font-weight: 600; color: var(--tns-fg3);
   margin-top: 4px;
 }
-.tns-chart-empty,
+.tns-chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 168px;
+  font-family: var(--tns-font);
+  font-size: 14px;
+  color: var(--tns-fg3);
+}
+
 .tns-list-empty {
-  text-align: center;
-  padding: 24px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
   font-family: var(--tns-font);
   font-size: 14px;
   color: var(--tns-fg3);
