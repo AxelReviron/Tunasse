@@ -25,7 +25,7 @@ export default {
     totalBalance: 'Total balance',
     alreadyPaid: 'Already paid',
     toPay: 'To pay',
-    recentTransactions: 'Recent',
+    recentTransactions: 'Recent transactions',
     monthlyOverview: 'This month',
     balanceByAccount: 'Balance by account',
     expenseBreakdown: 'Expense breakdown',
