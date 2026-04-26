@@ -6,7 +6,8 @@ const { t } = useI18n();
 const { fmt } = useFormat();
 
 defineProps({
-  account: { type: Object, required: true },
+  account:     { type: Object, required: true },
+  realBalance: { type: Number, default: null },
 });
 defineEmits(['click']);
 </script>
@@ -20,7 +21,7 @@ defineEmits(['click']);
       <div class="tns-acc-title">{{ account.label }}</div>
       <div class="tns-acc-sub">{{ t(`accounts.type.${account.type}`) }}</div>
     </div>
-    <div class="tns-acc-amt">{{ fmt(account.balance, account.currency) }}</div>
+    <div class="tns-acc-amt">{{ fmt(realBalance !== null ? realBalance : account.balance, account.currency) }}</div>
     <div class="tns-acc-chev"><slot name="chevron" /></div>
   </div>
 </template>

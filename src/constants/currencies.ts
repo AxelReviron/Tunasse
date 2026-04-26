@@ -7,9 +7,9 @@ export const CURRENCY_SUBUNIT: Record<Currency, number> = {
   BTC: 100_000_000,
 }
 
-export function toSubunits(input: string, subunit: number): number {
+export function toSubunits(input: string | number, subunit: number): number {
   const decimals = Math.log10(subunit)
-  const [intPart, decPart = ''] = input.replace(',', '.').split('.')
+  const [intPart, decPart = ''] = String(input).replace(',', '.').split('.')
   const paddedDec = decPart.padEnd(decimals, '0').slice(0, decimals)
   return parseInt(intPart + paddedDec, 10)
 }

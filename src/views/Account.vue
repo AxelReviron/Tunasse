@@ -14,7 +14,7 @@ import type { Account } from '@/types';
 
 const { t } = useI18n();
 const { fmt } = useFormat();
-const { accounts, totalBalance } = useAccounts();
+const { accounts, totalBalance, realBalances } = useAccounts();
 
 const showSheet  = ref(false);
 const selectedAccount = ref<Account | undefined>(undefined);
@@ -69,6 +69,7 @@ function iconFor(account: Account) {
             v-for="a in accounts"
             :key="a.id"
             :account="a"
+            :real-balance="realBalances[a.id] ?? a.balance"
             @click="openEdit(a)"
           >
             <template #icon>
