@@ -88,10 +88,12 @@ export default {
     title: 'Comptes',
     new: 'Nouveau compte',
     edit: 'Modifier le compte',
+    label: 'Nom du compte',
     balance: 'Solde',
     initialBalance: 'Solde initial',
-    iban: 'IBAN',
+    currency: 'Devise',
     type: {
+      label: 'Type',
       checking: 'Courant',
       savings: 'Épargne',
       investment: 'Investissement',

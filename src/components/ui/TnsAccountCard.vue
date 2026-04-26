@@ -1,29 +1,29 @@
-<template>
-  <!-- TnsAccountCard — list row for an account on Accounts page.
-       Uses an icon slot + coloured tile, iban/label, right-aligned balance. -->
-  <div class="tns-acc" @click="$emit('click', account)">
-    <div class="tns-acc-ico" :style="{ background: account.color }">
-      <slot name="icon"/>
-    </div>
-    <div class="tns-acc-main">
-      <div class="tns-acc-title">{{ account.label }}</div>
-      <div class="tns-acc-sub">{{ account.iban }}</div>
-    </div>
-    <div class="tns-acc-amt">{{ fmt(account.balance, account.currency) }}</div>
-    <div class="tns-acc-chev"><slot name="chevron"/></div>
-  </div>
-</template>
-
 <script setup>
-import { useFormat } from '../../composables/useFormat.js';
+import { useI18n } from 'vue-i18n';
+import { useFormat } from '@/composables/useFormat';
+
+const { t } = useI18n();
 const { fmt } = useFormat();
 
 defineProps({
-  /** Account shape: { id, label, iban, balance, currency, color, type }. */
   account: { type: Object, required: true },
 });
 defineEmits(['click']);
 </script>
+
+<template>
+  <div class="tns-acc" @click="$emit('click', account)">
+    <div class="tns-acc-ico" :style="{ background: account.color }">
+      <slot name="icon" />
+    </div>
+    <div class="tns-acc-main">
+      <div class="tns-acc-title">{{ account.label }}</div>
+      <div class="tns-acc-sub">{{ t(`accounts.type.${account.type}`) }}</div>
+    </div>
+    <div class="tns-acc-amt">{{ fmt(account.balance, account.currency) }}</div>
+    <div class="tns-acc-chev"><slot name="chevron" /></div>
+  </div>
+</template>
 
 <style scoped>
 .tns-acc {
