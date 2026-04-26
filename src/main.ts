@@ -24,7 +24,7 @@ import '@ionic/vue/css/display.css'
 import './theme/variables.css'
 
 import { seed } from './db/seed'
-if (import.meta.env.DEV) seed()
+if (import.meta.env.VITE_SHOULD_SEED === 'true') seed()
 
 const app = createApp(App)
   .use(IonicVue, { animated: window.innerWidth < 768 })
