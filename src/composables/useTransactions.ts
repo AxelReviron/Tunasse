@@ -40,6 +40,20 @@ export function useTransactions() {
       .slice(0, 5)
   )
 
+  const alreadyPaid = computed(() => {
+    const today = new Date().toISOString().slice(0, 10)
+    return thisMonthTransactions.value
+      .filter(tx => tx.type === 'expense' && tx.is_recurring && !tx.transfer_peer_id && tx.date <= today)
+      .reduce((sum, tx) => sum + tx.amount, 0)
+  })
+
+  const toPay = computed(() => {
+    const today = new Date().toISOString().slice(0, 10)
+    return thisMonthTransactions.value
+      .filter(tx => tx.type === 'expense' && tx.is_recurring && !tx.transfer_peer_id && tx.date > today)
+      .reduce((sum, tx) => sum + tx.amount, 0)
+  })
+
   function getByAccount(accountId: number): Transaction[] {
     return transactions.value.filter(tx => tx.account_id === accountId)
   }
@@ -74,7 +88,7 @@ export function useTransactions() {
 
   return {
     transactions, isLoading,
-    thisMonthTransactions, monthIncome, monthExpense, recent,
+    thisMonthTransactions, monthIncome, monthExpense, alreadyPaid, toPay, recent,
     getByAccount, getByBudget,
     create, update, remove,
     createTransfer, updateTransfer, removeTransfer,

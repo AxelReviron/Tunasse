@@ -23,13 +23,15 @@ import { useFormat }     from '@/composables/useFormat';
 import { useAccounts }     from '@/composables/useAccounts';
 import { useTransactions } from '@/composables/useTransactions';
 import { useBudgets }      from '@/composables/useBudgets';
+import { CURRENCY_SUBUNIT } from '@/constants/currencies';
+import type { Currency } from '@/types';
 
 const { t } = useI18n();
 const { fmt, fmtShort } = useFormat();
 const router = useRouter();
 
 const { accounts, totalBalance, realBalances, getById: accountOf } = useAccounts();
-const { transactions, monthIncome, monthExpense, recent: recentTx } = useTransactions();
+const { transactions, monthIncome, monthExpense, alreadyPaid, toPay, recent: recentTx } = useTransactions();
 const { budgets, getById: budgetOf } = useBudgets();
 
 const ICON_MAP: Record<string, unknown> = {
@@ -46,7 +48,10 @@ function iconFor(tx: { type: string; category?: string; is_recurring?: boolean; 
 const barLabels   = computed(() => accounts.value.map(a => a.label));
 const barDatasets = computed(() => [{
   label: t('accounts.balance'),
-  data:  accounts.value.map(a => realBalances.value[a.id] ?? 0),
+  data:  accounts.value.map(a => {
+    const raw = realBalances.value[a.id] ?? 0
+    return raw / (CURRENCY_SUBUNIT[a.currency] ?? 100)
+  }),
   backgroundColor: accounts.value.map(a => a.color + '99'),
   borderColor:     accounts.value.map(a => a.color),
   borderRadius: 8,
@@ -55,7 +60,7 @@ const barDatasets = computed(() => [{
 }]);
 
 const pieLabels = computed(() => budgets.value.map(b => b.label));
-const pieData   = computed(() => budgets.value.map(b => b.spent ?? 0));
+const pieData   = computed(() => budgets.value.map(b => (b.spent ?? 0) / (CURRENCY_SUBUNIT[b.currency as Currency] ?? 100)));
 const pieColors = computed(() => budgets.value.map(b => b.color));
 
 const lineChart = computed(() => {
@@ -64,8 +69,11 @@ const lineChart = computed(() => {
 
   const dailyMap: Record<string, number> = {};
   transactions.value.forEach(tx => {
-    if (tx.date.startsWith(prefix))
-      dailyMap[tx.date] = (dailyMap[tx.date] ?? 0) + (tx.type === 'income' ? tx.amount : -tx.amount);
+    if (!tx.date.startsWith(prefix)) return
+    if (tx.type === 'income' && tx.transfer_peer_id !== undefined) return
+    const currency = accountOf(tx.account_id)?.currency ?? 'EUR'
+    const value    = tx.amount / (CURRENCY_SUBUNIT[currency] ?? 100)
+    dailyMap[tx.date] = (dailyMap[tx.date] ?? 0) + (tx.type === 'income' ? value : -value)
   });
 
   const dates = Object.keys(dailyMap).sort();
@@ -128,10 +136,10 @@ const lineDatasets = computed(() => lineChart.value.datasets);
             <TnsKpiCard :label="t('transactions.expense')" :value="fmtShort(monthExpense, 'EUR')" tone="red">
               <template #icon><ion-icon :icon="trendingDownOutline" /></template>
             </TnsKpiCard>
-            <TnsKpiCard :label="t('dashboard.alreadyPaid')" :value="fmtShort(monthExpense, 'EUR')" tone="neutral">
+            <TnsKpiCard :label="t('dashboard.alreadyPaid')" :value="fmtShort(alreadyPaid, 'EUR')" tone="neutral">
               <template #icon><ion-icon :icon="checkmarkCircleOutline" /></template>
             </TnsKpiCard>
-            <TnsKpiCard :label="t('budgets.remaining')" :value="fmtShort(monthIncome - monthExpense, 'EUR')" tone="orange">
+            <TnsKpiCard :label="t('dashboard.toPay')" :value="fmtShort(toPay, 'EUR')" tone="orange">
               <template #icon><ion-icon :icon="alertCircleOutline" /></template>
             </TnsKpiCard>
           </div>
