@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { IonPage, IonContent, IonIcon } from '@ionic/vue';
+import { IonPage, IonContent, IonIcon, toastController } from '@ionic/vue';
 import {
   cartOutline, arrowDownOutline,
-  repeatOutline, addOutline,
+  repeatOutline, addOutline, funnelOutline,
 } from 'ionicons/icons';
 
 import TnsLargeTitle          from '@/components/ui/TnsLargeTitle.vue';
-import TnsFilterChips         from '@/components/ui/TnsFilterChips.vue';
 import TnsSectionHeader       from '@/components/ui/TnsSectionHeader.vue';
 import TnsList                from '@/components/ui/TnsList.vue';
 import TnsTransactionRow      from '@/components/ui/TnsTransactionRow.vue';
 import TnsTransactionSheet    from '@/components/TnsTransactionSheet.vue';
+import TnsFiltersSheet        from '@/components/TnsFiltersSheet.vue';
 import { useAccounts }        from '@/composables/useAccounts';
 import { useBudgets }         from '@/composables/useBudgets';
 import { useTransactions }    from '@/composables/useTransactions';
@@ -22,16 +22,42 @@ import type { Transaction }   from '@/types';
 
 const { t } = useI18n();
 
-const { getById: accountOf } = useAccounts();
+const { accounts, getById: accountOf } = useAccounts();
 const { getById: budgetOf }  = useBudgets();
 const { transactions }       = useTransactions();
 
-const { filter, grouped } = useTransactionFilters(transactions);
+const { filter, dateRange, query, grouped } = useTransactionFilters(transactions);
 
-const showSheet    = ref(false);
-const selectedTx   = ref<Transaction | undefined>(undefined);
+const showSheet      = ref(false);
+const showFilters    = ref(false);
+const selectedTx     = ref<Transaction | undefined>(undefined);
+
+async function showNoAccountToast() {
+  const toast = await toastController.create({
+    message:        t('transactions.noAccount'),
+    duration:       3000,
+    position:       'bottom',
+    positionAnchor: 'tns-tab-bar',
+    cssClass:       'tns-toast',
+  })
+  await toast.present()
+}
+
+const activeFilterCount = computed(() =>
+  (filter.value !== 'all' ? 1 : 0) + (dateRange.value !== 'all' ? 1 : 0)
+)
+
+function resetFilters() {
+  filter.value    = 'all'
+  dateRange.value = 'all'
+  showFilters.value = false
+}
 
 function openCreate() {
+  if (!accounts.value.length) {
+    showNoAccountToast();
+    return;
+  }
   selectedTx.value = undefined;
   showSheet.value  = true;
 }
@@ -61,15 +87,22 @@ function iconFor(tx: { type: string; icon?: string; is_recurring?: boolean }) {
 
         <TnsLargeTitle :title="t('transactions.title')" />
 
-        <TnsFilterChips
-          v-model="filter"
-          :chips="[
-            { value: 'all',       label: t('transactions.all') },
-            { value: 'income',    label: t('transactions.income') },
-            { value: 'expense',   label: t('transactions.expense') },
-            { value: 'recurring', label: t('transactions.recurring') },
-          ]"
-        />
+        <div class="tns-filters">
+          <div class="tns-search">
+            <span class="tns-search-icon">⌕</span>
+            <input
+              v-model="query"
+              type="search"
+              :placeholder="t('transactions.search')"
+              class="tns-search-input"
+            />
+            <button class="tns-filter-btn" :class="{ active: activeFilterCount > 0 }" @click="showFilters = true">
+              <ion-icon :icon="funnelOutline" />
+              <span class="tns-filter-btn-label">{{ t('common.filters') }}</span>
+              <span v-if="activeFilterCount" class="tns-filter-badge">{{ activeFilterCount }}</span>
+            </button>
+          </div>
+        </div>
 
         <template v-if="Object.keys(grouped).length">
           <template v-for="(txs, day) in grouped" :key="day">
@@ -109,16 +142,105 @@ function iconFor(tx: { type: string; icon?: string; is_recurring?: boolean }) {
       @saved="onSheetClose"
       @deleted="onSheetClose"
     />
+
+
+<TnsFiltersSheet
+      v-model="showFilters"
+      v-model:filter="filter"
+      v-model:date-range="dateRange"
+      @reset="resetFilters"
+    />
   </ion-page>
 </template>
 
+<style>
+.tns-toast {
+  --background: var(--tns-accent);
+  --color: #fff;
+  --border-radius: var(--tns-radius-lg);
+  --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+</style>
+
 <style scoped>
+.tns-page {
+  margin-top: 16px;
+}
 .tns-empty {
   text-align: center;
   padding: 48px 16px;
   color: var(--tns-fg2);
   font-family: var(--tns-font);
   font-size: 15px;
+}
+
+.tns-filters {
+  margin: 0 16px 12px;
+  background: var(--tns-card);
+  border-radius: var(--tns-radius-xl);
+  padding: 6px 4px;
+}
+
+.tns-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 14px;
+}
+
+.tns-search-icon {
+  font-size: 28px;
+  color: var(--tns-fg3);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.tns-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 15px;
+  color: var(--tns-fg);
+  font-family: var(--tns-font);
+}
+
+.tns-search-input::placeholder { color: var(--tns-fg3); }
+.tns-search-input::-webkit-search-cancel-button { cursor: pointer; }
+
+.tns-filter-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  background: rgba(120, 120, 128, 0.14);
+  border: none;
+  border-radius: 8px;
+  color: var(--tns-fg2);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--tns-font);
+  padding: 6px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tns-filter-btn ion-icon { font-size: 14px; }
+.tns-filter-btn.active { background: var(--tns-accent); color: #fff; }
+
+.tns-filter-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--tns-accent);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 14px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  text-align: center;
 }
 
 .tns-fab {
