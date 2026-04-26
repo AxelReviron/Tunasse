@@ -77,6 +77,7 @@ export default {
     title: 'Budgets',
     new: 'Nouveau budget',
     edit: 'Modifier le budget',
+    label: 'Nom du budget',
     monthlyCap: 'Plafond mensuel',
     spent: 'Dépensé',
     remaining: 'Restant',

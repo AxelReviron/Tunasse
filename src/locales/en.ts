@@ -77,6 +77,7 @@ export default {
     title: 'Budgets',
     new: 'New budget',
     edit: 'Edit budget',
+    label: 'Budget name',
     monthlyCap: 'Monthly cap',
     spent: 'Spent',
     remaining: 'Remaining',
