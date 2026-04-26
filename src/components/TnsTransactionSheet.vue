@@ -16,19 +16,23 @@ import { useBudgets }      from '@/composables/useBudgets'
 import { useTransactions } from '@/composables/useTransactions'
 import { DEFAULT_COLOR }   from '@/constants/colors'
 import { DEFAULT_ICON_INCOME, DEFAULT_ICON_EXPENSE } from '@/constants/icons'
-import { CURRENCY_SUBUNIT, toSubunits } from '@/constants/currencies'
-import type { RecurringUnit } from '@/types'
+import { CURRENCY_SUBUNIT, toSubunits, fromSubunits } from '@/constants/currencies'
+import type { Transaction, RecurringUnit } from '@/types'
 
-const props = defineProps<{ modelValue: boolean }>()
-const emit  = defineEmits<{
+const props = defineProps<{
+  modelValue: boolean
+  transaction?: Transaction
+}>()
+const emit = defineEmits<{
   'update:modelValue': [value: boolean]
   'saved': []
+  'deleted': []
 }>()
 
 const { t } = useI18n()
-const { accounts }     = useAccounts()
-const { budgets }      = useBudgets()
-const { create }       = useTransactions()
+const { accounts }         = useAccounts()
+const { budgets }          = useBudgets()
+const { create, update, remove } = useTransactions()
 
 const today = new Date().toISOString().slice(0, 10)
 
@@ -44,14 +48,37 @@ const isRecurring       = ref(false)
 const recurringInterval = ref(1)
 const recurringUnit     = ref<RecurringUnit>('month')
 
+const isEditMode = computed(() => !!props.transaction)
+
 const selectedAccount = computed(() =>
   accounts.value.find(a => a.id === Number(accountId.value))
 )
 const selectedCurrency = computed(() => selectedAccount.value?.currency ?? 'EUR')
 
 watch(type, val => {
-  icon.value = val === 'income' ? DEFAULT_ICON_INCOME : DEFAULT_ICON_EXPENSE
+  if (!isEditMode.value)
+    icon.value = val === 'income' ? DEFAULT_ICON_INCOME : DEFAULT_ICON_EXPENSE
 })
+
+watch(() => props.modelValue, open => {
+  if (!open) return
+  if (props.transaction) fill(props.transaction)
+  else reset()
+})
+
+function fill(tx: Transaction) {
+  type.value              = tx.type
+  amount.value            = fromSubunits(tx.amount, CURRENCY_SUBUNIT[selectedCurrency.value] ?? 100)
+  label.value             = tx.label
+  date.value              = tx.date
+  accountId.value         = tx.account_id
+  budgetId.value          = tx.budget_id ?? ''
+  color.value             = tx.color ?? DEFAULT_COLOR
+  icon.value              = tx.icon ?? (tx.type === 'income' ? DEFAULT_ICON_INCOME : DEFAULT_ICON_EXPENSE)
+  isRecurring.value       = tx.is_recurring ?? false
+  recurringInterval.value = tx.recurring_interval ?? 1
+  recurringUnit.value     = tx.recurring_unit ?? 'month'
+}
 
 const canSave = computed(() =>
   label.value.trim() !== '' &&
@@ -80,26 +107,42 @@ function close() {
 
 async function save() {
   if (!canSave.value) return
-  await create({
-    type:    type.value,
-    amount:  toSubunits(amount.value, CURRENCY_SUBUNIT[selectedCurrency.value]),
-    label:   label.value.trim(),
-    date:    date.value,
-    account_id:          Number(accountId.value),
-    budget_id:           budgetId.value !== '' ? Number(budgetId.value) : undefined,
-    color:               color.value,
-    icon:                icon.value,
-    is_recurring:        isRecurring.value || undefined,
-    recurring_interval:  isRecurring.value ? recurringInterval.value : undefined,
-    recurring_unit:      isRecurring.value ? recurringUnit.value : undefined,
-  })
+  const payload = {
+    type:               type.value,
+    amount:             toSubunits(amount.value, CURRENCY_SUBUNIT[selectedCurrency.value]),
+    label:              label.value.trim(),
+    date:               date.value,
+    account_id:         Number(accountId.value),
+    budget_id:          budgetId.value !== '' ? Number(budgetId.value) : undefined,
+    color:              color.value,
+    icon:               icon.value,
+    is_recurring:       isRecurring.value || undefined,
+    recurring_interval: isRecurring.value ? recurringInterval.value : undefined,
+    recurring_unit:     isRecurring.value ? recurringUnit.value : undefined,
+  }
+  if (isEditMode.value && props.transaction) {
+    await update(props.transaction.id, payload)
+  } else {
+    await create(payload)
+  }
   emit('saved')
+  close()
+}
+
+async function deleteTransaction() {
+  if (!props.transaction) return
+  await remove(props.transaction.id)
+  emit('deleted')
   close()
 }
 </script>
 
 <template>
-  <TnsSheet :model-value="modelValue" :title="t('transactions.new')" @update:model-value="close">
+  <TnsSheet
+    :model-value="modelValue"
+    :title="isEditMode ? t('transactions.edit') : t('transactions.new')"
+    @update:model-value="close"
+  >
     <template #closeIcon>
       <ion-icon :icon="closeOutline" style="font-size:20px" />
     </template>
@@ -157,23 +200,33 @@ async function save() {
       </TnsFormField>
     </template>
 
-    <TnsFormField :label="t('transactions.color', 'Color')">
+    <TnsFormField :label="t('transactions.color')">
       <TnsColorPicker v-model="color" />
     </TnsFormField>
 
-    <TnsFormField :label="t('transactions.icon', 'Icon')">
+    <TnsFormField :label="t('transactions.icon')">
       <TnsIconPicker v-model="icon" />
     </TnsFormField>
 
-    <button class="tns-save-btn" :disabled="!canSave" @click="save">
-      {{ t('common.save') }}
-    </button>
+    <div class="tns-actions">
+      <button v-if="isEditMode" class="tns-delete-btn" @click="deleteTransaction">
+        {{ t('common.delete') }}
+      </button>
+      <button class="tns-save-btn" :disabled="!canSave" @click="save">
+        {{ t('common.save') }}
+      </button>
+    </div>
   </TnsSheet>
 </template>
 
 <style scoped>
+.tns-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
 .tns-save-btn {
-  width: 100%;
+  flex: 1;
   padding: 16px;
   border: none;
   border-radius: var(--tns-radius-md);
@@ -183,13 +236,23 @@ async function save() {
   font-weight: 600;
   font-family: var(--tns-font);
   cursor: pointer;
-  margin-top: 8px;
   opacity: 1;
   transition: opacity .15s;
 }
 .tns-save-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+.tns-delete-btn {
+  padding: 16px 20px;
+  border: 1.5px solid var(--tns-red);
+  border-radius: var(--tns-radius-md);
+  background: transparent;
+  color: var(--tns-red);
+  font-size: 16px;
+  font-weight: 600;
+  font-family: var(--tns-font);
+  cursor: pointer;
 }
 .tns-toggle {
   display: flex;

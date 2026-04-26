@@ -3,8 +3,8 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { IonPage, IonContent, IonIcon } from '@ionic/vue';
 import {
-  cartOutline, restaurantOutline, arrowDownOutline,
-  repeatOutline, homeOutline, carOutline, addOutline,
+  cartOutline, arrowDownOutline,
+  repeatOutline, addOutline,
 } from 'ionicons/icons';
 
 import TnsLargeTitle          from '@/components/ui/TnsLargeTitle.vue';
@@ -18,16 +18,33 @@ import { useBudgets }         from '@/composables/useBudgets';
 import { useTransactions }    from '@/composables/useTransactions';
 import { useTransactionFilters } from '@/composables/useTransactionFilters';
 import { ICON_MAP }           from '@/constants/icons';
+import type { Transaction }   from '@/types';
 
 const { t } = useI18n();
 
-const { accounts, getById: accountOf } = useAccounts();
-const { getById: budgetOf }            = useBudgets();
-const { transactions }                 = useTransactions();
+const { getById: accountOf } = useAccounts();
+const { getById: budgetOf }  = useBudgets();
+const { transactions }       = useTransactions();
 
 const { filter, grouped } = useTransactionFilters(transactions);
 
-const showSheet = ref(false);
+const showSheet    = ref(false);
+const selectedTx   = ref<Transaction | undefined>(undefined);
+
+function openCreate() {
+  selectedTx.value = undefined;
+  showSheet.value  = true;
+}
+
+function openEdit(tx: Transaction) {
+  selectedTx.value = tx;
+  showSheet.value  = true;
+}
+
+function onSheetClose() {
+  showSheet.value  = false;
+  selectedTx.value = undefined;
+}
 
 function iconFor(tx: { type: string; icon?: string; is_recurring?: boolean }) {
   if (tx.icon && ICON_MAP[tx.icon]) return ICON_MAP[tx.icon];
@@ -66,6 +83,7 @@ function iconFor(tx: { type: string; icon?: string; is_recurring?: boolean }) {
                 :icon-color="tx.color || budgetOf(tx.budget_id)?.color || '#6B7280'"
                 :account-label="accountOf(tx.account_id)?.label || ''"
                 :show-date="false"
+                @click="openEdit(tx)"
               >
                 <template #icon>
                   <ion-icon :icon="iconFor(tx)" />
@@ -79,13 +97,18 @@ function iconFor(tx: { type: string; icon?: string; is_recurring?: boolean }) {
 
       </div>
 
-      <button class="tns-fab" @click="showSheet = true">
-        <ion-icon :icon="addOutline"  />
+      <button class="tns-fab" @click="openCreate">
+        <ion-icon :icon="addOutline" />
       </button>
 
     </ion-content>
 
-    <TnsTransactionSheet v-model="showSheet" @saved="showSheet = false" />
+    <TnsTransactionSheet
+      v-model="showSheet"
+      :transaction="selectedTx"
+      @saved="onSheetClose"
+      @deleted="onSheetClose"
+    />
   </ion-page>
 </template>
 

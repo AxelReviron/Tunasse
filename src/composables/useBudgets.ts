@@ -23,7 +23,8 @@ export function useBudgets() {
     budgets.value.reduce((sum, b) => sum + b.spent, 0)
   )
 
-  function getById(id: number): BudgetWithSpent | undefined {
+  function getById(id: number | undefined): BudgetWithSpent | undefined {
+    if (id === undefined) return undefined
     return budgets.value.find(b => b.id === id)
   }
 
