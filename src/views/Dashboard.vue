@@ -103,11 +103,14 @@ const lineDatasets = computed(() => lineChart.value.datasets);
         <!-- Balance hero — titre en label interne -->
         <div class="tns-balance">
           <div class="tns-balance-label">{{ t('dashboard.totalBalance') }}</div>
-          <div
-            v-for="entry in totalBalance"
-            :key="entry.currency"
-            class="tns-balance-amount"
-          >{{ fmt(entry.total, entry.currency) }}</div>
+          <template v-if="totalBalance.length">
+            <div
+              v-for="entry in totalBalance"
+              :key="entry.currency"
+              class="tns-balance-amount"
+            >{{ fmt(entry.total, entry.currency) }}</div>
+          </template>
+          <div v-else class="tns-balance-empty">{{ t('accounts.empty') }}</div>
         </div>
 
         <!-- KPI — titre au-dessus (exception : pas de card englobante) -->
@@ -140,7 +143,8 @@ const lineDatasets = computed(() => lineChart.value.datasets);
               <TnsSectionTitle :title="t('dashboard.balanceByAccount')" />
           </div>
             <div class="tns-chart-card">
-              <BarChart :labels="barLabels" :datasets="barDatasets" y-tick-suffix=" €" />
+              <BarChart v-if="accounts.length" :labels="barLabels" :datasets="barDatasets" y-tick-suffix=" €" />
+              <div v-else class="tns-chart-empty">{{ t('accounts.empty') }}</div>
             </div>
           </div>
           <div class="tns-chart-section">
@@ -149,7 +153,8 @@ const lineDatasets = computed(() => lineChart.value.datasets);
               <TnsSectionTitle :title="t('dashboard.expenseBreakdown')" />
           </div>
             <div class="tns-chart-card">
-              <PieChart :labels="pieLabels" :data="pieData" :colors="pieColors" :height="200" />
+              <PieChart v-if="budgets.length" :labels="pieLabels" :data="pieData" :colors="pieColors" :height="200" />
+              <div v-else class="tns-chart-empty">{{ t('budgets.empty') }}</div>
             </div>
           </div>
         </div>
@@ -161,7 +166,8 @@ const lineDatasets = computed(() => lineChart.value.datasets);
             <TnsSectionTitle :title="t('dashboard.monthlyFlow')" />
           </div>
           <div class="tns-chart-card">
-            <LineChart :labels="lineLabels" :datasets="lineDatasets" y-tick-suffix=" €" />
+            <LineChart v-if="lineLabels.length" :labels="lineLabels" :datasets="lineDatasets" y-tick-suffix=" €" />
+            <div v-else class="tns-chart-empty">{{ t('transactions.empty') }}</div>
           </div>
         </div>
 
@@ -173,15 +179,18 @@ const lineDatasets = computed(() => lineChart.value.datasets);
           <span class="tns-list-hdr-action" @click="router.push('/tabs/budget')">{{ t('common.seeAll') }}</span>
         </div>
         <TnsList>
-          <div v-for="b in budgets" :key="b.id" class="tns-budget-row">
-            <div class="tns-budget-icon" :style="{ background: b.color }">
-              <ion-icon :icon="ICON_MAP[b.label] ?? cartOutline" />
+          <template v-if="budgets.length">
+            <div v-for="b in budgets" :key="b.id" class="tns-budget-row">
+              <div class="tns-budget-icon" :style="{ background: b.color }">
+                <ion-icon :icon="ICON_MAP[b.label] ?? cartOutline" />
+              </div>
+              <div class="tns-budget-body">
+                <div class="tns-budget-label">{{ b.label }}</div>
+                <TnsBudgetProgress :spent="b.spent" :amount="b.amount" :color="b.color" :currency="b.currency" />
+              </div>
             </div>
-            <div class="tns-budget-body">
-              <div class="tns-budget-label">{{ b.label }}</div>
-              <TnsBudgetProgress :spent="b.spent" :amount="b.amount" :color="b.color" :currency="b.currency" />
-            </div>
-          </div>
+          </template>
+          <div v-else class="tns-list-empty">{{ t('budgets.empty') }}</div>
         </TnsList>
 
         <div class="tns-list-hdr">
@@ -192,19 +201,22 @@ const lineDatasets = computed(() => lineChart.value.datasets);
           <span class="tns-list-hdr-action" @click="router.push('/tabs/transactions')">{{ t('common.seeAll') }}</span>
         </div>
         <TnsList>
-          <TnsTransactionRow
-            v-for="tx in recentTx"
-            :key="tx.id"
-            :transaction="tx"
-            :currency="accountOf(tx.account_id)?.currency || 'EUR'"
-            :icon-color="budgetOf(tx.budget_id)?.color || '#6B7280'"
-            :account-label="accountOf(tx.account_id)?.label || ''"
-            :show-date="true"
-          >
-            <template #icon>
-              <ion-icon :icon="iconFor(tx)" />
-            </template>
-          </TnsTransactionRow>
+          <template v-if="recentTx.length">
+            <TnsTransactionRow
+              v-for="tx in recentTx"
+              :key="tx.id"
+              :transaction="tx"
+              :currency="accountOf(tx.account_id)?.currency || 'EUR'"
+              :icon-color="budgetOf(tx.budget_id)?.color || '#6B7280'"
+              :account-label="accountOf(tx.account_id)?.label || ''"
+              :show-date="true"
+            >
+              <template #icon>
+                <ion-icon :icon="iconFor(tx)" />
+              </template>
+            </TnsTransactionRow>
+          </template>
+          <div v-else class="tns-list-empty">{{ t('transactions.empty') }}</div>
         </TnsList>
 
       </div>
@@ -213,19 +225,22 @@ const lineDatasets = computed(() => lineChart.value.datasets);
 </template>
 
 <style scoped>
+.tns-page {
+  margin-top: 16px;
+}
 /* ── Balance hero ─────────────────────────────────────────────────────────── */
 .tns-balance {
   margin: 0 16px 24px;
-  background: linear-gradient(135deg, var(--tns-accent), var(--tns-accent-soft));
+  background: var(--tns-card);
   border-radius: var(--tns-radius-xl);
   padding: 24px;
   font-family: var(--tns-font);
 }
 .tns-balance-label {
-  font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.7);
+  font-size: 13px; font-weight: 500; color: var(--tns-fg2);
 }
 .tns-balance-amount {
-  font-size: 36px; font-weight: 700; color: #fff;
+  font-size: 36px; font-weight: 700; color: var(--tns-accent);
   letter-spacing: -1px; margin-top: 4px;
   font-variant-numeric: tabular-nums;
 }
@@ -326,5 +341,19 @@ const lineDatasets = computed(() => lineChart.value.datasets);
 .tns-budget-label {
   font-size: 15px; font-weight: 500;
   color: var(--tns-fg); font-family: var(--tns-font);
+}
+
+/* ── Empty states ────────────────────────────────────────────────────────── */
+.tns-balance-empty {
+  font-size: 22px; font-weight: 600; color: var(--tns-fg3);
+  margin-top: 4px;
+}
+.tns-chart-empty,
+.tns-list-empty {
+  text-align: center;
+  padding: 24px 16px;
+  font-family: var(--tns-font);
+  font-size: 14px;
+  color: var(--tns-fg3);
 }
 </style>
