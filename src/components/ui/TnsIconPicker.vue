@@ -28,6 +28,7 @@ defineEmits<{ 'update:modelValue': [icon: string] }>()
   padding: 4px 0;
 }
 .tns-icon-btn {
+  font-size: 22px;
   width: 40px;
   height: 40px;
   border-radius: var(--tns-radius-md);
@@ -39,10 +40,6 @@ defineEmits<{ 'update:modelValue': [icon: string] }>()
   align-items: center;
   justify-content: center;
   transition: background .15s, color .15s;
-}
-.tns-icon-btn :deep(svg) {
-  width: 20px;
-  height: 20px;
 }
 .tns-icon-btn.active {
   background: var(--tns-accent);
