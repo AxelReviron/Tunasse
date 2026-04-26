@@ -6,7 +6,8 @@ import { IonPage, IonContent, IonIcon } from '@ionic/vue';
 import {
   checkmarkCircleOutline, alertCircleOutline, trendingUpOutline,
   trendingDownOutline, cartOutline, homeOutline, carOutline,
-  restaurantOutline, repeatOutline,
+  restaurantOutline, repeatOutline, calendarClearOutline, barChartOutline, fileTrayFullOutline, layersOutline,
+  readerOutline, pieChartOutline
 } from 'ionicons/icons';
 
 import TnsLargeTitle     from '@/components/ui/TnsLargeTitle.vue';
@@ -102,12 +103,19 @@ const lineDatasets = computed(() => lineChart.value.datasets);
         <!-- Balance hero — titre en label interne -->
         <div class="tns-balance">
           <div class="tns-balance-label">{{ t('dashboard.totalBalance') }}</div>
-          <div class="tns-balance-amount">{{ fmt(totalBalance, 'EUR') }}</div>
+          <div
+            v-for="entry in totalBalance"
+            :key="entry.currency"
+            class="tns-balance-amount"
+          >{{ fmt(entry.total, entry.currency) }}</div>
         </div>
 
         <!-- KPI — titre au-dessus (exception : pas de card englobante) -->
         <div class="tns-section">
-          <TnsSectionTitle :title="t('dashboard.monthlyOverview')" />
+          <div class="tns-section-header-row">
+            <ion-icon :icon="fileTrayFullOutline" />
+            <TnsSectionTitle :title="t('dashboard.monthlyOverview')" />
+          </div>
           <div class="tns-kpi-grid">
             <TnsKpiCard :label="t('transactions.income')" :value="fmtShort(monthIncome, 'EUR')" tone="green">
               <template #icon><ion-icon :icon="trendingUpOutline" /></template>
@@ -127,13 +135,19 @@ const lineDatasets = computed(() => lineChart.value.datasets);
         <!-- Bar + Pie côte à côte — titre au-dessus de chaque card -->
         <div class="tns-charts-row">
           <div class="tns-chart-section">
-            <TnsSectionTitle :title="t('dashboard.balanceByAccount')" />
+          <div class="tns-section-header-row">
+              <ion-icon :icon="barChartOutline"/>
+              <TnsSectionTitle :title="t('dashboard.balanceByAccount')" />
+          </div>
             <div class="tns-chart-card">
               <BarChart :labels="barLabels" :datasets="barDatasets" y-tick-suffix=" €" />
             </div>
           </div>
           <div class="tns-chart-section">
-            <TnsSectionTitle :title="t('dashboard.expenseBreakdown')" />
+          <div class="tns-section-header-row">
+              <ion-icon :icon="pieChartOutline"/>
+              <TnsSectionTitle :title="t('dashboard.expenseBreakdown')" />
+          </div>
             <div class="tns-chart-card">
               <PieChart :labels="pieLabels" :data="pieData" :colors="pieColors" :height="200" />
             </div>
@@ -142,14 +156,20 @@ const lineDatasets = computed(() => lineChart.value.datasets);
 
         <!-- Line chart — titre au-dessus -->
         <div class="tns-chart-section">
-          <TnsSectionTitle :title="t('dashboard.monthlyFlow')" />
+          <div class="tns-section-header-row">
+            <ion-icon :icon="calendarClearOutline"/>
+            <TnsSectionTitle :title="t('dashboard.monthlyFlow')" />
+          </div>
           <div class="tns-chart-card">
             <LineChart :labels="lineLabels" :datasets="lineDatasets" y-tick-suffix=" €" />
           </div>
         </div>
 
         <div class="tns-list-hdr">
-          <span class="tns-list-hdr-title">{{ t('nav.budgets') }}</span>
+          <div class="tns-section-header-row">
+            <ion-icon :icon="layersOutline"/>
+            <span class="tns-list-hdr-title">{{ t('nav.budgets') }}</span>
+          </div>
           <span class="tns-list-hdr-action" @click="router.push('/tabs/budget')">{{ t('common.seeAll') }}</span>
         </div>
         <TnsList>
@@ -165,7 +185,10 @@ const lineDatasets = computed(() => lineChart.value.datasets);
         </TnsList>
 
         <div class="tns-list-hdr">
-          <span class="tns-list-hdr-title">{{ t('dashboard.recentTransactions') }}</span>
+          <div class="tns-section-header-row">
+            <ion-icon :icon="readerOutline"/>
+            <span class="tns-list-hdr-title">{{ t('dashboard.recentTransactions') }}</span>
+          </div>
           <span class="tns-list-hdr-action" @click="router.push('/tabs/transactions')">{{ t('common.seeAll') }}</span>
         </div>
         <TnsList>
@@ -207,11 +230,21 @@ const lineDatasets = computed(() => lineChart.value.datasets);
   font-variant-numeric: tabular-nums;
 }
 
-/* ── KPI grid ─────────────────────���───────────────────────��──────────────── */
+/* ── KPI grid ──────────────────────────────────────────────────────────── */
 /* ── KPI section ──────────────────────────────────────────────────────────── */
 .tns-section {
   padding: 0 16px;
   margin-bottom: 24px;
+}
+
+.tns-section-header-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  font-size: 22px;
 }
 
 .tns-kpi-grid {
@@ -265,7 +298,7 @@ const lineDatasets = computed(() => lineChart.value.datasets);
 }
 .tns-list-hdr-title {
   font-family: var(--tns-font);
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 600;
   color: var(--tns-fg);
   letter-spacing: -0.2px;

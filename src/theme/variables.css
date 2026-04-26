@@ -2,6 +2,8 @@
 http://ionicframework.com/docs/theming/ */
 
 :root {
+    color-scheme: dark;
+
     /* Accent — primary brand colour */
     --tns-accent:      #6366F1;
     --tns-accent-soft: #818CF8;

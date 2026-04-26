@@ -9,10 +9,9 @@ defineProps({ title: { type: String, required: true } });
 <style scoped>
 .tns-section-title {
   font-family: var(--tns-font);
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 600;
   color: var(--tns-fg);
-  margin-bottom: 8px;
   letter-spacing: -0.2px;
 }
 </style>
