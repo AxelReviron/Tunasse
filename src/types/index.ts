@@ -4,7 +4,7 @@ export type AccountType = 'checking' | 'savings' | 'investment'
 
 export type RecurringUnit = 'day' | 'week' | 'month' | 'year'
 
-export type TransactionType = 'income' | 'expense'
+export type TransactionType = 'income' | 'expense' | 'transfer'
 
 export type Account = {
   id: number
@@ -39,4 +39,6 @@ export type Transaction = {
   is_recurring?: boolean
   recurring_interval?: number
   recurring_unit?: RecurringUnit
+  transfer_peer_id?: number
+  to_account_id?: number
 }

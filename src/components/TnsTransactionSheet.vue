@@ -2,7 +2,7 @@
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { IonIcon } from '@ionic/vue'
-import { closeOutline, trendingUpOutline, trendingDownOutline } from 'ionicons/icons'
+import { closeOutline, trendingUpOutline, trendingDownOutline, swapHorizontalOutline } from 'ionicons/icons'
 
 import TnsSheet        from '@/components/ui/TnsSheet.vue'
 import TnsTypeToggle   from '@/components/ui/TnsTypeToggle.vue'
@@ -17,7 +17,7 @@ import { useTransactions } from '@/composables/useTransactions'
 import { DEFAULT_COLOR }   from '@/constants/colors'
 import { DEFAULT_ICON_INCOME, DEFAULT_ICON_EXPENSE } from '@/constants/icons'
 import { CURRENCY_SUBUNIT, toSubunits, fromSubunits } from '@/constants/currencies'
-import type { Transaction, RecurringUnit } from '@/types'
+import type { Transaction, TransactionType, RecurringUnit } from '@/types'
 
 const props = defineProps<{
   modelValue: boolean
@@ -30,17 +30,18 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { accounts }         = useAccounts()
-const { budgets }          = useBudgets()
-const { create, update, remove } = useTransactions()
+const { accounts }                         = useAccounts()
+const { budgets }                          = useBudgets()
+const { create, update, remove, createTransfer, updateTransfer, removeTransfer } = useTransactions()
 
 const today = new Date().toISOString().slice(0, 10)
 
-const type              = ref<'income' | 'expense'>('expense')
+const type              = ref<TransactionType>('expense')
 const amount            = ref('')
 const label             = ref('')
 const date              = ref(today)
 const accountId         = ref<number | ''>('')
+const toAccountId       = ref<number | ''>('')
 const budgetId          = ref<number | ''>('')
 const color             = ref(DEFAULT_COLOR)
 const icon              = ref(DEFAULT_ICON_EXPENSE)
@@ -48,12 +49,20 @@ const isRecurring       = ref(false)
 const recurringInterval = ref(1)
 const recurringUnit     = ref<RecurringUnit>('month')
 
-const isEditMode = computed(() => !!props.transaction)
+const isEditMode  = computed(() => !!props.transaction)
+const isTransfer  = computed(() => type.value === 'transfer')
 
 const selectedAccount = computed(() =>
   accounts.value.find(a => a.id === Number(accountId.value))
 )
 const selectedCurrency = computed(() => selectedAccount.value?.currency ?? 'EUR')
+
+const compatibleToAccounts = computed(() =>
+  accounts.value.filter(a =>
+    a.id !== Number(accountId.value) &&
+    a.currency === selectedAccount.value?.currency
+  )
+)
 
 watch(type, val => {
   if (!isEditMode.value)
@@ -67,11 +76,12 @@ watch(() => props.modelValue, open => {
 })
 
 function fill(tx: Transaction) {
-  type.value              = tx.type
+  type.value              = tx.transfer_peer_id !== undefined ? 'transfer' : tx.type
+  accountId.value         = tx.account_id
+  toAccountId.value       = tx.to_account_id ?? ''
   amount.value            = fromSubunits(tx.amount, CURRENCY_SUBUNIT[selectedCurrency.value] ?? 100)
   label.value             = tx.label
   date.value              = tx.date
-  accountId.value         = tx.account_id
   budgetId.value          = tx.budget_id ?? ''
   color.value             = tx.color ?? DEFAULT_COLOR
   icon.value              = tx.icon ?? (tx.type === 'income' ? DEFAULT_ICON_INCOME : DEFAULT_ICON_EXPENSE)
@@ -80,11 +90,13 @@ function fill(tx: Transaction) {
   recurringUnit.value     = tx.recurring_unit ?? 'month'
 }
 
-const canSave = computed(() =>
-  label.value.trim() !== '' &&
-  toSubunits(amount.value || '0', CURRENCY_SUBUNIT[selectedCurrency.value]) > 0 &&
-  accountId.value !== ''
-)
+const canSave = computed(() => {
+  const amountOk = parseFloat(amount.value) > 0 && accountId.value !== ''
+  if (isTransfer.value) {
+    return amountOk && toAccountId.value !== '' && toAccountId.value !== accountId.value
+  }
+  return amountOk && label.value.trim() !== ''
+})
 
 function reset() {
   type.value              = 'expense'
@@ -92,6 +104,7 @@ function reset() {
   label.value             = ''
   date.value              = today
   accountId.value         = ''
+  toAccountId.value       = ''
   budgetId.value          = ''
   color.value             = DEFAULT_COLOR
   icon.value              = DEFAULT_ICON_EXPENSE
@@ -107,31 +120,52 @@ function close() {
 
 async function save() {
   if (!canSave.value) return
-  const payload = {
-    type:               type.value,
-    amount:             toSubunits(amount.value, CURRENCY_SUBUNIT[selectedCurrency.value]),
-    label:              label.value.trim(),
-    date:               date.value,
-    account_id:         Number(accountId.value),
-    budget_id:          budgetId.value !== '' ? Number(budgetId.value) : undefined,
-    color:              color.value,
-    icon:               icon.value,
-    is_recurring:       isRecurring.value || undefined,
-    recurring_interval: isRecurring.value ? recurringInterval.value : undefined,
-    recurring_unit:     isRecurring.value ? recurringUnit.value : undefined,
-  }
-  if (isEditMode.value && props.transaction) {
-    await update(props.transaction.id, payload)
+
+  if (isTransfer.value) {
+    const payload = {
+      label:           label.value.trim() || t('transactions.transfer'),
+      amount:          toSubunits(amount.value, CURRENCY_SUBUNIT[selectedCurrency.value]),
+      date:            date.value,
+      from_account_id: Number(accountId.value),
+      to_account_id:   Number(toAccountId.value),
+    }
+    if (isEditMode.value && props.transaction) {
+      await updateTransfer(props.transaction.id, payload)
+    } else {
+      await createTransfer(payload)
+    }
   } else {
-    await create(payload)
+    const payload = {
+      type:               type.value,
+      amount:             toSubunits(amount.value, CURRENCY_SUBUNIT[selectedCurrency.value]),
+      label:              label.value.trim(),
+      date:               date.value,
+      account_id:         Number(accountId.value),
+      budget_id:          budgetId.value !== '' ? Number(budgetId.value) : undefined,
+      color:              color.value,
+      icon:               icon.value,
+      is_recurring:       isRecurring.value || undefined,
+      recurring_interval: isRecurring.value ? recurringInterval.value : undefined,
+      recurring_unit:     isRecurring.value ? recurringUnit.value : undefined,
+    }
+    if (isEditMode.value && props.transaction) {
+      await update(props.transaction.id, payload)
+    } else {
+      await create(payload)
+    }
   }
+
   emit('saved')
   close()
 }
 
 async function deleteTransaction() {
   if (!props.transaction) return
-  await remove(props.transaction.id)
+  if (props.transaction.transfer_peer_id !== undefined) {
+    await removeTransfer(props.transaction.id)
+  } else {
+    await remove(props.transaction.id)
+  }
   emit('deleted')
   close()
 }
@@ -151,14 +185,16 @@ async function deleteTransaction() {
       v-model="type"
       :income-label="t('transactions.income')"
       :expense-label="t('transactions.expense')"
+      :transfer-label="t('transactions.transfer')"
     >
       <template #incomeIcon><ion-icon :icon="trendingUpOutline" /></template>
       <template #expenseIcon><ion-icon :icon="trendingDownOutline" /></template>
+      <template #transferIcon><ion-icon :icon="swapHorizontalOutline" /></template>
     </TnsTypeToggle>
 
     <TnsAmountInput v-model="amount" :type="type" />
 
-    <TnsFormField :label="t('transactions.label')">
+    <TnsFormField v-if="!isTransfer" :label="t('transactions.label')">
       <input v-model="label" type="text" :placeholder="t('transactions.label')" />
     </TnsFormField>
 
@@ -166,47 +202,61 @@ async function deleteTransaction() {
       <input v-model="date" type="date" />
     </TnsFormField>
 
-    <TnsFormField :label="t('transactions.account')">
+    <TnsFormField :label="isTransfer ? t('transactions.transferFrom') : t('transactions.account')">
       <select v-model="accountId">
         <option value="" disabled>— {{ t('transactions.account') }} —</option>
         <option v-for="a in accounts" :key="a.id" :value="a.id">{{ a.label }}</option>
       </select>
     </TnsFormField>
 
-    <TnsFormField v-if="type === 'expense'" :label="t('transactions.budget')">
-      <select v-model="budgetId">
-        <option value="">— {{ t('common.noData') }} —</option>
-        <option v-for="b in budgets" :key="b.id" :value="b.id">{{ b.label }}</option>
-      </select>
-    </TnsFormField>
-
-    <TnsFormField :label="t('transactions.isRecurring')">
-      <label class="tns-toggle">
-        <input v-model="isRecurring" type="checkbox" />
-        <span>{{ t('transactions.isRecurring') }}</span>
-      </label>
-    </TnsFormField>
-
-    <template v-if="isRecurring">
-      <TnsFormField :label="t('transactions.recurringUnit.month')">
-        <div class="tns-recurring-row">
-          <input v-model.number="recurringInterval" type="number" min="1" style="width:60px" />
-          <select v-model="recurringUnit">
-            <option v-for="u in ['day','week','month','year']" :key="u" :value="u">
-              {{ t(`transactions.recurringUnit.${u}`) }}
-            </option>
-          </select>
-        </div>
+    <template v-if="isTransfer">
+      <TnsFormField :label="t('transactions.transferTo')">
+        <select v-model="toAccountId" :disabled="!selectedAccount">
+          <option value="" disabled>— {{ t('transactions.account') }} —</option>
+          <option v-for="a in compatibleToAccounts" :key="a.id" :value="a.id">{{ a.label }}</option>
+        </select>
       </TnsFormField>
+      <p v-if="selectedAccount && !compatibleToAccounts.length" class="tns-currency-warn">
+        {{ t('transactions.noCurrencyMatch') }}
+      </p>
     </template>
 
-    <TnsFormField :label="t('transactions.color')">
-      <TnsColorPicker v-model="color" />
-    </TnsFormField>
+    <template v-if="!isTransfer">
+      <TnsFormField v-if="type === 'expense'" :label="t('transactions.budget')">
+        <select v-model="budgetId">
+          <option value="">— {{ t('common.noData') }} —</option>
+          <option v-for="b in budgets" :key="b.id" :value="b.id">{{ b.label }}</option>
+        </select>
+      </TnsFormField>
 
-    <TnsFormField :label="t('transactions.icon')">
-      <TnsIconPicker v-model="icon" />
-    </TnsFormField>
+      <TnsFormField :label="t('transactions.isRecurring')">
+        <label class="tns-toggle">
+          <input v-model="isRecurring" type="checkbox" />
+          <span>{{ t('transactions.isRecurring') }}</span>
+        </label>
+      </TnsFormField>
+
+      <template v-if="isRecurring">
+        <TnsFormField :label="t('transactions.period')">
+          <div class="tns-recurring-row">
+            <input v-model.number="recurringInterval" type="number" min="1" style="width:60px" />
+            <select v-model="recurringUnit">
+              <option v-for="u in ['day','week','month','year']" :key="u" :value="u">
+                {{ t(`transactions.recurringUnit.${u}`) }}
+              </option>
+            </select>
+          </div>
+        </TnsFormField>
+      </template>
+
+      <TnsFormField :label="t('transactions.color')">
+        <TnsColorPicker v-model="color" />
+      </TnsFormField>
+
+      <TnsFormField :label="t('transactions.icon')">
+        <TnsIconPicker v-model="icon" />
+      </TnsFormField>
+    </template>
 
     <div class="tns-actions">
       <button v-if="isEditMode" class="tns-delete-btn" @click="deleteTransaction">
@@ -267,5 +317,12 @@ async function deleteTransaction() {
   display: flex;
   gap: 10px;
   padding-top: 4px;
+}
+.tns-currency-warn {
+  font-size: 13px;
+  color: var(--tns-red);
+  font-family: var(--tns-font);
+  padding: 0 4px;
+  margin: -8px 0 8px;
 }
 </style>

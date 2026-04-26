@@ -7,7 +7,7 @@ import {
   checkmarkCircleOutline, alertCircleOutline, trendingUpOutline,
   trendingDownOutline, cartOutline, homeOutline, carOutline,
   restaurantOutline, repeatOutline, calendarClearOutline, barChartOutline, fileTrayFullOutline, layersOutline,
-  readerOutline, pieChartOutline
+  readerOutline, pieChartOutline, swapHorizontalOutline,
 } from 'ionicons/icons';
 
 import TnsLargeTitle     from '@/components/ui/TnsLargeTitle.vue';
@@ -36,7 +36,8 @@ const ICON_MAP: Record<string, unknown> = {
   Courses: cartOutline, Restaurant: restaurantOutline,
   Logement: homeOutline, Transport: carOutline,
 };
-function iconFor(tx: { type: string; category?: string; is_recurring?: boolean }) {
+function iconFor(tx: { type: string; category?: string; is_recurring?: boolean; transfer_peer_id?: number }) {
+  if (tx.transfer_peer_id !== undefined) return swapHorizontalOutline;
   if (tx.type === 'income') return trendingUpOutline;
   if (tx.is_recurring)      return repeatOutline;
   return ICON_MAP[tx.category ?? ''] ?? cartOutline;
@@ -208,8 +209,9 @@ const lineDatasets = computed(() => lineChart.value.datasets);
               :key="tx.id"
               :transaction="tx"
               :currency="accountOf(tx.account_id)?.currency || 'EUR'"
-              :icon-color="tx.color || budgetOf(tx.budget_id)?.color || '#6B7280'"
+              :icon-color="tx.transfer_peer_id !== undefined ? 'var(--tns-accent)' : tx.color || budgetOf(tx.budget_id)?.color || '#6B7280'"
               :account-label="accountOf(tx.account_id)?.label || ''"
+              :to-account-label="tx.to_account_id ? accountOf(tx.to_account_id)?.label || '' : ''"
               :show-date="true"
             >
               <template #icon>

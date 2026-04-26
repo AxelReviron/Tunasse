@@ -63,4 +63,95 @@ export const TransactionService = {
   remove(id: number): Promise<void> {
     return db.transactions.delete(id)
   },
+
+  async createTransfer(payload: {
+    label: string
+    amount: number
+    date: string
+    from_account_id: number
+    to_account_id: number
+  }): Promise<void> {
+    const [fromAcc, toAcc] = await Promise.all([
+      db.accounts.get(payload.from_account_id),
+      db.accounts.get(payload.to_account_id),
+    ])
+    if (!fromAcc) throw new Error(`Account not found: ${payload.from_account_id}`)
+    if (!toAcc)   throw new Error(`Account not found: ${payload.to_account_id}`)
+    if (fromAcc.currency !== toAcc.currency)
+      throw new Error('Both accounts must share the same currency')
+    if (payload.amount <= 0) throw new Error('Amount must be positive')
+
+    const date = new Date(payload.date).toISOString().slice(0, 10)
+
+    const expenseId = await db.transactions.add({
+      label:            payload.label,
+      amount:           payload.amount,
+      type:             'expense',
+      date,
+      account_id:       payload.from_account_id,
+      to_account_id:    payload.to_account_id,
+      transfer_peer_id: 0,
+    } as Transaction)
+
+    const incomeId = await db.transactions.add({
+      label:            payload.label,
+      amount:           payload.amount,
+      type:             'income',
+      date,
+      account_id:       payload.to_account_id,
+      transfer_peer_id: expenseId,
+    } as Transaction)
+
+    await db.transactions.update(expenseId, { transfer_peer_id: incomeId })
+  },
+
+  async updateTransfer(expenseId: number, changes: {
+    label?: string
+    amount?: number
+    date?: string
+    from_account_id?: number
+    to_account_id?: number
+  }): Promise<void> {
+    const expense = await db.transactions.get(expenseId)
+    if (!expense?.transfer_peer_id) throw new Error('Transfer not found')
+
+    if (changes.from_account_id !== undefined || changes.to_account_id !== undefined) {
+      const fromId = changes.from_account_id ?? expense.account_id
+      const toId   = changes.to_account_id   ?? expense.to_account_id!
+      const [fromAcc, toAcc] = await Promise.all([
+        db.accounts.get(fromId),
+        db.accounts.get(toId),
+      ])
+      if (fromAcc && toAcc && fromAcc.currency !== toAcc.currency)
+        throw new Error('Both accounts must share the same currency')
+    }
+
+    const date = changes.date
+      ? new Date(changes.date).toISOString().slice(0, 10)
+      : undefined
+
+    const expenseChanges: Partial<Transaction> = {}
+    const incomeChanges:  Partial<Transaction> = {}
+
+    if (changes.label  !== undefined) { expenseChanges.label  = changes.label;  incomeChanges.label  = changes.label }
+    if (changes.amount !== undefined) { expenseChanges.amount = changes.amount; incomeChanges.amount = changes.amount }
+    if (date           !== undefined) { expenseChanges.date   = date;           incomeChanges.date   = date }
+    if (changes.from_account_id !== undefined) expenseChanges.account_id = changes.from_account_id
+    if (changes.to_account_id   !== undefined) {
+      expenseChanges.to_account_id = changes.to_account_id
+      incomeChanges.account_id     = changes.to_account_id
+    }
+
+    await Promise.all([
+      db.transactions.update(expenseId, expenseChanges),
+      db.transactions.update(expense.transfer_peer_id, incomeChanges),
+    ])
+  },
+
+  async removeTransfer(id: number): Promise<void> {
+    const tx = await db.transactions.get(id)
+    const peerId = tx?.transfer_peer_id
+    await db.transactions.delete(id)
+    if (peerId) await db.transactions.delete(peerId)
+  },
 }

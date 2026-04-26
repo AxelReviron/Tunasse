@@ -10,11 +10,18 @@
       <div class="tns-row-title">{{ transaction.label }}</div>
       <div class="tns-row-sub">
         <template v-if="showDate">{{ fmtDateShort(transaction.date) }} · </template>
-        {{ transaction.location || transaction.category || accountLabel }}
+        <template v-if="transaction.transfer_peer_id !== undefined">
+          {{ accountLabel }} → {{ toAccountLabel }}
+        </template>
+        <template v-else>{{ transaction.location || transaction.category || accountLabel }}</template>
       </div>
     </div>
-    <div class="tns-row-amt" :class="transaction.type === 'income' ? 'pos' : 'neg'">
-      {{ transaction.type === 'income' ? '+' : '-' }}{{ fmt(transaction.amount, currency) }}
+    <div
+      class="tns-row-amt"
+      :class="transaction.transfer_peer_id !== undefined ? '' : transaction.type === 'income' ? 'pos' : 'neg'"
+    >
+      <template v-if="transaction.transfer_peer_id !== undefined">{{ fmt(transaction.amount, currency) }}</template>
+      <template v-else>{{ transaction.type === 'income' ? '+' : '-' }}{{ fmt(transaction.amount, currency) }}</template>
     </div>
   </div>
 </template>
@@ -32,7 +39,8 @@ defineProps({
   /** Hex/CSS colour for the round icon tile — usually budget.color. */
   iconColor:    { type: String, default: '#6B7280' },
   /** Account label shown when location/category are missing. */
-  accountLabel: { type: String, default: '' },
+  accountLabel:   { type: String, default: '' },
+  toAccountLabel: { type: String, default: '' },
   /** Show the short date in the sub-label (transactions list = true,
    *  account detail where day is already a section header = false). */
   showDate:     { type: Boolean, default: true },

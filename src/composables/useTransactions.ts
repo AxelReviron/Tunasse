@@ -23,18 +23,19 @@ export function useTransactions() {
 
   const monthIncome = computed(() =>
     thisMonthTransactions.value
-      .filter(tx => tx.type === 'income')
+      .filter(tx => tx.type === 'income' && !tx.transfer_peer_id)
       .reduce((sum, tx) => sum + tx.amount, 0)
   )
 
   const monthExpense = computed(() =>
     thisMonthTransactions.value
-      .filter(tx => tx.type === 'expense')
+      .filter(tx => tx.type === 'expense' && !tx.transfer_peer_id)
       .reduce((sum, tx) => sum + tx.amount, 0)
   )
 
   const recent = computed(() =>
     [...transactions.value]
+      .filter(tx => !(tx.type === 'income' && tx.transfer_peer_id !== undefined))
       .sort((a, b) => b.date.localeCompare(a.date))
       .slice(0, 5)
   )
@@ -59,10 +60,23 @@ export function useTransactions() {
     return TransactionService.remove(id)
   }
 
+  async function createTransfer(payload: Parameters<typeof TransactionService.createTransfer>[0]) {
+    return TransactionService.createTransfer(payload)
+  }
+
+  async function updateTransfer(id: number, changes: Parameters<typeof TransactionService.updateTransfer>[1]) {
+    return TransactionService.updateTransfer(id, changes)
+  }
+
+  async function removeTransfer(id: number) {
+    return TransactionService.removeTransfer(id)
+  }
+
   return {
     transactions, isLoading,
     thisMonthTransactions, monthIncome, monthExpense, recent,
     getByAccount, getByBudget,
     create, update, remove,
+    createTransfer, updateTransfer, removeTransfer,
   }
 }

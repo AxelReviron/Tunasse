@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { IonPage, IonContent, IonIcon, toastController } from '@ionic/vue';
 import {
   cartOutline, arrowDownOutline,
-  repeatOutline, addOutline, funnelOutline,
+  repeatOutline, addOutline, funnelOutline, swapHorizontalOutline,
 } from 'ionicons/icons';
 
 import TnsLargeTitle          from '@/components/ui/TnsLargeTitle.vue';
@@ -72,7 +72,8 @@ function onSheetClose() {
   selectedTx.value = undefined;
 }
 
-function iconFor(tx: { type: string; icon?: string; is_recurring?: boolean }) {
+function iconFor(tx: { type: string; icon?: string; is_recurring?: boolean; transfer_peer_id?: number }) {
+  if (tx.transfer_peer_id !== undefined) return swapHorizontalOutline;
   if (tx.icon && ICON_MAP[tx.icon]) return ICON_MAP[tx.icon];
   if (tx.type === 'income') return arrowDownOutline;
   if (tx.is_recurring)      return repeatOutline;
@@ -113,8 +114,9 @@ function iconFor(tx: { type: string; icon?: string; is_recurring?: boolean }) {
                 :key="tx.id"
                 :transaction="tx"
                 :currency="accountOf(tx.account_id)?.currency || 'EUR'"
-                :icon-color="tx.color || budgetOf(tx.budget_id)?.color || '#6B7280'"
+                :icon-color="tx.transfer_peer_id !== undefined ? 'var(--tns-accent)' : tx.color || budgetOf(tx.budget_id)?.color || '#6B7280'"
                 :account-label="accountOf(tx.account_id)?.label || ''"
+                :to-account-label="tx.to_account_id ? accountOf(tx.to_account_id)?.label || '' : ''"
                 :show-date="false"
                 @click="openEdit(tx)"
               >

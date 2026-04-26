@@ -13,4 +13,10 @@ db.version(1).stores({
   budgets:      '++id',
 })
 
+db.version(2).stores({
+  accounts:     '++id, type',
+  transactions: '++id, account_id, type, date, budget_id, is_recurring, transfer_peer_id',
+  budgets:      '++id',
+})
+
 export { db }

@@ -6,7 +6,7 @@ import { closeOutline } from 'ionicons/icons'
 import TnsSheet      from '@/components/ui/TnsSheet.vue'
 import TnsFilterChips from '@/components/ui/TnsFilterChips.vue'
 
-type FilterValue    = 'all' | 'income' | 'expense' | 'recurring'
+type FilterValue    = 'all' | 'income' | 'expense' | 'recurring' | 'transfer'
 type DateRangeValue = 'all' | 'thisMonth' | 'lastMonth' | 'thisYear'
 
 defineProps<{
@@ -40,6 +40,7 @@ const { t } = useI18n()
           { value: 'income',    label: t('transactions.income') },
           { value: 'expense',   label: t('transactions.expense') },
           { value: 'recurring', label: t('transactions.recurring') },
+          { value: 'transfer',  label: t('transactions.transfer') },
         ]"
         @update:model-value="emit('update:filter', $event as FilterValue)"
       />
