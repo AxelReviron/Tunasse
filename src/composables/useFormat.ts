@@ -1,5 +1,6 @@
 import { useI18n } from 'vue-i18n'
 import type { Currency } from '@/types'
+import { CURRENCY_SUBUNIT } from '@/constants/currencies'
 
 const CURRENCY_LOCALES: Record<Currency, string> = {
   EUR: 'fr-FR',
@@ -20,8 +21,9 @@ export function useFormat() {
     return DATE_LOCALES[locale.value] ?? 'fr-FR'
   }
 
-  function fmt(amount: number, currency: Currency = 'EUR'): string {
-    if (currency === 'BTC') return `${amount.toFixed(4)} ₿`
+  function fmt(amountInSubunits: number, currency: Currency = 'EUR'): string {
+    const amount = amountInSubunits / CURRENCY_SUBUNIT[currency]
+    if (currency === 'BTC') return `${amount.toFixed(8)} ₿`
     return new Intl.NumberFormat(CURRENCY_LOCALES[currency], {
       style: 'currency',
       currency,
@@ -29,7 +31,8 @@ export function useFormat() {
     }).format(amount)
   }
 
-  function fmtShort(amount: number, currency: Currency = 'EUR'): string {
+  function fmtShort(amountInSubunits: number, currency: Currency = 'EUR'): string {
+    const amount = amountInSubunits / CURRENCY_SUBUNIT[currency]
     if (currency === 'BTC') return `${amount.toFixed(4)} ₿`
     const opts: Intl.NumberFormatOptions = Math.abs(amount) >= 1000
       ? { maximumFractionDigits: 0 }

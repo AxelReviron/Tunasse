@@ -1,0 +1,58 @@
+import {
+  cartOutline, restaurantOutline, cafeOutline, fastFoodOutline, wineOutline,
+  carOutline, busOutline, trainOutline, bicycleOutline, airplaneOutline,
+  homeOutline, flashOutline, waterOutline, wifiOutline, constructOutline,
+  fitnessOutline, medicalOutline, heartOutline,
+  gameControllerOutline, musicalNotesOutline, filmOutline, tvOutline,
+  bagHandleOutline, shirtOutline, giftOutline,
+  cashOutline, cardOutline, walletOutline, trendingUpOutline, trendingDownOutline,
+  briefcaseOutline, repeatOutline,
+  schoolOutline, bookOutline,
+  personOutline, pawOutline, globeOutline, phonePortraitOutline,
+} from 'ionicons/icons'
+
+export const ICON_MAP: Record<string, unknown> = {
+  'cart-outline':            cartOutline,
+  'restaurant-outline':      restaurantOutline,
+  'cafe-outline':            cafeOutline,
+  'fast-food-outline':       fastFoodOutline,
+  'wine-outline':            wineOutline,
+  'car-outline':             carOutline,
+  'bus-outline':             busOutline,
+  'train-outline':           trainOutline,
+  'bicycle-outline':         bicycleOutline,
+  'airplane-outline':        airplaneOutline,
+  'home-outline':            homeOutline,
+  'flash-outline':           flashOutline,
+  'water-outline':           waterOutline,
+  'wifi-outline':            wifiOutline,
+  'construct-outline':       constructOutline,
+  'fitness-outline':         fitnessOutline,
+  'medical-outline':         medicalOutline,
+  'heart-outline':           heartOutline,
+  'game-controller-outline': gameControllerOutline,
+  'musical-notes-outline':   musicalNotesOutline,
+  'film-outline':            filmOutline,
+  'tv-outline':              tvOutline,
+  'bag-handle-outline':      bagHandleOutline,
+  'shirt-outline':           shirtOutline,
+  'gift-outline':            giftOutline,
+  'cash-outline':            cashOutline,
+  'card-outline':            cardOutline,
+  'wallet-outline':          walletOutline,
+  'trending-up-outline':     trendingUpOutline,
+  'trending-down-outline':   trendingDownOutline,
+  'briefcase-outline':       briefcaseOutline,
+  'repeat-outline':          repeatOutline,
+  'school-outline':          schoolOutline,
+  'book-outline':            bookOutline,
+  'person-outline':          personOutline,
+  'paw-outline':             pawOutline,
+  'globe-outline':           globeOutline,
+  'phone-portrait-outline':  phonePortraitOutline,
+}
+
+export const ICON_LIST = Object.keys(ICON_MAP)
+
+export const DEFAULT_ICON_INCOME  = 'trending-up-outline'
+export const DEFAULT_ICON_EXPENSE = 'cart-outline'

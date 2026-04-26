@@ -23,6 +23,9 @@ import '@ionic/vue/css/display.css'
 /* Theme variables */
 import './theme/variables.css'
 
+import { seed } from './db/seed'
+if (import.meta.env.DEV) seed()
+
 const app = createApp(App)
   .use(IonicVue, { animated: window.innerWidth < 768 })
   .use(router)

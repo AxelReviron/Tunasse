@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonIcon } from '@ionic/vue';
 import {
   checkmarkCircleOutline, alertCircleOutline, trendingUpOutline,
@@ -18,50 +19,17 @@ import BarChart          from '@/components/BarChart.vue';
 import PieChart          from '@/components/PieChart.vue';
 import LineChart         from '@/components/LineChart.vue';
 import { useFormat }     from '@/composables/useFormat';
-import type { Account, Budget, Transaction } from '@/types';
+import { useAccounts }     from '@/composables/useAccounts';
+import { useTransactions } from '@/composables/useTransactions';
+import { useBudgets }      from '@/composables/useBudgets';
 
 const { t } = useI18n();
 const { fmt, fmtShort } = useFormat();
+const router = useRouter();
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
-const accounts = ref<Account[]>([
-  { id: 1, label: 'Compte courant', currency: 'EUR', iban: '****1234', type: 'checking', balance: 3200, color: '#6366F1' },
-  { id: 2, label: 'Livret A',       currency: 'EUR', iban: '****5678', type: 'savings',  balance: 8000, color: '#22C55E' },
-]);
-
-const budgets = ref<Budget[]>([
-  { id: 1, label: 'Courses',    color: '#F97316', amount: 400, spent: 230, currency: 'EUR' },
-  { id: 2, label: 'Restaurant', color: '#F43F5E', amount: 150, spent: 90,  currency: 'EUR' },
-  { id: 3, label: 'Logement',   color: '#6366F1', amount: 900, spent: 900, currency: 'EUR' },
-  { id: 4, label: 'Transport',  color: '#0EA5E9', amount: 100, spent: 60,  currency: 'EUR' },
-]);
-
-const transactions = ref<Transaction[]>([
-  { id: 1, label: 'Carrefour',        amount: 54.30,  type: 'expense', date: '2026-04-23', account_id: 1, budget_id: 1, category: 'Courses' },
-  { id: 2, label: 'Salaire avril',    amount: 2800,   type: 'income',  date: '2026-04-23', account_id: 1 },
-  { id: 3, label: 'Sushi Shop',       amount: 32.00,  type: 'expense', date: '2026-04-22', account_id: 1, budget_id: 2, category: 'Restaurant' },
-  { id: 4, label: 'Loyer',            amount: 900,    type: 'expense', date: '2026-04-22', account_id: 1, budget_id: 3, category: 'Logement', is_recurring: true, recurring_unit: 'month' },
-  { id: 5, label: 'Lidl',             amount: 38.10,  type: 'expense', date: '2026-04-21', account_id: 1, budget_id: 1, category: 'Courses' },
-  { id: 6, label: 'Navigo mensuel',   amount: 86.40,  type: 'expense', date: '2026-04-20', account_id: 1, budget_id: 4, category: 'Transport', is_recurring: true, recurring_unit: 'month' },
-  { id: 7, label: 'Virement épargne', amount: 200,    type: 'expense', date: '2026-04-20', account_id: 1 },
-]);
-// ───────────────────────────────────────────────────────────��─────────────────
-
-const totalBalance = computed(() =>
-  accounts.value.reduce((sum, a) => sum + a.balance, 0)
-);
-const monthIncome = computed(() =>
-  transactions.value.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0)
-);
-const monthExpense = computed(() =>
-  transactions.value.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
-);
-const recentTx = computed(() =>
-  [...transactions.value].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 4)
-);
-
-function accountOf(id: number) { return accounts.value.find(a => a.id === id); }
-function budgetOf(id?: number) { return id ? budgets.value.find(b => b.id === id) : undefined; }
+const { accounts, totalBalance, getById: accountOf } = useAccounts();
+const { transactions, monthIncome, monthExpense, recent: recentTx } = useTransactions();
+const { budgets, getById: budgetOf } = useBudgets();
 
 const ICON_MAP: Record<string, unknown> = {
   Courses: cartOutline, Restaurant: restaurantOutline,
@@ -84,44 +52,44 @@ const barDatasets = computed(() => [{
 }]);
 
 const pieLabels = computed(() => budgets.value.map(b => b.label));
-const pieData   = computed(() => budgets.value.map(b => b.spent));
+const pieData   = computed(() => budgets.value.map(b => b.spent ?? 0));
 const pieColors = computed(() => budgets.value.map(b => b.color));
 
-const lineLabels = computed(() => {
-  const now = new Date();
-  const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  return Array.from({ length: days }, (_, i) => String(i + 1).padStart(2, '0'));
-});
-const lineDatasets = computed(() => {
-  const now   = new Date();
-  const year  = now.getFullYear();
-  const month = now.getMonth();
-  const days  = new Date(year, month + 1, 0).getDate();
-  const daily = new Array(days).fill(0);
+const lineChart = computed(() => {
+  const now    = new Date();
+  const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
+  const dailyMap: Record<string, number> = {};
   transactions.value.forEach(tx => {
-    const d = new Date(tx.date);
-    if (d.getFullYear() === year && d.getMonth() === month) {
-      daily[d.getDate() - 1] += tx.type === 'income' ? tx.amount : -tx.amount;
-    }
+    if (tx.date.startsWith(prefix))
+      dailyMap[tx.date] = (dailyMap[tx.date] ?? 0) + (tx.type === 'income' ? tx.amount : -tx.amount);
   });
 
-  const cumul = daily.reduce<number[]>((acc, v, i) => {
-    acc.push((acc[i - 1] ?? 0) + v);
-    return acc;
-  }, []);
+  const dates = Object.keys(dailyMap).sort();
 
-  return [{
-    label: t('dashboard.cumulativeBalance'),
-    data: cumul,
-    borderColor: '#6366F1',
-    backgroundColor: 'rgba(99,102,241,0.15)',
-    fill: true,
-    tension: 0.4,
-    pointRadius: 3,
-    pointBackgroundColor: '#6366F1',
-  }];
+  let cumul = 0;
+  const data = dates.map(date => {
+    cumul += dailyMap[date];
+    return cumul;
+  });
+
+  return {
+    labels: dates.map(d => d.slice(8, 10)),
+    datasets: [{
+      label: t('dashboard.cumulativeBalance'),
+      data,
+      borderColor: '#6366F1',
+      backgroundColor: 'rgba(99,102,241,0.15)',
+      fill: true,
+      tension: 0.4,
+      pointRadius: 4,
+      pointBackgroundColor: '#6366F1',
+    }],
+  };
 });
+
+const lineLabels   = computed(() => lineChart.value.labels);
+const lineDatasets = computed(() => lineChart.value.datasets);
 </script>
 
 <template>
@@ -182,7 +150,7 @@ const lineDatasets = computed(() => {
 
         <div class="tns-list-hdr">
           <span class="tns-list-hdr-title">{{ t('nav.budgets') }}</span>
-          <span class="tns-list-hdr-action">{{ t('common.seeAll') }}</span>
+          <span class="tns-list-hdr-action" @click="router.push('/tabs/budget')">{{ t('common.seeAll') }}</span>
         </div>
         <TnsList>
           <div v-for="b in budgets" :key="b.id" class="tns-budget-row">
@@ -198,7 +166,7 @@ const lineDatasets = computed(() => {
 
         <div class="tns-list-hdr">
           <span class="tns-list-hdr-title">{{ t('dashboard.recentTransactions') }}</span>
-          <span class="tns-list-hdr-action">{{ t('common.seeAll') }}</span>
+          <span class="tns-list-hdr-action" @click="router.push('/tabs/transactions')">{{ t('common.seeAll') }}</span>
         </div>
         <TnsList>
           <TnsTransactionRow

@@ -27,11 +27,14 @@ defineEmits(['update:modelValue']);
 </script>
 
 <style scoped>
+/* ── Backdrop ─────────────────────────────────────────────────────────────── */
 .tns-sheet-bg {
   position: absolute; inset: 0;
   background: rgba(0, 0, 0, 0.4); z-index: 40;
   display: flex; align-items: flex-end;
 }
+
+/* ── Sheet ────────────────────────────────────────────────────────────────── */
 .tns-sheet {
   width: 100%; background: var(--tns-card);
   border-radius: var(--tns-radius-xl) var(--tns-radius-xl) 0 0;
@@ -58,13 +61,31 @@ defineEmits(['update:modelValue']);
   cursor: pointer;
 }
 
-/* transition */
-.tns-sheet-enter-active .tns-sheet,
-.tns-sheet-leave-active .tns-sheet { transition: transform .25s ease-out; }
-.tns-sheet-enter-from .tns-sheet,
-.tns-sheet-leave-to   .tns-sheet { transform: translateY(100%); }
+/* ── Desktop — modale centrée ─────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .tns-sheet-bg {
+    align-items: center;
+    justify-content: center;
+  }
+  .tns-sheet {
+    width: 480px;
+    border-radius: var(--tns-radius-xl);
+    max-height: 90%;
+  }
+  .tns-sheet-handle { display: none; }
+}
+
+/* ── Transitions ──────────────────────────────────────────────────────────── */
 .tns-sheet-enter-active,
 .tns-sheet-leave-active { transition: opacity .2s ease-out; }
 .tns-sheet-enter-from,
 .tns-sheet-leave-to { opacity: 0; }
+
+/* slide up sur mobile uniquement */
+@media (max-width: 767px) {
+  .tns-sheet-enter-active .tns-sheet,
+  .tns-sheet-leave-active .tns-sheet { transition: transform .25s ease-out; }
+  .tns-sheet-enter-from .tns-sheet,
+  .tns-sheet-leave-to   .tns-sheet { transform: translateY(100%); }
+}
 </style>
