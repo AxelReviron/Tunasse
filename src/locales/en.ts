@@ -4,6 +4,7 @@ export default {
     transactions: 'Transactions',
     budgets: 'Budgets',
     accounts: 'Accounts',
+    settings: 'Settings'
   },
 
   common: {
