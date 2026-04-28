@@ -39,8 +39,8 @@ Tunasse stores everything locally on your device using IndexedDB. There is no se
 ## Getting started
 
 ```bash
-npm install
-npm run dev
+docker build -t tunasse-dev .
+docker run --rm -p 8100:8100 -v $(pwd):/app -v /app/node_modules tunasse-dev
 ```
 
 Build for production:
