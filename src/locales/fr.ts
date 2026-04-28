@@ -76,6 +76,8 @@ export default {
     noAccount: 'Créez d\'abord un compte pour ajouter une transaction.',
     empty: 'Aucune transaction',
     emptyFiltered: 'Aucun résultat pour ce filtre',
+    deleteConfirm: 'Supprimer cette transaction ?',
+    deleteConfirmMessage: 'Cette action est irréversible.',
   },
 
   budgets: {
@@ -88,6 +90,8 @@ export default {
     remaining: 'Restant',
     over: 'Dépassé',
     empty: 'Aucun budget',
+    deleteConfirm: 'Supprimer ce budget ?',
+    deleteConfirmMessage: 'Les transactions liées ne seront pas supprimées. Cette action est irréversible.',
   },
 
   accounts: {
@@ -105,5 +109,12 @@ export default {
       investment: 'Investissement',
     },
     empty: 'Aucun compte',
+    deleteConfirm: 'Supprimer ce compte ?',
+    deleteConfirmMessage: 'Toutes les transactions associées seront également supprimées. Cette action est irréversible.',
   },
+
+  settings: {
+    title: 'Paramètres',
+    sync: 'Synchroniser'
+  }
 }

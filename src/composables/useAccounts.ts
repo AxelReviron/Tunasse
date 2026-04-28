@@ -6,7 +6,7 @@ import type { Account } from '@/types'
 export function useAccounts() {
   const accounts      = ref<Account[]>([])
   const totalBalance  = ref<BalanceEntry[]>([])
-  const realBalances  = ref<Record<number, number>>({})
+  const realBalances  = ref<Record<string, number>>({})
   const isLoading     = ref(true)
 
   const subAccounts = liveQuery(() => AccountService.getAll())
@@ -32,19 +32,19 @@ export function useAccounts() {
     subRealBalances.unsubscribe()
   })
 
-  function getById(id: number): Account | undefined {
+  function getById(id: string): Account | undefined {
     return accounts.value.find(a => a.id === id)
   }
 
-  async function create(account: Omit<Account, 'id'>) {
+  async function create(account: Omit<Account, 'id' | 'createdAt' | 'updatedAt'>) {
     return AccountService.create(account)
   }
 
-  async function update(id: number, changes: Partial<Omit<Account, 'id'>>) {
+  async function update(id: string, changes: Partial<Omit<Account, 'id' | 'createdAt' | 'updatedAt'>>) {
     return AccountService.update(id, changes)
   }
 
-  async function remove(id: number) {
+  async function remove(id: string) {
     return AccountService.remove(id)
   }
 

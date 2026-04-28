@@ -76,6 +76,8 @@ export default {
     noAccount: 'Create an account first to add a transaction.',
     empty: 'No transactions',
     emptyFiltered: 'No results for this filter',
+    deleteConfirm: 'Delete this transaction?',
+    deleteConfirmMessage: 'This action cannot be undone.',
   },
 
   budgets: {
@@ -88,6 +90,8 @@ export default {
     remaining: 'Remaining',
     over: 'Over budget',
     empty: 'No budgets',
+    deleteConfirm: 'Delete this budget?',
+    deleteConfirmMessage: 'Linked transactions will not be deleted. This action cannot be undone.',
   },
 
   accounts: {
@@ -105,5 +109,12 @@ export default {
       investment: 'Investment',
     },
     empty: 'No accounts',
+    deleteConfirm: 'Delete this account?',
+    deleteConfirmMessage: 'All associated transactions will also be deleted. This action cannot be undone.',
   },
+
+  settings: {
+    title: 'Settings',
+    sync: 'Synchronize'
+  }
 }

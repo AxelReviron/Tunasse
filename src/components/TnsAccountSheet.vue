@@ -4,9 +4,10 @@ import { useI18n } from 'vue-i18n'
 import { IonIcon } from '@ionic/vue'
 import { closeOutline } from 'ionicons/icons'
 
-import TnsSheet      from '@/components/ui/TnsSheet.vue'
-import TnsFormField  from '@/components/ui/TnsFormField.vue'
-import TnsColorPicker from '@/components/ui/TnsColorPicker.vue'
+import TnsSheet        from '@/components/ui/TnsSheet.vue'
+import TnsFormField    from '@/components/ui/TnsFormField.vue'
+import TnsColorPicker  from '@/components/ui/TnsColorPicker.vue'
+import TnsConfirmAlert from '@/components/ui/TnsConfirmAlert.vue'
 
 import { useAccounts } from '@/composables/useAccounts'
 import { DEFAULT_COLOR } from '@/constants/colors'
@@ -82,9 +83,15 @@ async function save() {
   close()
 }
 
-async function deleteAccount() {
+const showConfirm = ref(false)
+
+function deleteAccount() {
   if (!props.account) return
-  await remove(props.account.id)
+  showConfirm.value = true
+}
+
+async function handleDeleteConfirmed() {
+  await remove(props.account!.id)
   emit('deleted')
   close()
 }
@@ -138,6 +145,15 @@ async function deleteAccount() {
       </button>
     </div>
   </TnsSheet>
+
+  <TnsConfirmAlert
+    v-model="showConfirm"
+    :title="t('accounts.deleteConfirm')"
+    :message="t('accounts.deleteConfirmMessage')"
+    :confirm-label="t('common.delete')"
+    :cancel-label="t('common.cancel')"
+    @confirm="handleDeleteConfirmed"
+  />
 </template>
 
 <style scoped>

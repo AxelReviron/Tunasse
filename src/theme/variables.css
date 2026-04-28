@@ -31,6 +31,9 @@ http://ionicframework.com/docs/theming/ */
     --tns-pad: 16px;
     --tns-gap: 10px;
 
+    /* Layout */
+    --tns-sidebar-w: 0px;
+
     /* Type */
     --tns-font: -apple-system, "SF Pro", BlinkMacSystemFont, system-ui, sans-serif;
 
@@ -60,22 +63,13 @@ http://ionicframework.com/docs/theming/ */
     --ion-color-primary-tint:   #7577f3;
 }
 
+@media (min-width: 768px) {
+    :root { --tns-sidebar-w: 220px; }
+}
+
 /* Optional compact density — add data-density="compact" on a parent. */
 [data-density="compact"] {
     --tns-pad: 12px;
     --tns-gap: 8px;
 }
 
-/* ── Page container — centre le contenu sur desktop ─────────────────────── */
-/* Utilisé dans toutes les vues : <div class="tns-page"> */
-.tns-page {
-    width: 100%;
-}
-
-@media (min-width: 768px) {
-    .tns-page {
-        max-width: 960px;
-        margin: 0 auto;
-        padding: 0 24px;
-    }
-}

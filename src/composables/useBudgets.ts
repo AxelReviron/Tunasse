@@ -23,20 +23,20 @@ export function useBudgets() {
     budgets.value.reduce((sum, b) => sum + b.spent, 0)
   )
 
-  function getById(id: number | undefined): BudgetWithSpent | undefined {
+  function getById(id: string | undefined): BudgetWithSpent | undefined {
     if (id === undefined) return undefined
     return budgets.value.find(b => b.id === id)
   }
 
-  async function create(budget: Omit<Budget, 'id'>) {
+  async function create(budget: Omit<Budget, 'id' | 'createdAt' | 'updatedAt'>) {
     return BudgetService.create(budget)
   }
 
-  async function update(id: number, changes: Partial<Omit<Budget, 'id'>>) {
+  async function update(id: string, changes: Partial<Omit<Budget, 'id' | 'createdAt' | 'updatedAt'>>) {
     return BudgetService.update(id, changes)
   }
 
-  async function remove(id: number) {
+  async function remove(id: string) {
     return BudgetService.remove(id)
   }
 

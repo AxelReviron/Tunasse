@@ -3,12 +3,15 @@ import type { Account, Currency } from '@/types'
 
 export type BalanceEntry = { currency: Currency; total: number }
 
+type AccountCreate = Omit<Account, 'id' | 'createdAt' | 'updatedAt'>
+type AccountUpdate = Partial<Omit<Account, 'id' | 'createdAt' | 'updatedAt'>>
+
 export const AccountService = {
   getAll(): Promise<Account[]> {
     return db.accounts.toArray()
   },
 
-  getById(id: number): Promise<Account | undefined> {
+  getById(id: string): Promise<Account | undefined> {
     return db.accounts.get(id)
   },
 
@@ -16,7 +19,7 @@ export const AccountService = {
     return db.accounts.where('type').equals(type).toArray()
   },
 
-  async getRealBalance(accountId: number): Promise<number> {
+  async getRealBalance(accountId: string): Promise<number> {
     const account = await db.accounts.get(accountId)
     if (!account) return 0
 
@@ -43,16 +46,30 @@ export const AccountService = {
     }))
   },
 
-  create(account: Omit<Account, 'id'>): Promise<number> {
-    return db.accounts.add(account as Account)
+  create(account: AccountCreate): Promise<string> {
+    const now = new Date().toISOString()
+    return db.accounts.add({
+      ...account,
+      id: crypto.randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+    })
   },
 
-  update(id: number, changes: Partial<Omit<Account, 'id'>>): Promise<number> {
-    return db.accounts.update(id, changes)
+  update(id: string, changes: AccountUpdate): Promise<number> {
+    return db.accounts.update(id, { ...changes, updatedAt: new Date().toISOString() })
   },
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
+    const now   = new Date().toISOString()
+    const txIds = (await db.transactions.where('account_id').equals(id).primaryKeys()) as string[]
+
     await db.transactions.where('account_id').equals(id).delete()
     await db.accounts.delete(id)
+
+    await db.deletions.bulkAdd([
+      { id: crypto.randomUUID(), tableName: 'accounts',      recordId: id,   deletedAt: now },
+      ...txIds.map(txId => ({ id: crypto.randomUUID(), tableName: 'transactions' as const, recordId: txId, deletedAt: now })),
+    ])
   },
 }

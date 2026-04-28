@@ -165,9 +165,6 @@ function iconFor(tx: { type: string; icon?: string; is_recurring?: boolean; tran
 </style>
 
 <style scoped>
-.tns-page {
-  margin-top: 16px;
-}
 .tns-empty {
   text-align: center;
   padding: 48px 16px;

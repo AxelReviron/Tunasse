@@ -5,6 +5,7 @@ import { IonIcon } from '@ionic/vue'
 import { closeOutline, trendingUpOutline, trendingDownOutline, swapHorizontalOutline } from 'ionicons/icons'
 
 import TnsSheet        from '@/components/ui/TnsSheet.vue'
+import TnsConfirmAlert from '@/components/ui/TnsConfirmAlert.vue'
 import TnsTypeToggle   from '@/components/ui/TnsTypeToggle.vue'
 import TnsAmountInput  from '@/components/ui/TnsAmountInput.vue'
 import TnsFormField    from '@/components/ui/TnsFormField.vue'
@@ -159,12 +160,18 @@ async function save() {
   close()
 }
 
-async function deleteTransaction() {
+const showConfirm = ref(false)
+
+function deleteTransaction() {
   if (!props.transaction) return
-  if (props.transaction.transfer_peer_id !== undefined) {
-    await removeTransfer(props.transaction.id)
+  showConfirm.value = true
+}
+
+async function handleDeleteConfirmed() {
+  if (props.transaction!.transfer_peer_id !== undefined) {
+    await removeTransfer(props.transaction!.id)
   } else {
-    await remove(props.transaction.id)
+    await remove(props.transaction!.id)
   }
   emit('deleted')
   close()
@@ -267,6 +274,15 @@ async function deleteTransaction() {
       </button>
     </div>
   </TnsSheet>
+
+  <TnsConfirmAlert
+    v-model="showConfirm"
+    :title="t('transactions.deleteConfirm')"
+    :message="t('transactions.deleteConfirmMessage')"
+    :confirm-label="t('common.delete')"
+    :cancel-label="t('common.cancel')"
+    @confirm="handleDeleteConfirmed"
+  />
 </template>
 
 <style scoped>
