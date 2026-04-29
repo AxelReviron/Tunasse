@@ -10,7 +10,7 @@ export default defineConfig({
     },
     apple: {
       ...minimal2023Preset.apple,
-      padding: 0.1,
+      padding: 0,
       resizeOptions: { fit: 'cover', background: 'white' },
     },
   },
