@@ -3,7 +3,8 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
-import {home, reader, wallet, pieChart, cardOutline, settingsOutline} from 'ionicons/icons';
+import {home, reader, pieChart, cardOutline, settingsOutline} from 'ionicons/icons';
+import logo from '@/assets/images/tunasse-logo.svg'
 
 const { t } = useI18n();
 const route  = useRoute();
@@ -29,8 +30,8 @@ function isActive(path: string) {
       <!-- Sidebar — desktop uniquement -->
       <aside class="tns-sidebar">
         <div class="tns-sidebar-logo">
-          <ion-icon :icon="wallet" />
-          <span>Tunasse</span>
+          <img :src="logo" alt="" class="tns-sidebar-logo-img" />
+          <span class="tns-sidebar-logo-name">Tunasse</span>
         </div>
         <nav class="tns-sidebar-nav">
           <div
@@ -133,15 +134,21 @@ function isActive(path: string) {
   padding: 0 8px 24px;
   margin-bottom: 8px;
   border-bottom: 0.5px solid var(--tns-sep);
-  font-family: var(--tns-font);
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--tns-fg);
 }
 
-.tns-sidebar-logo ion-icon {
+.tns-sidebar-logo-img {
+  height: 40px;
+  width: 40px;
+  display: block;
+  flex-shrink: 0;
+}
+
+.tns-sidebar-logo-name {
+  font-family: var(--tns-font);
   font-size: 22px;
-  color: var(--tns-accent);
+  font-weight: 700;
+  color: var(--tns-fg);
+  letter-spacing: -0.3px;
 }
 
 /* ── Nav items ───────────────────────────────────────────────────────────── */

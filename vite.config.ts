@@ -1,6 +1,5 @@
 /// <reference types="vitest" />
 
-import legacy from '@vitejs/plugin-legacy'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
 import { defineConfig } from 'vite'
@@ -11,12 +10,19 @@ export default defineConfig({
   base: '/',
   plugins: [
     vue(),
-    legacy(),
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
+        name: 'Tunasse',
+        short_name: 'Tunasse',
         start_url: '/',
         scope: '/',
+        icons: [
+          { src: 'pwa-64x64.png',             sizes: '64x64',   type: 'image/png' },
+          { src: 'pwa-192x192.png',            sizes: '192x192', type: 'image/png' },
+          { src: 'pwa-512x512.png',            sizes: '512x512', type: 'image/png' },
+          { src: 'maskable-icon-512x512.png',  sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
       }
     })
   ],
