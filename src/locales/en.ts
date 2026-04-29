@@ -140,5 +140,19 @@ export default {
       success: 'Synced successfully',
       error: 'Error: {msg}',
     }
+  },
+
+  pwa: {
+    update: {
+      message: 'A new version is available.',
+      later: 'Later',
+      refresh: 'Update',
+    },
+    install: {
+      title: 'Install Tunasse',
+      description: 'Access the app from your home screen, even offline.',
+      ios: 'Tap ⎙ Share then "Add to Home Screen".',
+      install: 'Install',
+    },
   }
 }
