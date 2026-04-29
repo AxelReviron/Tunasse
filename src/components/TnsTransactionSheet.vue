@@ -5,6 +5,7 @@ import { IonIcon } from '@ionic/vue'
 import { closeOutline, trendingUpOutline, trendingDownOutline, swapHorizontalOutline } from 'ionicons/icons'
 
 import TnsSheet        from '@/components/ui/TnsSheet.vue'
+import TnsConfirmAlert from '@/components/ui/TnsConfirmAlert.vue'
 import TnsTypeToggle   from '@/components/ui/TnsTypeToggle.vue'
 import TnsAmountInput  from '@/components/ui/TnsAmountInput.vue'
 import TnsFormField    from '@/components/ui/TnsFormField.vue'
@@ -40,9 +41,9 @@ const type              = ref<TransactionType>('expense')
 const amount            = ref('')
 const label             = ref('')
 const date              = ref(today)
-const accountId         = ref<number | ''>('')
-const toAccountId       = ref<number | ''>('')
-const budgetId          = ref<number | ''>('')
+const accountId         = ref<string | ''>('')
+const toAccountId       = ref<string | ''>('')
+const budgetId          = ref<string | ''>('')
 const color             = ref(DEFAULT_COLOR)
 const icon              = ref(DEFAULT_ICON_EXPENSE)
 const isRecurring       = ref(false)
@@ -53,13 +54,13 @@ const isEditMode  = computed(() => !!props.transaction)
 const isTransfer  = computed(() => type.value === 'transfer')
 
 const selectedAccount = computed(() =>
-  accounts.value.find(a => a.id === Number(accountId.value))
+  accounts.value.find(a => a.id === accountId.value)
 )
 const selectedCurrency = computed(() => selectedAccount.value?.currency ?? 'EUR')
 
 const compatibleToAccounts = computed(() =>
   accounts.value.filter(a =>
-    a.id !== Number(accountId.value) &&
+    a.id !== accountId.value &&
     a.currency === selectedAccount.value?.currency
   )
 )
@@ -126,8 +127,8 @@ async function save() {
       label:           label.value.trim() || t('transactions.transfer'),
       amount:          toSubunits(amount.value, CURRENCY_SUBUNIT[selectedCurrency.value]),
       date:            date.value,
-      from_account_id: Number(accountId.value),
-      to_account_id:   Number(toAccountId.value),
+      from_account_id: accountId.value as string,
+      to_account_id:   toAccountId.value as string,
     }
     if (isEditMode.value && props.transaction) {
       await updateTransfer(props.transaction.id, payload)
@@ -140,8 +141,8 @@ async function save() {
       amount:             toSubunits(amount.value, CURRENCY_SUBUNIT[selectedCurrency.value]),
       label:              label.value.trim(),
       date:               date.value,
-      account_id:         Number(accountId.value),
-      budget_id:          budgetId.value !== '' ? Number(budgetId.value) : undefined,
+      account_id:         accountId.value as string,
+      budget_id:          budgetId.value !== '' ? budgetId.value : undefined,
       color:              color.value,
       icon:               icon.value,
       is_recurring:       isRecurring.value || undefined,
@@ -159,12 +160,18 @@ async function save() {
   close()
 }
 
-async function deleteTransaction() {
+const showConfirm = ref(false)
+
+function deleteTransaction() {
   if (!props.transaction) return
-  if (props.transaction.transfer_peer_id !== undefined) {
-    await removeTransfer(props.transaction.id)
+  showConfirm.value = true
+}
+
+async function handleDeleteConfirmed() {
+  if (props.transaction!.transfer_peer_id !== undefined) {
+    await removeTransfer(props.transaction!.id)
   } else {
-    await remove(props.transaction.id)
+    await remove(props.transaction!.id)
   }
   emit('deleted')
   close()
@@ -267,6 +274,15 @@ async function deleteTransaction() {
       </button>
     </div>
   </TnsSheet>
+
+  <TnsConfirmAlert
+    v-model="showConfirm"
+    :title="t('transactions.deleteConfirm')"
+    :message="t('transactions.deleteConfirmMessage')"
+    :confirm-label="t('common.delete')"
+    :cancel-label="t('common.cancel')"
+    @confirm="handleDeleteConfirmed"
+  />
 </template>
 
 <style scoped>

@@ -4,6 +4,7 @@ export default {
     transactions: 'Transactions',
     budgets: 'Budgets',
     accounts: 'Comptes',
+    settings: 'Paramètres'
   },
 
   common: {
@@ -75,6 +76,8 @@ export default {
     noAccount: 'Créez d\'abord un compte pour ajouter une transaction.',
     empty: 'Aucune transaction',
     emptyFiltered: 'Aucun résultat pour ce filtre',
+    deleteConfirm: 'Supprimer cette transaction ?',
+    deleteConfirmMessage: 'Cette action est irréversible.',
   },
 
   budgets: {
@@ -87,6 +90,8 @@ export default {
     remaining: 'Restant',
     over: 'Dépassé',
     empty: 'Aucun budget',
+    deleteConfirm: 'Supprimer ce budget ?',
+    deleteConfirmMessage: 'Les transactions liées ne seront pas supprimées. Cette action est irréversible.',
   },
 
   accounts: {
@@ -104,5 +109,36 @@ export default {
       investment: 'Investissement',
     },
     empty: 'Aucun compte',
+    deleteConfirm: 'Supprimer ce compte ?',
+    deleteConfirmMessage: 'Toutes les transactions associées seront également supprimées. Cette action est irréversible.',
   },
+
+  settings: {
+    title: 'Paramètres',
+    sync: {
+      title: 'Synchronisation',
+      description: 'Ouvrez cette page sur les deux appareils. Partagez votre code avec l\'autre, ou entrez son code pour vous connecter.',
+      myDevice: 'Mon appareil',
+      myDevicePlaceholder: 'Ex : iPhone de Pierre',
+      myDeviceRequired: 'Nommez votre appareil pour pouvoir synchroniser.',
+      searching: 'En recherche…',
+      connected: '1 appareil connecté | {count} appareils connectés',
+      myCode: 'Mon code',
+      copy: 'Copier',
+      copied: 'Copié !',
+      otherDevice: 'Autre appareil',
+      codePlaceholder: 'mot1-mot2-mot3-mot4',
+      connect: 'Se connecter',
+      connectedTo: 'Connecté à {name}',
+      disconnect: 'Déconnecter',
+      peersSection: 'Appareils connectés',
+      recents: 'Récents',
+      rename: 'Renommer',
+      forget: 'Oublier',
+      syncButton: 'Synchroniser maintenant',
+      syncing: 'Synchronisation…',
+      success: 'Synchronisé avec succès',
+      error: 'Erreur : {msg}',
+    }
+  }
 }

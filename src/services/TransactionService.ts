@@ -1,7 +1,10 @@
 import { db } from '@/db/database'
 import type { Transaction } from '@/types'
 
-async function validate(data: Partial<Omit<Transaction, 'id'>>, isCreate = false) {
+type TransactionCreate = Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'>
+type TransactionUpdate = Partial<Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'>>
+
+async function validate(data: TransactionUpdate, isCreate = false) {
   if (data.amount !== undefined && data.amount <= 0)
     throw new Error('Amount must be positive')
 
@@ -26,15 +29,15 @@ export const TransactionService = {
     return db.transactions.toArray()
   },
 
-  getById(id: number): Promise<Transaction | undefined> {
+  getById(id: string): Promise<Transaction | undefined> {
     return db.transactions.get(id)
   },
 
-  getByAccount(accountId: number): Promise<Transaction[]> {
+  getByAccount(accountId: string): Promise<Transaction[]> {
     return db.transactions.where('account_id').equals(accountId).toArray()
   },
 
-  getByBudget(budgetId: number): Promise<Transaction[]> {
+  getByBudget(budgetId: string): Promise<Transaction[]> {
     return db.transactions.where('budget_id').equals(budgetId).toArray()
   },
 
@@ -43,33 +46,37 @@ export const TransactionService = {
     return db.transactions.where('date').startsWith(prefix).toArray()
   },
 
-  async create(transaction: Omit<Transaction, 'id'>): Promise<number> {
+  async create(transaction: TransactionCreate): Promise<string> {
     await validate(transaction, true)
-    const normalized = {
+    const now = new Date().toISOString()
+    return db.transactions.add({
       ...transaction,
+      id: crypto.randomUUID(),
       date: new Date(transaction.date).toISOString().slice(0, 10),
-    }
-    return db.transactions.add(normalized as Transaction)
+      createdAt: now,
+      updatedAt: now,
+    })
   },
 
-  async update(id: number, changes: Partial<Omit<Transaction, 'id'>>): Promise<number> {
+  async update(id: string, changes: TransactionUpdate): Promise<number> {
     await validate(changes)
     const normalized = changes.date
       ? { ...changes, date: new Date(changes.date).toISOString().slice(0, 10) }
       : changes
-    return db.transactions.update(id, normalized)
+    return db.transactions.update(id, { ...normalized, updatedAt: new Date().toISOString() })
   },
 
-  remove(id: number): Promise<void> {
-    return db.transactions.delete(id)
+  async remove(id: string): Promise<void> {
+    await db.transactions.delete(id)
+    await db.deletions.add({ id: crypto.randomUUID(), tableName: 'transactions', recordId: id, deletedAt: new Date().toISOString() })
   },
 
   async createTransfer(payload: {
     label: string
     amount: number
     date: string
-    from_account_id: number
-    to_account_id: number
+    from_account_id: string
+    to_account_id: string
   }): Promise<void> {
     const [fromAcc, toAcc] = await Promise.all([
       db.accounts.get(payload.from_account_id),
@@ -81,36 +88,44 @@ export const TransactionService = {
       throw new Error('Both accounts must share the same currency')
     if (payload.amount <= 0) throw new Error('Amount must be positive')
 
-    const date = new Date(payload.date).toISOString().slice(0, 10)
+    const date      = new Date(payload.date).toISOString().slice(0, 10)
+    const now       = new Date().toISOString()
+    const expenseId = crypto.randomUUID()
+    const incomeId  = crypto.randomUUID()
 
-    const expenseId = await db.transactions.add({
-      label:            payload.label,
-      amount:           payload.amount,
-      type:             'expense',
-      date,
-      account_id:       payload.from_account_id,
-      to_account_id:    payload.to_account_id,
-      transfer_peer_id: 0,
-    } as Transaction)
-
-    const incomeId = await db.transactions.add({
-      label:            payload.label,
-      amount:           payload.amount,
-      type:             'income',
-      date,
-      account_id:       payload.to_account_id,
-      transfer_peer_id: expenseId,
-    } as Transaction)
-
-    await db.transactions.update(expenseId, { transfer_peer_id: incomeId })
+    await db.transactions.bulkAdd([
+      {
+        id:               expenseId,
+        label:            payload.label,
+        amount:           payload.amount,
+        type:             'expense',
+        date,
+        account_id:       payload.from_account_id,
+        to_account_id:    payload.to_account_id,
+        transfer_peer_id: incomeId,
+        createdAt:        now,
+        updatedAt:        now,
+      },
+      {
+        id:               incomeId,
+        label:            payload.label,
+        amount:           payload.amount,
+        type:             'income',
+        date,
+        account_id:       payload.to_account_id,
+        transfer_peer_id: expenseId,
+        createdAt:        now,
+        updatedAt:        now,
+      },
+    ])
   },
 
-  async updateTransfer(expenseId: number, changes: {
+  async updateTransfer(expenseId: string, changes: {
     label?: string
     amount?: number
     date?: string
-    from_account_id?: number
-    to_account_id?: number
+    from_account_id?: string
+    to_account_id?: string
   }): Promise<void> {
     const expense = await db.transactions.get(expenseId)
     if (!expense?.transfer_peer_id) throw new Error('Transfer not found')
@@ -130,8 +145,9 @@ export const TransactionService = {
       ? new Date(changes.date).toISOString().slice(0, 10)
       : undefined
 
-    const expenseChanges: Partial<Transaction> = {}
-    const incomeChanges:  Partial<Transaction> = {}
+    const updatedAt       = new Date().toISOString()
+    const expenseChanges: Partial<Transaction> = { updatedAt }
+    const incomeChanges:  Partial<Transaction> = { updatedAt }
 
     if (changes.label  !== undefined) { expenseChanges.label  = changes.label;  incomeChanges.label  = changes.label }
     if (changes.amount !== undefined) { expenseChanges.amount = changes.amount; incomeChanges.amount = changes.amount }
@@ -148,10 +164,16 @@ export const TransactionService = {
     ])
   },
 
-  async removeTransfer(id: number): Promise<void> {
-    const tx = await db.transactions.get(id)
+  async removeTransfer(id: string): Promise<void> {
+    const tx     = await db.transactions.get(id)
     const peerId = tx?.transfer_peer_id
+    const now    = new Date().toISOString()
+
     await db.transactions.delete(id)
     if (peerId) await db.transactions.delete(peerId)
+
+    const entries = [{ id: crypto.randomUUID(), tableName: 'transactions' as const, recordId: id, deletedAt: now }]
+    if (peerId) entries.push({ id: crypto.randomUUID(), tableName: 'transactions' as const, recordId: peerId, deletedAt: now })
+    await db.deletions.bulkAdd(entries)
   },
 }

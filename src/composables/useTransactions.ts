@@ -54,23 +54,23 @@ export function useTransactions() {
       .reduce((sum, tx) => sum + tx.amount, 0)
   })
 
-  function getByAccount(accountId: number): Transaction[] {
+  function getByAccount(accountId: string): Transaction[] {
     return transactions.value.filter(tx => tx.account_id === accountId)
   }
 
-  function getByBudget(budgetId: number): Transaction[] {
+  function getByBudget(budgetId: string): Transaction[] {
     return transactions.value.filter(tx => tx.budget_id === budgetId)
   }
 
-  async function create(transaction: Omit<Transaction, 'id'>) {
+  async function create(transaction: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'>) {
     return TransactionService.create(transaction)
   }
 
-  async function update(id: number, changes: Partial<Omit<Transaction, 'id'>>) {
+  async function update(id: string, changes: Partial<Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'>>) {
     return TransactionService.update(id, changes)
   }
 
-  async function remove(id: number) {
+  async function remove(id: string) {
     return TransactionService.remove(id)
   }
 
@@ -78,11 +78,11 @@ export function useTransactions() {
     return TransactionService.createTransfer(payload)
   }
 
-  async function updateTransfer(id: number, changes: Parameters<typeof TransactionService.updateTransfer>[1]) {
+  async function updateTransfer(id: string, changes: Parameters<typeof TransactionService.updateTransfer>[1]) {
     return TransactionService.updateTransfer(id, changes)
   }
 
-  async function removeTransfer(id: number) {
+  async function removeTransfer(id: string) {
     return TransactionService.removeTransfer(id)
   }
 

@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
-import {home, reader, wallet, pieChart, cardOutline} from 'ionicons/icons';
+import {home, reader, wallet, pieChart, cardOutline, settingsOutline} from 'ionicons/icons';
 
 const { t } = useI18n();
 const route  = useRoute();
@@ -14,6 +14,7 @@ const navItems = computed(() => [
   { route: '/tabs/transactions', label: t('nav.transactions'), icon: reader },
   { route: '/tabs/budget',       label: t('nav.budgets'),      icon: pieChart },
   { route: '/tabs/account',      label: t('nav.accounts'),     icon: cardOutline },
+  { route: '/tabs/settings',     label: t('nav.settings'),     icon: settingsOutline },
 ]);
 
 function isActive(path: string) {
@@ -64,6 +65,10 @@ function isActive(path: string) {
             <ion-tab-button tab="account" href="/tabs/account">
               <ion-icon aria-hidden="true" :icon="cardOutline" />
               <ion-label>{{ t('nav.accounts') }}</ion-label>
+            </ion-tab-button>
+            <ion-tab-button tab="settings" href="/tabs/settings">
+              <ion-icon aria-hidden="true" :icon="settingsOutline" />
+              <ion-label>{{ t('nav.settings') }}</ion-label>
             </ion-tab-button>
           </ion-tab-bar>
         </ion-tabs>

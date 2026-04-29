@@ -38,7 +38,7 @@ const ICON_MAP: Record<string, unknown> = {
   Courses: cartOutline, Restaurant: restaurantOutline,
   Logement: homeOutline, Transport: carOutline,
 };
-function iconFor(tx: { type: string; category?: string; is_recurring?: boolean; transfer_peer_id?: number }) {
+function iconFor(tx: { type: string; category?: string; is_recurring?: boolean; transfer_peer_id?: string }) {
   if (tx.transfer_peer_id !== undefined) return swapHorizontalOutline;
   if (tx.type === 'income') return trendingUpOutline;
   if (tx.is_recurring)      return repeatOutline;
@@ -236,9 +236,6 @@ const lineDatasets = computed(() => lineChart.value.datasets);
 </template>
 
 <style scoped>
-.tns-page {
-  margin-top: 16px;
-}
 /* ── Balance hero ─────────────────────────────────────────────────────────── */
 .tns-balance {
   margin: 0 16px 24px;
@@ -258,21 +255,6 @@ const lineDatasets = computed(() => lineChart.value.datasets);
 
 /* ── KPI grid ──────────────────────────────────────────────────────────── */
 /* ── KPI section ──────────────────────────────────────────────────────────── */
-.tns-section {
-  padding: 0 16px;
-  margin-bottom: 24px;
-}
-
-.tns-section-header-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 6px;
-  margin-top: 16px;
-  margin-bottom: 8px;
-  font-size: 22px;
-}
-
 .tns-kpi-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

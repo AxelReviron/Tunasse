@@ -23,6 +23,9 @@ import '@ionic/vue/css/display.css'
 /* Theme variables */
 import './theme/variables.css'
 
+/* Global CSS */
+import './theme/styles.css'
+
 import { seed } from './db/seed'
 if (import.meta.env.VITE_SHOULD_SEED === 'true') seed()
 

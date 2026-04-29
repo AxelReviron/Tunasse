@@ -4,6 +4,7 @@ export default {
     transactions: 'Transactions',
     budgets: 'Budgets',
     accounts: 'Accounts',
+    settings: 'Settings'
   },
 
   common: {
@@ -75,6 +76,8 @@ export default {
     noAccount: 'Create an account first to add a transaction.',
     empty: 'No transactions',
     emptyFiltered: 'No results for this filter',
+    deleteConfirm: 'Delete this transaction?',
+    deleteConfirmMessage: 'This action cannot be undone.',
   },
 
   budgets: {
@@ -87,6 +90,8 @@ export default {
     remaining: 'Remaining',
     over: 'Over budget',
     empty: 'No budgets',
+    deleteConfirm: 'Delete this budget?',
+    deleteConfirmMessage: 'Linked transactions will not be deleted. This action cannot be undone.',
   },
 
   accounts: {
@@ -104,5 +109,36 @@ export default {
       investment: 'Investment',
     },
     empty: 'No accounts',
+    deleteConfirm: 'Delete this account?',
+    deleteConfirmMessage: 'All associated transactions will also be deleted. This action cannot be undone.',
   },
+
+  settings: {
+    title: 'Settings',
+    sync: {
+      title: 'Synchronization',
+      description: 'Open this page on both devices. Share your code with the other device, or enter its code to connect.',
+      myDevice: 'My device',
+      myDevicePlaceholder: 'E.g. Pierre\'s iPhone',
+      myDeviceRequired: 'Name your device before syncing.',
+      searching: 'Searching…',
+      connected: '1 device connected | {count} devices connected',
+      myCode: 'My code',
+      copy: 'Copy',
+      copied: 'Copied!',
+      otherDevice: 'Other device',
+      codePlaceholder: 'word1-word2-word3-word4',
+      connect: 'Connect',
+      connectedTo: 'Connected to {name}',
+      disconnect: 'Disconnect',
+      peersSection: 'Connected devices',
+      recents: 'Recents',
+      rename: 'Rename',
+      forget: 'Forget',
+      syncButton: 'Sync now',
+      syncing: 'Syncing…',
+      success: 'Synced successfully',
+      error: 'Error: {msg}',
+    }
+  }
 }
