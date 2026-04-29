@@ -115,6 +115,30 @@ export default {
 
   settings: {
     title: 'Paramètres',
-    sync: 'Synchroniser'
+    sync: {
+      title: 'Synchronisation',
+      description: 'Ouvrez cette page sur les deux appareils. Partagez votre code avec l\'autre, ou entrez son code pour vous connecter.',
+      myDevice: 'Mon appareil',
+      myDevicePlaceholder: 'Ex : iPhone de Pierre',
+      myDeviceRequired: 'Nommez votre appareil pour pouvoir synchroniser.',
+      searching: 'En recherche…',
+      connected: '1 appareil connecté | {count} appareils connectés',
+      myCode: 'Mon code',
+      copy: 'Copier',
+      copied: 'Copié !',
+      otherDevice: 'Autre appareil',
+      codePlaceholder: 'mot1-mot2-mot3-mot4',
+      connect: 'Se connecter',
+      connectedTo: 'Connecté à {name}',
+      disconnect: 'Déconnecter',
+      peersSection: 'Appareils connectés',
+      recents: 'Récents',
+      rename: 'Renommer',
+      forget: 'Oublier',
+      syncButton: 'Synchroniser maintenant',
+      syncing: 'Synchronisation…',
+      success: 'Synchronisé avec succès',
+      error: 'Erreur : {msg}',
+    }
   }
 }

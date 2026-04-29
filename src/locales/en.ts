@@ -115,6 +115,30 @@ export default {
 
   settings: {
     title: 'Settings',
-    sync: 'Synchronize'
+    sync: {
+      title: 'Synchronization',
+      description: 'Open this page on both devices. Share your code with the other device, or enter its code to connect.',
+      myDevice: 'My device',
+      myDevicePlaceholder: 'E.g. Pierre\'s iPhone',
+      myDeviceRequired: 'Name your device before syncing.',
+      searching: 'Searching…',
+      connected: '1 device connected | {count} devices connected',
+      myCode: 'My code',
+      copy: 'Copy',
+      copied: 'Copied!',
+      otherDevice: 'Other device',
+      codePlaceholder: 'word1-word2-word3-word4',
+      connect: 'Connect',
+      connectedTo: 'Connected to {name}',
+      disconnect: 'Disconnect',
+      peersSection: 'Connected devices',
+      recents: 'Recents',
+      rename: 'Rename',
+      forget: 'Forget',
+      syncButton: 'Sync now',
+      syncing: 'Syncing…',
+      success: 'Synced successfully',
+      error: 'Error: {msg}',
+    }
   }
 }

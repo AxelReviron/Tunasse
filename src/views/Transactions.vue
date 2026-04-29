@@ -72,7 +72,7 @@ function onSheetClose() {
   selectedTx.value = undefined;
 }
 
-function iconFor(tx: { type: string; icon?: string; is_recurring?: boolean; transfer_peer_id?: number }) {
+function iconFor(tx: { type: string; icon?: string; is_recurring?: boolean; transfer_peer_id?: string }) {
   if (tx.transfer_peer_id !== undefined) return swapHorizontalOutline;
   if (tx.icon && ICON_MAP[tx.icon]) return ICON_MAP[tx.icon];
   if (tx.type === 'income') return arrowDownOutline;

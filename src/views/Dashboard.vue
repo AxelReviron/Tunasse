@@ -38,7 +38,7 @@ const ICON_MAP: Record<string, unknown> = {
   Courses: cartOutline, Restaurant: restaurantOutline,
   Logement: homeOutline, Transport: carOutline,
 };
-function iconFor(tx: { type: string; category?: string; is_recurring?: boolean; transfer_peer_id?: number }) {
+function iconFor(tx: { type: string; category?: string; is_recurring?: boolean; transfer_peer_id?: string }) {
   if (tx.transfer_peer_id !== undefined) return swapHorizontalOutline;
   if (tx.type === 'income') return trendingUpOutline;
   if (tx.is_recurring)      return repeatOutline;
