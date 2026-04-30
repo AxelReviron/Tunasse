@@ -10,7 +10,9 @@
 
 ## Privacy first
 
-Tunasse stores everything locally on your device using IndexedDB. There is no server, no account, no analytics, no cloud sync. Your financial data is yours — it never leaves your phone or browser.
+Tunasse stores everything locally on your device using IndexedDB. There is no account, no analytics, and no cloud where your data is held. Your financial data is yours — it lives on your devices.
+
+Optional **device sync** is peer-to-peer over WebRTC, end-to-end encrypted by DTLS/SRTP. Peers find each other through a shared passphrase you control. No server ever stores or sees your data in the clear. See [Device sync](#device-sync) for the trade-offs.
 
 
 ## Features
@@ -34,6 +36,7 @@ Tunasse stores everything locally on your device using IndexedDB. There is no se
 | Build          | [Vite](https://vitejs.dev) + [TypeScript](https://www.typescriptlang.org)        |
 | i18n           | [Vue I18n](https://vue-i18n.intlify.dev) (English / French)                      |
 | Charts         | [Chart.js](https://www.chartjs.org) via [vue-chartjs](https://vue-chartjs.org)   |
+| Device sync    | [Trystero](https://github.com/dmotz/trystero) (WebRTC, peer-to-peer)             |
 
 
 ## Getting started
@@ -52,6 +55,26 @@ Build for production:
 ```bash
 npm run build
 ```
+
+## Device sync
+
+Sync between your own devices is peer-to-peer over WebRTC, built on [Trystero](https://github.com/dmotz/trystero). Peers that share the same passphrase join the same room and exchange data directly.
+
+**What stays private**
+
+- All payload data is encrypted end-to-end by the browser's WebRTC stack (DTLS for the data channel, SRTP for any media). Relays in the path see only opaque ciphertext.
+- The signaling layer (used to discover peers and exchange ICE candidates) carries no user data — only short connection-setup metadata.
+
+**Network path**
+
+WebRTC tries, in order:
+
+1. **Direct LAN** — preferred whenever both peers are on the same network. Most desktop-to-desktop sync goes here.
+2. **Direct via STUN** — public-IP-to-public-IP across NAT. STUN servers only return your IP, they don't relay traffic.
+3. **TURN relay** — fallback when direct paths fail (e.g. iOS Safari ↔ Chromium peers, where Chromium uses mDNS host candidates that WebKit cannot resolve reliably).
+
+The current `rtcConfig` uses Google's public STUN and the [Open Relay](https://www.metered.ca/tools/openrelay/) public TURN as fallback.
+
 
 ## Roadmap
 
