@@ -72,7 +72,25 @@ export function useSync() {
       isSyncing.value      = false
     }
 
-    const room = joinRoom({ appId: 'tunasse' }, passphrase)
+    const room = joinRoom(
+      {
+        appId: 'tunasse',
+        rtcConfig: {
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            {
+              urls: [
+                'turn:openrelay.metered.ca:80',
+                'turn:openrelay.metered.ca:443',
+              ],
+              username: 'openrelayproject',
+              credential: 'openrelayproject',
+            },
+          ],
+        },
+      },
+      passphrase,
+    )
     const [sendMsg,   receiveMsg]   = room.makeAction<SyncMessage>('sync-data')
     const [sendAck,   receiveAck]   = room.makeAction<MergeResult>('sync-ack')
     const [sendHello, receiveHello] = room.makeAction<HelloMessage>('device-hello')
