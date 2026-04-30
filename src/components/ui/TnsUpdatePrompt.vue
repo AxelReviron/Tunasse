@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { useRegisterSW } from 'virtual:pwa-register/vue'
+import { usePwa } from '@/composables/usePwa'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
-const { needRefresh, updateServiceWorker } = useRegisterSW()
-</script>
+
+const { needRefresh, updateServiceWorker } = usePwa()</script>
 
 <template>
   <Transition name="slide-up">

@@ -1,21 +1,25 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
+import {ref, onMounted, onUnmounted, computed} from 'vue'
+import {useI18n} from 'vue-i18n'
+import {usePwa} from "@/composables/usePwa";
 
 const deferredPrompt = ref<any>(null)
-const dismissed      = ref(false)
+const dismissed = ref(false)
+const {needRefresh} = usePwa()
 
 // Détection iOS
 const isIos = computed(() =>
-  /iphone|ipad|ipod/i.test(navigator.userAgent) && !(window as any).MSStream
+    /iphone|ipad|ipod/i.test(navigator.userAgent) && !(window as any).MSStream
 )
 const isInStandaloneMode = computed(() =>
-  ('standalone' in window.navigator) && (window.navigator as any).standalone
+    ('standalone' in window.navigator) && (window.navigator as any).standalone
 )
 
 const show = computed(() =>
-  !dismissed.value && !isInStandaloneMode.value &&
-  (deferredPrompt.value !== null || isIos.value)
+    !dismissed.value
+    && !isInStandaloneMode.value
+    && !needRefresh.value
+    && (deferredPrompt.value !== null || isIos.value)
 )
 
 function onBeforeInstallPrompt(e: Event) {
@@ -26,12 +30,12 @@ function onBeforeInstallPrompt(e: Event) {
 async function install() {
   if (!deferredPrompt.value) return
   deferredPrompt.value.prompt()
-  const { outcome } = await deferredPrompt.value.userChoice
+  const {outcome} = await deferredPrompt.value.userChoice
   if (outcome === 'accepted') dismissed.value = true
   deferredPrompt.value = null
 }
 
-const { t } = useI18n()
+const {t} = useI18n()
 
 onMounted(() => window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt))
 onUnmounted(() => window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt))
@@ -138,6 +142,7 @@ onUnmounted(() => window.removeEventListener('beforeinstallprompt', onBeforeInst
 .slide-up-leave-active {
   transition: transform 0.25s ease, opacity 0.25s ease;
 }
+
 .slide-up-enter-from,
 .slide-up-leave-to {
   transform: translateX(-50%) translateY(20px);
