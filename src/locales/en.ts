@@ -139,7 +139,23 @@ export default {
       syncing: 'Syncing…',
       success: 'Synced successfully',
       error: 'Error: {msg}',
-    }
+    },
+    advanced: {
+      title: 'Advanced',
+      turn: {
+        title: 'TURN Server',
+        description: 'On some devices or network configurations, a direct connection between two devices may fail. A TURN server acts as an encrypted relay to guarantee the connection.',
+        link: 'How to set up your own TURN server →',
+        noServer: 'No server configured',
+        host: 'Host',
+        port: 'Port',
+        username: 'Username',
+        password: 'Password',
+        save: 'Save',
+        saved: '✓ Saved',
+        reset: 'Reset',
+      },
+    },
   },
 
   pwa: {

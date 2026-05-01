@@ -139,7 +139,23 @@ export default {
       syncing: 'Synchronisation…',
       success: 'Synchronisé avec succès',
       error: 'Erreur : {msg}',
-    }
+    },
+    advanced: {
+      title: 'Avancé',
+      turn: {
+        title: 'Serveur TURN',
+        description: 'Sur certains appareils ou configurations réseau, la connexion directe entre deux appareils peut échouer. Un serveur TURN sert de relai chiffré pour garantir la connexion.',
+        link: 'Comment configurer votre propre serveur TURN →',
+        noServer: 'Aucun serveur configuré',
+        host: 'Hôte',
+        port: 'Port',
+        username: 'Identifiant',
+        password: 'Mot de passe',
+        save: 'Enregistrer',
+        saved: '✓ Enregistré',
+        reset: 'Réinitialiser',
+      },
+    },
   },
 
   pwa: {

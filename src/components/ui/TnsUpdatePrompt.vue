@@ -4,7 +4,8 @@ import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
-const { needRefresh, updateServiceWorker } = usePwa()</script>
+const { needRefresh, updateServiceWorker } = usePwa()
+</script>
 
 <template>
   <Transition name="slide-up">

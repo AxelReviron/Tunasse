@@ -1,4 +1,7 @@
-<h1 align="center">Tunasse</h1>
+<h1 align="center">
+  <img src="public/tunasse-logo.svg" alt="" height="42" align="absmiddle">
+  Tunasse
+</h1>
 
 <p align="center">
   <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue.js-3-4FC08D?style=flat-square&logo=vue.js&logoColor=white" alt="Vue.js"></a>
@@ -12,7 +15,7 @@
 
 Tunasse stores everything locally on your device using IndexedDB. There is no account, no analytics, and no cloud where your data is held. Your financial data is yours — it lives on your devices.
 
-Optional **device sync** is peer-to-peer over WebRTC, end-to-end encrypted by DTLS/SRTP. Peers find each other through a shared passphrase you control. No server ever stores or sees your data in the clear. See [Device sync](#device-sync) for the trade-offs.
+Optional **device sync** lets you keep your devices in sync over a direct peer-to-peer connection. Data is encrypted end-to-end by DTLS; no server ever sees it in the clear.
 
 
 ## Features
@@ -45,11 +48,13 @@ Optional **device sync** is peer-to-peer over WebRTC, end-to-end encrypted by DT
 docker build -t tunasse-dev .
 docker run --rm --name tunasse -p 8100:8100 -v $(pwd):/app -v /app/node_modules tunasse-dev
 ```
-### Execute commands inside the container
+
+Run a command inside the container:
+
 ```bash
 docker exec -it tunasse sh
-
 ```
+
 Build for production:
 
 ```bash
@@ -58,26 +63,60 @@ npm run build
 
 ## Device sync
 
-Sync between your own devices is peer-to-peer over WebRTC, built on [Trystero](https://github.com/dmotz/trystero). Peers that share the same passphrase join the same room and exchange data directly.
+Sync between your own devices is peer-to-peer over WebRTC, built on [Trystero](https://github.com/dmotz/trystero). Peers that share the same passphrase join the same room and exchange data encrypted end-to-end by DTLS. No server ever receives or stores your data.
 
-**What stays private**
-
-- All payload data is encrypted end-to-end by the browser's WebRTC stack (DTLS for the data channel, SRTP for any media). Relays in the path see only opaque ciphertext.
-- The signaling layer (used to discover peers and exchange ICE candidates) carries no user data — only short connection-setup metadata.
+The signaling layer (used to exchange ICE candidates and establish the connection) carries no user data — only short connection-setup metadata.
 
 **Network path**
 
 WebRTC tries, in order:
 
-1. **Direct LAN** — preferred whenever both peers are on the same network. Most desktop-to-desktop sync goes here.
-2. **Direct via STUN** — public-IP-to-public-IP across NAT. STUN servers only return your IP, they don't relay traffic.
-3. **TURN relay** — fallback when direct paths fail (e.g. iOS Safari ↔ Chromium peers, where Chromium uses mDNS host candidates that WebKit cannot resolve reliably).
+1. **Direct LAN** — preferred whenever both peers are on the same network. Desktop-to-desktop sync on the same Wi-Fi goes here, with no third-party server involved.
+2. **TURN relay** — fallback when a direct path fails (e.g. iOS Safari ↔ Chromium peers)
 
-The current `rtcConfig` uses Google's public STUN and the [Open Relay](https://www.metered.ca/tools/openrelay/) public TURN as fallback.
+No third-party STUN or TURN server is ever used. If you need a TURN relay (typically for iOS ↔ desktop sync), you run your own — see [Self-hosting a TURN server](#self-hosting-a-turn-server) below.
+
+## Self-hosting a TURN server
+
+A TURN server is only needed when direct peer-to-peer connections fail. The `coturn/` directory contains a ready-to-use [coturn](https://github.com/coturn/coturn) Docker setup.
+
+**Requirements:** Docker, Docker Compose, and a machine reachable by both devices (local network or VPS).
+
+```bash
+cd coturn
+cp turnserver.conf.example turnserver.conf
+```
+
+Edit `turnserver.conf` and replace `YOUR_USERNAME` and `YOUR_PASSWORD` with credentials of your choice:
+
+```
+user=alice:supersecret
+```
+
+Then start the server:
+
+```bash
+docker compose up -d
+```
+
+The server listens on port `3478` (TCP + UDP). Make sure that port is reachable from your devices (open it in your firewall if needed).
+
+**Connecting the app**
+
+Open Tunasse → Settings → Advanced → TURN server and fill in:
+
+| Field      | Value                                        |
+|------------|----------------------------------------------|
+| Host       | IP or hostname of the machine running coturn |
+| Port       | `3478`                                       |
+| Username   | the value you set in `turnserver.conf`       |
+| Password   | the value you set in `turnserver.conf`       |
+
+Hit **Save** — the app will test connectivity and show a green indicator if the server is reachable.
 
 
 ## Roadmap
 
+- [x] PWA icons
 - [ ] Settings page — Import/Export, full data reset
-- [ ] PWA icons & splash screen
 - [ ] Onboarding

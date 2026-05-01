@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { IonContent, IonIcon, IonPage, IonSpinner } from '@ionic/vue'
 import {
   syncOutline, phonePortraitOutline,
   checkmarkCircleOutline, alertCircleOutline,
+  constructOutline,
 } from 'ionicons/icons'
+import type { TurnConfig } from '@/composables/useSync'
 import { useI18n } from 'vue-i18n'
 import TnsLargeTitle from '@/components/ui/TnsLargeTitle.vue'
 import TnsList from '@/components/ui/TnsList.vue'
@@ -16,7 +18,10 @@ const {
   peers, connectedPeers, isSyncing, syncError, syncSuccess,
   canSync,
   sync, setDeviceName, joinRemote,
+  turnConfig, turnStatus, saveTurnConfig, checkTurn,
 } = useSync()
+
+onMounted(() => { if (turnConfig.value) checkTurn() })
 
 const hasPeers          = computed(() => peers.value.length > 0)
 const deviceNameMissing = computed(() => hasPeers.value && deviceName.value.trim() === '')
@@ -46,6 +51,33 @@ function handleConnect() {
   if (!val) return
   joinRemote(val)
   remoteInput.value = ''
+}
+
+// ── TURN config ───────────────────────────────────────────────────────────────
+const turnHost       = ref(turnConfig.value?.host ?? '')
+const turnPort       = ref<number>(turnConfig.value?.port ?? 3478)
+const turnUsername   = ref(turnConfig.value?.username ?? '')
+const turnCredential = ref(turnConfig.value?.credential ?? '')
+const turnSaved      = ref(false)
+
+function saveTurn() {
+  const cfg: TurnConfig = {
+    host:       turnHost.value.trim(),
+    port:       turnPort.value || 3478,
+    username:   turnUsername.value.trim(),
+    credential: turnCredential.value,
+  }
+  saveTurnConfig(cfg)
+  turnSaved.value = true
+  setTimeout(() => { turnSaved.value = false }, 2000)
+}
+
+function resetTurn() {
+  saveTurnConfig(null)
+  turnHost.value       = ''
+  turnPort.value       = 3478
+  turnUsername.value   = ''
+  turnCredential.value = ''
 }
 </script>
 
@@ -159,6 +191,97 @@ function handleConnect() {
           <ion-icon :icon="alertCircleOutline" />
           {{ t('settings.sync.error', { msg: syncError }) }}
         </div>
+
+        <!-- ── Section avancé ───────────────────────────────── -->
+        <div class="tns-list-hdr adv-hdr">
+          <div class="tns-section-header-row">
+            <ion-icon :icon="constructOutline" />
+            <span class="tns-list-hdr-title">{{ t('settings.advanced.title') }}</span>
+          </div>
+        </div>
+
+        <TnsList>
+          <div class="srow srow-block">
+            <p class="block-label">{{ t('settings.advanced.turn.title') }}</p>
+            <p class="turn-desc">{{ t('settings.advanced.turn.description') }}</p>
+            <a
+              class="turn-link"
+              href="https://github.com/AxelReviron/Tunasse/tree/main/coturn"
+              target="_blank"
+              rel="noopener"
+            >
+              {{ t('settings.advanced.turn.link') }}
+            </a>
+            <div class="turn-status">
+              <span class="turn-status-dot" :class="turnConfig ? turnStatus : 'idle'" />
+              <span class="turn-status-text">
+                {{ turnConfig ? `${turnConfig.host}:${turnConfig.port || 3478}` : t('settings.advanced.turn.noServer') }}
+              </span>
+              <button v-if="turnConfig" class="btn-retest" :disabled="turnStatus === 'testing'" @click="checkTurn">
+                <ion-spinner v-if="turnStatus === 'testing'" name="crescent" class="retest-spinner" />
+                <span v-else>↻</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="srow srow-block">
+            <p class="block-label">{{ t('settings.advanced.turn.host') }}</p>
+            <input
+              v-model="turnHost"
+              class="device-input"
+              placeholder="192.168.1.100"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="none"
+              spellcheck="false"
+            />
+          </div>
+
+          <div class="srow srow-block">
+            <p class="block-label">{{ t('settings.advanced.turn.port') }}</p>
+            <input
+              v-model.number="turnPort"
+              class="device-input"
+              type="number"
+              placeholder="3478"
+            />
+          </div>
+
+          <div class="srow srow-block">
+            <p class="block-label">{{ t('settings.advanced.turn.username') }}</p>
+            <input
+              v-model="turnUsername"
+              class="device-input"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="none"
+              spellcheck="false"
+            />
+          </div>
+
+          <div class="srow srow-block">
+            <p class="block-label">{{ t('settings.advanced.turn.password') }}</p>
+            <input
+              v-model="turnCredential"
+              class="device-input"
+              type="password"
+              autocomplete="new-password"
+            />
+          </div>
+
+          <div class="srow srow-turn-actions">
+            <button class="btn-reset" :disabled="!turnConfig" @click="resetTurn">
+              {{ t('settings.advanced.turn.reset') }}
+            </button>
+            <button
+              class="btn-action"
+              :disabled="!turnHost.trim() || !turnUsername.trim() || !turnCredential"
+              @click="saveTurn"
+            >
+              {{ turnSaved ? t('settings.advanced.turn.saved') : t('settings.advanced.turn.save') }}
+            </button>
+          </div>
+        </TnsList>
 
       </div>
     </ion-content>
@@ -282,10 +405,11 @@ function handleConnect() {
   color: var(--tns-fg);
   letter-spacing: 0.03em;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-x: auto;
   white-space: nowrap;
+  scrollbar-width: none;
 }
+.mono-box::-webkit-scrollbar { display: none; }
 
 .mono-input {
   flex: 1;
@@ -407,4 +531,86 @@ function handleConnect() {
 }
 .feedback.success { background: rgb(34 197 94 / 0.1); color: var(--tns-green); }
 .feedback.error   { background: rgb(244 63 94 / 0.1); color: var(--tns-red); }
+
+/* ── Avancé ───────────────────────────────────────────── */
+.adv-hdr { margin-top: 28px; }
+
+.turn-desc {
+  font-size: 13px;
+  color: var(--tns-fg2);
+  line-height: 1.55;
+  margin: 0;
+  font-family: var(--tns-font);
+}
+
+.turn-link {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--tns-accent);
+  text-decoration: none;
+  margin-top: 6px;
+  font-family: var(--tns-font);
+}
+
+.turn-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.turn-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+.turn-status-dot.idle    { background: var(--tns-fg3); }
+.turn-status-dot.testing { background: #f59e0b; animation: blink 1s ease-in-out infinite; }
+.turn-status-dot.ok      { background: var(--tns-green); }
+.turn-status-dot.fail    { background: var(--tns-red); }
+
+.btn-retest {
+  background: none;
+  border: none;
+  padding: 0 2px;
+  cursor: pointer;
+  color: var(--tns-fg2);
+  font-size: 15px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+.btn-retest:disabled { opacity: 0.4; cursor: not-allowed; }
+.retest-spinner { width: 13px; height: 13px; --color: var(--tns-fg2); }
+
+.turn-status-text {
+  font-size: 13px;
+  font-family: monospace;
+  color: var(--tns-fg2);
+}
+
+.srow-turn-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--tns-card);
+}
+
+.btn-reset {
+  background: none;
+  border: 0.5px solid var(--tns-sep);
+  border-radius: var(--tns-radius-lg);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tns-fg2);
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  font-family: var(--tns-font);
+}
+.btn-reset:disabled { opacity: 0.35; cursor: not-allowed; }
 </style>

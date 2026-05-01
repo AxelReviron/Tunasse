@@ -34,11 +34,10 @@ const selectedTx     = ref<Transaction | undefined>(undefined);
 
 async function showNoAccountToast() {
   const toast = await toastController.create({
-    message:        t('transactions.noAccount'),
-    duration:       3000,
-    position:       'bottom',
-    positionAnchor: 'tns-tab-bar',
-    cssClass:       'tns-toast',
+    message:   t('transactions.noAccount'),
+    duration:  3000,
+    position:  'bottom',
+    cssClass:  'tns-toast',
   })
   await toast.present()
 }
@@ -161,6 +160,13 @@ function iconFor(tx: { type: string; icon?: string; is_recurring?: boolean; tran
   --color: #fff;
   --border-radius: var(--tns-radius-lg);
   --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  .tns-toast {
+    --bottom: env(safe-area-inset-bottom, 0px);
+  }
 }
 </style>
 

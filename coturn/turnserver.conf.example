@@ -1,0 +1,15 @@
+# Coturn configuration for Tunasse
+# Copy this file to turnserver.conf and fill in your credentials.
+# Full reference: https://github.com/coturn/coturn/blob/master/doc/turnserver.conf
+
+realm=tunasse
+user=YOUR_USERNAME:YOUR_PASSWORD
+lt-cred-mech
+
+no-tls
+no-multicast-peers
+cli-disable
+
+min-port=49160
+max-port=49200
+log-file=stdout

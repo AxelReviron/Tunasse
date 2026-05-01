@@ -6,10 +6,12 @@ import { BIP39_WORDLIST } from '@/constants/wordlist'
 const PASSPHRASE_KEY    = 'tunasse_passphrase'
 const DEVICE_NAME_KEY   = 'tunasse_device_name'
 const KNOWN_DEVICES_KEY = 'tunasse_known_devices'
+const TURN_CONFIG_KEY   = 'tunasse_turn_config'
 const MAX_KNOWN_DEVICES = 10
 
 export type KnownDevice = { passphrase: string; name: string; lastSeen: string }
 export type PeerInfo    = { name: string; passphrase: string }
+export type TurnConfig  = { host: string; port: number; username: string; credential: string }
 
 type SyncMessage  = { kind: 'push' | 'pull'; dump: SyncDump }
 type HelloMessage = { name: string; passphrase: string }
@@ -41,6 +43,18 @@ function persistKnownDevices(devices: KnownDevice[]) {
   localStorage.setItem(KNOWN_DEVICES_KEY, JSON.stringify(devices))
 }
 
+function loadTurnConfig(): TurnConfig | null {
+  try { return JSON.parse(localStorage.getItem(TURN_CONFIG_KEY) ?? 'null') } catch { return null }
+}
+
+function buildIceServers(cfg: TurnConfig | null): RTCIceServer[] {
+  if (!cfg?.host || !cfg.username || !cfg.credential) return []
+  return [
+    { urls: `stun:${cfg.host}:${cfg.port || 3478}` },
+    { urls: `turn:${cfg.host}:${cfg.port || 3478}`, username: cfg.username, credential: cfg.credential },
+  ]
+}
+
 // ── Composable ────────────────────────────────────────────────────────────────
 
 export function useSync() {
@@ -53,6 +67,33 @@ export function useSync() {
   const syncError        = ref<string | null>(null)
   const syncSuccess      = ref(false)
   const knownDevices     = ref<KnownDevice[]>(loadKnownDevices())
+  const turnConfig  = ref<TurnConfig | null>(loadTurnConfig())
+  const turnStatus  = ref<'idle' | 'testing' | 'ok' | 'fail'>('idle')
+
+  async function checkTurn() {
+    const cfg = turnConfig.value
+    if (!cfg) { turnStatus.value = 'idle'; return }
+    turnStatus.value = 'testing'
+    const ok = await new Promise<boolean>(resolve => {
+      const pc = new RTCPeerConnection({ iceServers: buildIceServers(cfg) })
+      let done = false
+      const finish = (result: boolean) => {
+        if (done) return
+        done = true
+        clearTimeout(timer)
+        pc.close()
+        resolve(result)
+      }
+      const timer = setTimeout(() => finish(false), 5000)
+      pc.addEventListener('icecandidate', e => {
+        if (e.candidate?.type === 'relay') finish(true)
+        else if (e.candidate === null) finish(false)
+      })
+      pc.createDataChannel('_t')
+      pc.createOffer().then(o => pc.setLocalDescription(o)).catch(() => finish(false))
+    })
+    turnStatus.value = ok ? 'ok' : 'fail'
+  }
 
   const canSync = () =>
     deviceName.value.trim() !== '' && peers.value.length > 0 && !isSyncing.value
@@ -75,19 +116,7 @@ export function useSync() {
     const room = joinRoom(
       {
         appId: 'tunasse',
-        rtcConfig: {
-          iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            {
-              urls: [
-                'turn:openrelay.metered.ca:80',
-                'turn:openrelay.metered.ca:443',
-              ],
-              username: 'openrelayproject',
-              credential: 'openrelayproject',
-            },
-          ],
-        },
+        rtcConfig: { iceServers: buildIceServers(turnConfig.value) },
       },
       passphrase,
     )
@@ -194,6 +223,14 @@ export function useSync() {
     setupRoom(p)
   }
 
+  function saveTurnConfig(cfg: TurnConfig | null) {
+    turnConfig.value = cfg
+    if (cfg) localStorage.setItem(TURN_CONFIG_KEY, JSON.stringify(cfg))
+    else localStorage.removeItem(TURN_CONFIG_KEY)
+    setupRoom(activePassphrase.value)
+    checkTurn()
+  }
+
   function disconnect() {
     activePassphrase.value = ownPassphrase.value
     setupRoom(ownPassphrase.value)
@@ -233,5 +270,6 @@ export function useSync() {
     peers, connectedPeers, isSyncing, syncError, syncSuccess,
     knownDevices, canSync,
     sync, setDeviceName, joinRemote, disconnect, renameDevice, forgetDevice,
+    turnConfig, turnStatus, saveTurnConfig, checkTurn,
   }
 }
