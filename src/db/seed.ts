@@ -12,6 +12,12 @@ export async function seed() {
   const account1Id = crypto.randomUUID()
   const account2Id = crypto.randomUUID()
 
+  function dateInCurrentMonth(day: number) {
+    const date = new Date()
+    date.setDate(day)
+    return date.toISOString().slice(0, 10)
+  }
+
   await Promise.all([
     db.accounts.add({
       id:        account1Id,
@@ -48,13 +54,13 @@ export async function seed() {
   ])
 
   await Promise.all([
-    db.transactions.add({ id: crypto.randomUUID(), label: 'Carrefour',      amount: 5430,   type: 'expense', date: '2026-04-23', account_id: account1Id, budget_id: budget1Id, category: 'Courses',   createdAt: now, updatedAt: now }),
-    db.transactions.add({ id: crypto.randomUUID(), label: 'Salaire avril',  amount: 280000, type: 'income',  date: '2026-04-23', account_id: account1Id,                                               createdAt: now, updatedAt: now }),
-    db.transactions.add({ id: crypto.randomUUID(), label: 'Sushi Shop',     amount: 3200,   type: 'expense', date: '2026-04-22', account_id: account1Id, budget_id: budget2Id, category: 'Restaurant', createdAt: now, updatedAt: now }),
-    db.transactions.add({ id: crypto.randomUUID(), label: 'Loyer',          amount: 90000,  type: 'expense', date: '2026-04-22', account_id: account1Id, budget_id: budget3Id, category: 'Logement',   createdAt: now, updatedAt: now, is_recurring: true, recurring_interval: 1, recurring_unit: 'month' }),
-    db.transactions.add({ id: crypto.randomUUID(), label: 'Lidl',           amount: 3810,   type: 'expense', date: '2026-04-21', account_id: account1Id, budget_id: budget1Id, category: 'Courses',   createdAt: now, updatedAt: now }),
-    db.transactions.add({ id: crypto.randomUUID(), label: 'Navigo mensuel', amount: 8640,   type: 'expense', date: '2026-04-20', account_id: account1Id, budget_id: budget4Id, category: 'Transport',  createdAt: now, updatedAt: now, is_recurring: true, recurring_interval: 1, recurring_unit: 'month' }),
-    db.transactions.add({ id: crypto.randomUUID(), label: 'Virement épargne', amount: 20000, type: 'expense', date: '2026-04-20', account_id: account1Id,                                              createdAt: now, updatedAt: now }),
+    db.transactions.add({ id: crypto.randomUUID(), label: 'Carrefour',      amount: 5430,   type: 'expense', date: dateInCurrentMonth(23), account_id: account1Id, budget_id: budget1Id, category: 'Courses',   createdAt: now, updatedAt: now }),
+    db.transactions.add({ id: crypto.randomUUID(), label: 'Salaire avril',  amount: 280000, type: 'income',  date: dateInCurrentMonth(23), account_id: account1Id,                                               createdAt: now, updatedAt: now }),
+    db.transactions.add({ id: crypto.randomUUID(), label: 'Sushi Shop',     amount: 3200,   type: 'expense', date: dateInCurrentMonth(22), account_id: account1Id, budget_id: budget2Id, category: 'Restaurant', createdAt: now, updatedAt: now }),
+    db.transactions.add({ id: crypto.randomUUID(), label: 'Loyer',          amount: 90000,  type: 'expense', date: dateInCurrentMonth(22), account_id: account1Id, budget_id: budget3Id, category: 'Logement',   createdAt: now, updatedAt: now, is_recurring: true, recurring_interval: 1, recurring_unit: 'month' }),
+    db.transactions.add({ id: crypto.randomUUID(), label: 'Lidl',           amount: 3810,   type: 'expense', date: dateInCurrentMonth(21), account_id: account1Id, budget_id: budget1Id, category: 'Courses',   createdAt: now, updatedAt: now }),
+    db.transactions.add({ id: crypto.randomUUID(), label: 'Navigo mensuel', amount: 8640,   type: 'expense', date: dateInCurrentMonth(20), account_id: account1Id, budget_id: budget4Id, category: 'Transport',  createdAt: now, updatedAt: now, is_recurring: true, recurring_interval: 1, recurring_unit: 'month' }),
+    db.transactions.add({ id: crypto.randomUUID(), label: 'Virement épargne', amount: 20000, type: 'expense', date: dateInCurrentMonth(20), account_id: account1Id,                                              createdAt: now, updatedAt: now }),
   ])
 
   console.log('Db seeded')
