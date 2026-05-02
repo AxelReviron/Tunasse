@@ -167,7 +167,7 @@ export default {
       turn: {
         title: 'TURN Server',
         description: 'On some devices or network configurations, a direct connection between two devices may fail. A TURN server acts as an encrypted relay to guarantee the connection.',
-        link: 'How to set up your own TURN server →',
+        link: 'How to set up your own TURN server ?',
         noServer: 'No server configured',
         host: 'Host',
         port: 'Port',

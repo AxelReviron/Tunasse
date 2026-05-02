@@ -167,7 +167,7 @@ export default {
       turn: {
         title: 'Serveur TURN',
         description: 'Sur certains appareils ou configurations réseau, la connexion directe entre deux appareils peut échouer. Un serveur TURN sert de relai chiffré pour garantir la connexion.',
-        link: 'Comment configurer votre propre serveur TURN →',
+        link: 'Comment configurer votre propre serveur TURN ?',
         noServer: 'Aucun serveur configuré',
         host: 'Hôte',
         port: 'Port',

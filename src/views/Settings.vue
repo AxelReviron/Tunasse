@@ -5,7 +5,7 @@ import TnsPage from '@/components/ui/TnsPage.vue'
 import {
   syncOutline, phonePortraitOutline,
   checkmarkCircleOutline, alertCircleOutline,
-  constructOutline,
+  constructOutline, chevronDownOutline, chevronForwardOutline,
 } from 'ionicons/icons'
 import type { TurnConfig } from '@/composables/useSync'
 import { useI18n } from 'vue-i18n'
@@ -53,6 +53,9 @@ function handleConnect() {
   joinRemote(val)
   remoteInput.value = ''
 }
+
+// ── Advanced collapse ─────────────────────────────────────────────────────────
+const showAdvanced = ref(false)
 
 // ── TURN config ───────────────────────────────────────────────────────────────
 const turnHost       = ref(turnConfig.value?.host ?? '')
@@ -164,6 +167,96 @@ function resetTurn() {
             </div>
           </div>
 
+          <!-- Avancé (collapsible) -->
+          <div class="srow srow-adv-toggle" @click="showAdvanced = !showAdvanced">
+            <ion-icon :icon="constructOutline" class="adv-toggle-icon" />
+            <span class="srow-text adv-toggle-label">{{ t('settings.advanced.title') }}</span>
+            <ion-icon :icon="showAdvanced ? chevronDownOutline : chevronForwardOutline" class="adv-chevron" />
+          </div>
+
+          <template v-if="showAdvanced">
+            <div class="srow srow-block">
+              <p class="block-label">{{ t('settings.advanced.turn.title') }}</p>
+              <p class="turn-desc">{{ t('settings.advanced.turn.description') }}</p>
+              <a
+                class="turn-link"
+                href="https://github.com/AxelReviron/Tunasse#self-hosting-a-turn-server"
+                target="_blank"
+                rel="noopener"
+              >
+                {{ t('settings.advanced.turn.link') }}
+              </a>
+              <div class="turn-status">
+                <span class="turn-status-dot" :class="turnConfig ? turnStatus : 'idle'" />
+                <span class="turn-status-text">
+                  {{ turnConfig ? `${turnConfig.host}:${turnConfig.port || 3478}` : t('settings.advanced.turn.noServer') }}
+                </span>
+                <button v-if="turnConfig" class="btn-retest" :disabled="turnStatus === 'testing'" @click.stop="checkTurn">
+                  <ion-spinner v-if="turnStatus === 'testing'" name="crescent" class="retest-spinner" />
+                  <span v-else>↻</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="srow srow-block">
+              <p class="block-label">{{ t('settings.advanced.turn.host') }}</p>
+              <input
+                v-model="turnHost"
+                class="device-input"
+                placeholder="192.168.1.100"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="none"
+                spellcheck="false"
+              />
+            </div>
+
+            <div class="srow srow-block">
+              <p class="block-label">{{ t('settings.advanced.turn.port') }}</p>
+              <input
+                v-model.number="turnPort"
+                class="device-input"
+                type="number"
+                placeholder="3478"
+              />
+            </div>
+
+            <div class="srow srow-block">
+              <p class="block-label">{{ t('settings.advanced.turn.username') }}</p>
+              <input
+                v-model="turnUsername"
+                class="device-input"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="none"
+                spellcheck="false"
+              />
+            </div>
+
+            <div class="srow srow-block">
+              <p class="block-label">{{ t('settings.advanced.turn.password') }}</p>
+              <input
+                v-model="turnCredential"
+                class="device-input"
+                type="password"
+                autocomplete="new-password"
+              />
+            </div>
+
+            <div class="srow srow-turn-actions">
+              <button class="btn-reset" :disabled="!turnConfig" @click="resetTurn">
+                {{ t('settings.advanced.turn.reset') }}
+              </button>
+              <button
+                class="btn-action"
+                :disabled="!turnHost.trim() || !turnUsername.trim() || !turnCredential"
+                @click="saveTurn"
+              >
+                {{ turnSaved ? t('settings.advanced.turn.saved') : t('settings.advanced.turn.save') }}
+              </button>
+            </div>
+          </template>
+
           <!-- Bouton sync -->
           <div class="srow srow-sync-wrap">
             <p v-if="deviceNameMissing" class="sync-required">
@@ -191,97 +284,6 @@ function resetTurn() {
           <ion-icon :icon="alertCircleOutline" />
           {{ t('settings.sync.error', { msg: syncError }) }}
         </div>
-
-        <!-- ── Section avancé ───────────────────────────────── -->
-        <div class="tns-list-hdr adv-hdr">
-          <div class="tns-section-header-row">
-            <ion-icon :icon="constructOutline" />
-            <span class="tns-list-hdr-title">{{ t('settings.advanced.title') }}</span>
-          </div>
-        </div>
-
-        <TnsList>
-          <div class="srow srow-block">
-            <p class="block-label">{{ t('settings.advanced.turn.title') }}</p>
-            <p class="turn-desc">{{ t('settings.advanced.turn.description') }}</p>
-            <a
-              class="turn-link"
-              href="https://github.com/AxelReviron/Tunasse/tree/main/coturn"
-              target="_blank"
-              rel="noopener"
-            >
-              {{ t('settings.advanced.turn.link') }}
-            </a>
-            <div class="turn-status">
-              <span class="turn-status-dot" :class="turnConfig ? turnStatus : 'idle'" />
-              <span class="turn-status-text">
-                {{ turnConfig ? `${turnConfig.host}:${turnConfig.port || 3478}` : t('settings.advanced.turn.noServer') }}
-              </span>
-              <button v-if="turnConfig" class="btn-retest" :disabled="turnStatus === 'testing'" @click="checkTurn">
-                <ion-spinner v-if="turnStatus === 'testing'" name="crescent" class="retest-spinner" />
-                <span v-else>↻</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="srow srow-block">
-            <p class="block-label">{{ t('settings.advanced.turn.host') }}</p>
-            <input
-              v-model="turnHost"
-              class="device-input"
-              placeholder="192.168.1.100"
-              autocomplete="off"
-              autocorrect="off"
-              autocapitalize="none"
-              spellcheck="false"
-            />
-          </div>
-
-          <div class="srow srow-block">
-            <p class="block-label">{{ t('settings.advanced.turn.port') }}</p>
-            <input
-              v-model.number="turnPort"
-              class="device-input"
-              type="number"
-              placeholder="3478"
-            />
-          </div>
-
-          <div class="srow srow-block">
-            <p class="block-label">{{ t('settings.advanced.turn.username') }}</p>
-            <input
-              v-model="turnUsername"
-              class="device-input"
-              autocomplete="off"
-              autocorrect="off"
-              autocapitalize="none"
-              spellcheck="false"
-            />
-          </div>
-
-          <div class="srow srow-block">
-            <p class="block-label">{{ t('settings.advanced.turn.password') }}</p>
-            <input
-              v-model="turnCredential"
-              class="device-input"
-              type="password"
-              autocomplete="new-password"
-            />
-          </div>
-
-          <div class="srow srow-turn-actions">
-            <button class="btn-reset" :disabled="!turnConfig" @click="resetTurn">
-              {{ t('settings.advanced.turn.reset') }}
-            </button>
-            <button
-              class="btn-action"
-              :disabled="!turnHost.trim() || !turnUsername.trim() || !turnCredential"
-              @click="saveTurn"
-            >
-              {{ turnSaved ? t('settings.advanced.turn.saved') : t('settings.advanced.turn.save') }}
-            </button>
-          </div>
-        </TnsList>
 
       </div>
   </TnsPage>
@@ -531,8 +533,31 @@ function resetTurn() {
 .feedback.success { background: rgb(34 197 94 / 0.1); color: var(--tns-green); }
 .feedback.error   { background: rgb(244 63 94 / 0.1); color: var(--tns-red); }
 
-/* ── Avancé ───────────────────────────────────────────── */
-.adv-hdr { margin-top: 28px; }
+/* ── Avancé (toggle) ──────────────────────────────────── */
+.srow-adv-toggle {
+  cursor: pointer;
+  user-select: none;
+}
+.srow-adv-toggle:active { background: var(--tns-bg); }
+
+.adv-toggle-icon {
+  font-size: 16px;
+  color: var(--tns-fg2);
+  flex-shrink: 0;
+}
+
+.adv-toggle-label {
+  flex: 1;
+  font-size: 15px;
+  color: var(--tns-fg2);
+}
+
+.adv-chevron {
+  font-size: 14px;
+  color: var(--tns-fg3);
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
 
 .turn-desc {
   font-size: 13px;
