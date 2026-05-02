@@ -3,7 +3,16 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
-import {home, reader, pieChart, cardOutline, settingsOutline} from 'ionicons/icons';
+import {
+  home,
+  reader,
+  pieChart,
+  cardOutline,
+  settingsOutline,
+  homeOutline,
+  readerOutline,
+  pieChartOutline
+} from 'ionicons/icons';
 import logo from '@/assets/images/tunasse-logo.svg'
 
 const { t } = useI18n();
@@ -11,9 +20,9 @@ const route  = useRoute();
 const router = useRouter();
 
 const navItems = computed(() => [
-  { route: '/tabs/dashboard',    label: t('nav.dashboard'),    icon: home },
-  { route: '/tabs/transactions', label: t('nav.transactions'), icon: reader },
-  { route: '/tabs/budget',       label: t('nav.budgets'),      icon: pieChart },
+  { route: '/tabs/dashboard',    label: t('nav.dashboard'),    icon: homeOutline },
+  { route: '/tabs/transactions', label: t('nav.transactions'), icon: readerOutline },
+  { route: '/tabs/budget',       label: t('nav.budgets'),      icon: pieChartOutline },
   { route: '/tabs/account',      label: t('nav.accounts'),     icon: cardOutline },
   { route: '/tabs/settings',     label: t('nav.settings'),     icon: settingsOutline },
 ]);
@@ -52,15 +61,15 @@ function isActive(path: string) {
           <ion-router-outlet />
           <ion-tab-bar id="tns-tab-bar" slot="bottom" class="tns-tab-bar">
             <ion-tab-button tab="dashboard" href="/tabs/dashboard">
-              <ion-icon aria-hidden="true" :icon="home" />
+              <ion-icon aria-hidden="true" :icon="homeOutline" />
               <ion-label>{{ t('nav.dashboard') }}</ion-label>
             </ion-tab-button>
             <ion-tab-button tab="transactions" href="/tabs/transactions">
-              <ion-icon aria-hidden="true" :icon="reader" />
+              <ion-icon aria-hidden="true" :icon="readerOutline" />
               <ion-label>{{ t('nav.transactions') }}</ion-label>
             </ion-tab-button>
             <ion-tab-button tab="budget" href="/tabs/budget">
-              <ion-icon aria-hidden="true" :icon="pieChart" />
+              <ion-icon aria-hidden="true" :icon="pieChartOutline" />
               <ion-label>{{ t('nav.budgets') }}</ion-label>
             </ion-tab-button>
             <ion-tab-button tab="account" href="/tabs/account">
