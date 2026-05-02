@@ -192,5 +192,8 @@ export default {
       ios: 'Tap ⎙ Share then "Add to Home Screen".',
       install: 'Install',
     },
-  }
+  },
+  footer: {
+    sourceCode: 'Source code',
+  },
 }

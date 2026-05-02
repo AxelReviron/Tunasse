@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { IonPage, IonContent, IonIcon } from '@ionic/vue';
+import { IonIcon } from '@ionic/vue';
+import TnsPage from '@/components/ui/TnsPage.vue';
 import { addOutline } from 'ionicons/icons';
 
 import TnsLargeTitle    from '@/components/ui/TnsLargeTitle.vue';
@@ -41,9 +42,8 @@ function iconFor(budget: Budget) {
 </script>
 
 <template>
-  <ion-page>
-    <ion-content :fullscreen="true" :style="{ '--background': 'var(--tns-bg)' }">
-      <div class="tns-page">
+  <TnsPage>
+    <div class="tns-page">
 
         <TnsLargeTitle :title="t('budgets.title')" />
 
@@ -97,15 +97,15 @@ function iconFor(budget: Budget) {
         <ion-icon :icon="addOutline" />
       </button>
 
-    </ion-content>
-
-    <TnsBudgetSheet
-      v-model="showSheet"
-      :budget="selectedBudget"
-      @saved="onSheetClose"
-      @deleted="onSheetClose"
-    />
-  </ion-page>
+    <template #modals>
+      <TnsBudgetSheet
+        v-model="showSheet"
+        :budget="selectedBudget"
+        @saved="onSheetClose"
+        @deleted="onSheetClose"
+      />
+    </template>
+  </TnsPage>
 </template>
 
 <style scoped>

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { IonPage, IonContent, IonIcon, toastController } from '@ionic/vue';
+import { IonIcon, toastController } from '@ionic/vue';
+import TnsPage from '@/components/ui/TnsPage.vue';
 import {
   cartOutline, arrowDownOutline,
   repeatOutline, addOutline, funnelOutline, swapHorizontalOutline,
@@ -81,78 +82,75 @@ function iconFor(tx: { type: string; icon?: string; is_recurring?: boolean; tran
 </script>
 
 <template>
-  <ion-page>
-    <ion-content :fullscreen="true" :style="{ '--background': 'var(--tns-bg)' }">
-      <div class="tns-page">
+  <TnsPage>
+    <div class="tns-page">
 
-        <TnsLargeTitle :title="t('transactions.title')" />
+      <TnsLargeTitle :title="t('transactions.title')" />
 
-        <div class="tns-filters">
-          <div class="tns-search">
-            <span class="tns-search-icon">⌕</span>
-            <input
-              v-model="query"
-              type="search"
-              :placeholder="t('transactions.search')"
-              class="tns-search-input"
-            />
-            <button class="tns-filter-btn" :class="{ active: activeFilterCount > 0 }" @click="showFilters = true">
-              <ion-icon :icon="funnelOutline" />
-              <span class="tns-filter-btn-label">{{ t('common.filters') }}</span>
-              <span v-if="activeFilterCount" class="tns-filter-badge">{{ activeFilterCount }}</span>
-            </button>
-          </div>
+      <div class="tns-filters">
+        <div class="tns-search">
+          <span class="tns-search-icon">⌕</span>
+          <input
+            v-model="query"
+            type="search"
+            :placeholder="t('transactions.search')"
+            class="tns-search-input"
+          />
+          <button class="tns-filter-btn" :class="{ active: activeFilterCount > 0 }" @click="showFilters = true">
+            <ion-icon :icon="funnelOutline" />
+            <span class="tns-filter-btn-label">{{ t('common.filters') }}</span>
+            <span v-if="activeFilterCount" class="tns-filter-badge">{{ activeFilterCount }}</span>
+          </button>
         </div>
-
-        <template v-if="Object.keys(grouped).length">
-          <template v-for="(txs, day) in grouped" :key="day">
-            <TnsSectionHeader :label="day" />
-            <TnsList>
-              <TnsTransactionRow
-                v-for="tx in txs"
-                :key="tx.id"
-                :transaction="tx"
-                :currency="accountOf(tx.account_id)?.currency || 'EUR'"
-                :icon-color="tx.transfer_peer_id !== undefined ? 'var(--tns-accent)' : tx.color || budgetOf(tx.budget_id)?.color || '#6B7280'"
-                :account-label="accountOf(tx.account_id)?.label || ''"
-                :to-account-label="tx.to_account_id ? accountOf(tx.to_account_id)?.label || '' : ''"
-                :show-date="false"
-                :future="tx.date > today"
-                @click="openEdit(tx)"
-              >
-                <template #icon>
-                  <ion-icon :icon="iconFor(tx)" />
-                </template>
-              </TnsTransactionRow>
-            </TnsList>
-          </template>
-        </template>
-
-        <div v-else class="tns-empty">{{ t('transactions.empty') }}</div>
-
       </div>
 
-      <button class="tns-fab" @click="openCreate">
-        <ion-icon :icon="addOutline" />
-      </button>
+      <template v-if="Object.keys(grouped).length">
+        <template v-for="(txs, day) in grouped" :key="day">
+          <TnsSectionHeader :label="day" />
+          <TnsList>
+            <TnsTransactionRow
+              v-for="tx in txs"
+              :key="tx.id"
+              :transaction="tx"
+              :currency="accountOf(tx.account_id)?.currency || 'EUR'"
+              :icon-color="tx.transfer_peer_id !== undefined ? 'var(--tns-accent)' : tx.color || budgetOf(tx.budget_id)?.color || '#6B7280'"
+              :account-label="accountOf(tx.account_id)?.label || ''"
+              :to-account-label="tx.to_account_id ? accountOf(tx.to_account_id)?.label || '' : ''"
+              :show-date="false"
+              :future="tx.date > today"
+              @click="openEdit(tx)"
+            >
+              <template #icon>
+                <ion-icon :icon="iconFor(tx)" />
+              </template>
+            </TnsTransactionRow>
+          </TnsList>
+        </template>
+      </template>
 
-    </ion-content>
+      <div v-else class="tns-empty">{{ t('transactions.empty') }}</div>
 
-    <TnsTransactionSheet
-      v-model="showSheet"
-      :transaction="selectedTx"
-      @saved="onSheetClose"
-      @deleted="onSheetClose"
-    />
+    </div>
 
+    <button class="tns-fab" @click="openCreate">
+      <ion-icon :icon="addOutline" />
+    </button>
 
-<TnsFiltersSheet
-      v-model="showFilters"
-      v-model:filter="filter"
-      v-model:date-range="dateRange"
-      @reset="resetFilters"
-    />
-  </ion-page>
+    <template #modals>
+      <TnsTransactionSheet
+        v-model="showSheet"
+        :transaction="selectedTx"
+        @saved="onSheetClose"
+        @deleted="onSheetClose"
+      />
+      <TnsFiltersSheet
+        v-model="showFilters"
+        v-model:filter="filter"
+        v-model:date-range="dateRange"
+        @reset="resetFilters"
+      />
+    </template>
+  </TnsPage>
 </template>
 
 <style>

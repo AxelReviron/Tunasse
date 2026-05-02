@@ -192,5 +192,8 @@ export default {
       ios: 'Appuyez sur ⎙ Partager puis « Sur l\'écran d\'accueil ».',
       install: 'Installer',
     },
-  }
+  },
+  footer: {
+    sourceCode: 'Code source',
+  },
 }

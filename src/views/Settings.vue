@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
-import { IonContent, IonIcon, IonPage, IonSpinner } from '@ionic/vue'
+import { IonIcon, IonSpinner } from '@ionic/vue'
+import TnsPage from '@/components/ui/TnsPage.vue'
 import {
   syncOutline, phonePortraitOutline,
   checkmarkCircleOutline, alertCircleOutline,
@@ -82,9 +83,8 @@ function resetTurn() {
 </script>
 
 <template>
-  <ion-page>
-    <ion-content :fullscreen="true" :style="{ '--background': 'var(--tns-bg)' }">
-      <div class="tns-page">
+  <TnsPage>
+    <div class="tns-page">
         <TnsLargeTitle :title="t('settings.title')" />
 
         <!-- ── En-tête section ──────────────────────────────────── -->
@@ -284,8 +284,7 @@ function resetTurn() {
         </TnsList>
 
       </div>
-    </ion-content>
-  </ion-page>
+  </TnsPage>
 </template>
 
 <style scoped>

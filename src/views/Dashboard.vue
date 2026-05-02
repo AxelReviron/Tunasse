@@ -2,7 +2,8 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { IonPage, IonContent, IonIcon } from '@ionic/vue';
+import { IonIcon } from '@ionic/vue';
+import TnsPage from '@/components/ui/TnsPage.vue';
 import {
   trendingUpOutline, trendingDownOutline, timeOutline,
   cartOutline, homeOutline, carOutline,
@@ -188,9 +189,8 @@ const lineDatasets = computed(() => lineChart.value.datasets);
 </script>
 
 <template>
-  <ion-page>
-    <ion-content :fullscreen="true" :style="{ '--background': 'var(--tns-bg)' }">
-      <div class="tns-page">
+  <TnsPage>
+    <div class="tns-page">
 
         <TnsLargeTitle :title="t('dashboard.title')" />
 
@@ -358,8 +358,7 @@ const lineDatasets = computed(() => lineChart.value.datasets);
         :body="helpTopic.body"
         @update:model-value="helpTopic = null"
       />
-    </ion-content>
-  </ion-page>
+  </TnsPage>
 </template>
 
 <style scoped>

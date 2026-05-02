@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { IonPage, IonContent, IonIcon } from '@ionic/vue';
+import { IonIcon } from '@ionic/vue';
+import TnsPage from '@/components/ui/TnsPage.vue';
 import { cardOutline, leafOutline, barChartOutline, addOutline, chevronForwardOutline } from 'ionicons/icons';
 
 import TnsLargeTitle   from '@/components/ui/TnsLargeTitle.vue';
@@ -46,9 +47,8 @@ function iconFor(account: Account) {
 </script>
 
 <template>
-  <ion-page>
-    <ion-content :fullscreen="true" :style="{ '--background': 'var(--tns-bg)' }">
-      <div class="tns-page">
+  <TnsPage>
+    <div class="tns-page">
 
         <TnsLargeTitle :title="t('accounts.title')" />
 
@@ -89,15 +89,15 @@ function iconFor(account: Account) {
         <ion-icon :icon="addOutline" />
       </button>
 
-    </ion-content>
-
-    <TnsAccountSheet
-      v-model="showSheet"
-      :account="selectedAccount"
-      @saved="onSheetClose"
-      @deleted="onSheetClose"
-    />
-  </ion-page>
+    <template #modals>
+      <TnsAccountSheet
+        v-model="showSheet"
+        :account="selectedAccount"
+        @saved="onSheetClose"
+        @deleted="onSheetClose"
+      />
+    </template>
+  </TnsPage>
 </template>
 
 <style scoped>
