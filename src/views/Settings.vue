@@ -1,22 +1,25 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
-import { IonIcon, IonSpinner } from '@ionic/vue'
+import {computed, ref, onMounted} from 'vue'
+import {IonIcon, IonSpinner} from '@ionic/vue'
+import {exportData, importData, clearAllData} from '@/services/DataService'
 import TnsPage from '@/components/ui/TnsPage.vue'
 import {
   syncOutline, phonePortraitOutline,
   checkmarkCircleOutline, alertCircleOutline,
   constructOutline, chevronDownOutline, chevronForwardOutline,
-  moonOutline, sunnyOutline, colorPaletteOutline,
+  moonOutline, sunnyOutline, colorPaletteOutline, documentsOutline,
+  trashOutline, arrowUpCircleOutline, arrowDownCircleOutline,
 } from 'ionicons/icons'
-import { useTheme, ACCENT_PRESETS } from '@/composables/useTheme'
-import type { TurnConfig } from '@/composables/useSync'
-import { useI18n } from 'vue-i18n'
+import {useTheme, ACCENT_PRESETS} from '@/composables/useTheme'
+import type {TurnConfig} from '@/composables/useSync'
+import {useI18n} from 'vue-i18n'
 import TnsLargeTitle from '@/components/ui/TnsLargeTitle.vue'
 import TnsList from '@/components/ui/TnsList.vue'
-import { useSync } from '@/composables/useSync'
+import TnsConfirmModal from '@/components/ui/TnsConfirmModal.vue'
+import {useSync} from '@/composables/useSync'
 
-const { t } = useI18n()
-const { theme, accent } = useTheme()
+const {t} = useI18n()
+const {theme, accent} = useTheme()
 const {
   ownPassphrase, deviceName,
   peers, connectedPeers, isSyncing, syncError, syncSuccess,
@@ -25,11 +28,13 @@ const {
   turnConfig, turnStatus, saveTurnConfig, checkTurn,
 } = useSync()
 
-onMounted(() => { if (turnConfig.value) checkTurn() })
+onMounted(() => {
+  if (turnConfig.value) checkTurn()
+})
 
-const hasPeers          = computed(() => peers.value.length > 0)
+const hasPeers = computed(() => peers.value.length > 0)
 const deviceNameMissing = computed(() => hasPeers.value && deviceName.value.trim() === '')
-const peerList          = computed(() => Object.entries(connectedPeers.value))
+const peerList = computed(() => Object.entries(connectedPeers.value))
 
 // ── Device name ───────────────────────────────────────────────────────────────
 const localDeviceName = ref(deviceName.value)
@@ -44,7 +49,9 @@ const copied = ref(false)
 function copyPassphrase() {
   navigator.clipboard.writeText(ownPassphrase.value)
   copied.value = true
-  setTimeout(() => { copied.value = false }, 2000)
+  setTimeout(() => {
+    copied.value = false
+  }, 2000)
 }
 
 // ── Join remote ───────────────────────────────────────────────────────────────
@@ -61,125 +68,216 @@ function handleConnect() {
 const showAdvanced = ref(false)
 
 // ── TURN config ───────────────────────────────────────────────────────────────
-const turnHost       = ref(turnConfig.value?.host ?? '')
-const turnPort       = ref<number>(turnConfig.value?.port ?? 3478)
-const turnUsername   = ref(turnConfig.value?.username ?? '')
+const turnHost = ref(turnConfig.value?.host ?? '')
+const turnPort = ref<number>(turnConfig.value?.port ?? 3478)
+const turnUsername = ref(turnConfig.value?.username ?? '')
 const turnCredential = ref(turnConfig.value?.credential ?? '')
-const turnSaved      = ref(false)
+const turnSaved = ref(false)
 
 function saveTurn() {
   const cfg: TurnConfig = {
-    host:       turnHost.value.trim(),
-    port:       turnPort.value || 3478,
-    username:   turnUsername.value.trim(),
+    host: turnHost.value.trim(),
+    port: turnPort.value || 3478,
+    username: turnUsername.value.trim(),
     credential: turnCredential.value,
   }
   saveTurnConfig(cfg)
   turnSaved.value = true
-  setTimeout(() => { turnSaved.value = false }, 2000)
+  setTimeout(() => {
+    turnSaved.value = false
+  }, 2000)
 }
 
 function resetTurn() {
   saveTurnConfig(null)
-  turnHost.value       = ''
-  turnPort.value       = 3478
-  turnUsername.value   = ''
+  turnHost.value = ''
+  turnPort.value = 3478
+  turnUsername.value = ''
   turnCredential.value = ''
+}
+
+// ── Import / Export ───────────────────────────────────────────────────────────
+const fileInputRef = ref<HTMLInputElement>()
+const isExporting = ref(false)
+const isImporting = ref(false)
+const dataSuccess = ref('')
+const dataError = ref('')
+const showImportConfirm = ref(false)
+const pendingFile = ref<File | null>(null)
+
+function clearDataFeedback() {
+  dataSuccess.value = ''
+  dataError.value = ''
+}
+
+async function handleExport() {
+  clearDataFeedback()
+  isExporting.value = true
+  try {
+    await exportData()
+  } catch (e) {
+    dataError.value = t('settings.data.importError', {msg: String(e)})
+  } finally {
+    isExporting.value = false
+  }
+}
+
+function triggerImport() {
+  fileInputRef.value?.click()
+}
+
+function handleFileSelected(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+  if (!file) return
+  pendingFile.value = file
+  showImportConfirm.value = true
+}
+
+async function confirmImport() {
+  const file = pendingFile.value
+  if (!file) return
+  showImportConfirm.value = false
+  pendingFile.value = null
+
+  clearDataFeedback()
+  isImporting.value = true
+  try {
+    await importData(file)
+    dataSuccess.value = t('settings.data.importSuccess')
+    setTimeout(() => {
+      dataSuccess.value = ''
+    }, 3000)
+  } catch (e) {
+    dataError.value = t('settings.data.importError', {msg: String(e)})
+  } finally {
+    isImporting.value = false
+  }
+}
+
+function cancelImport() {
+  showImportConfirm.value = false
+  pendingFile.value = null
+}
+
+// ── Reset ─────────────────────────────────────────────────────────────────────
+const showResetConfirm = ref(false)
+const isResetting = ref(false)
+
+async function confirmReset() {
+  showResetConfirm.value = false
+  clearDataFeedback()
+  isResetting.value = true
+  try {
+    await clearAllData()
+    dataSuccess.value = t('settings.data.resetSuccess')
+    setTimeout(() => {
+      dataSuccess.value = ''
+    }, 3000)
+  } catch (e) {
+    dataError.value = t('settings.data.importError', {msg: String(e)})
+  } finally {
+    isResetting.value = false
+  }
 }
 </script>
 
 <template>
   <TnsPage>
     <div class="tns-page">
-        <TnsLargeTitle :title="t('settings.title')" />
+      <TnsLargeTitle :title="t('settings.title')"/>
 
-        <!-- ── Apparence ────────────────────────────────────────── -->
-        <div class="tns-list-hdr">
-          <div class="tns-section-header-row">
-            <ion-icon :icon="colorPaletteOutline" />
-            <span class="tns-list-hdr-title">{{ t('settings.preferences.title') }}</span>
+      <!-- ── Apparence ────────────────────────────────────────── -->
+      <div class="tns-list-hdr">
+        <div class="tns-section-header-row">
+          <ion-icon :icon="colorPaletteOutline"/>
+          <span class="tns-list-hdr-title">{{ t('settings.preferences.title') }}</span>
+        </div>
+      </div>
+      <p class="section-desc">{{ t('settings.preferences.description') }}</p>
+
+      <TnsList>
+        <!-- Toggle dark / light -->
+        <div class="srow srow-theme">
+          <ion-icon :icon="theme === 'dark' ? moonOutline : sunnyOutline" class="theme-icon"/>
+          <span class="srow-text">{{ t('settings.preferences.theme') }}</span>
+          <div class="theme-toggle" :class="theme" @click="theme = theme === 'dark' ? 'light' : 'dark'">
+            <span class="theme-toggle-knob"/>
+            <span class="theme-toggle-label">
+                {{ theme === 'dark' ? t('settings.preferences.dark') : t('settings.preferences.light') }}
+              </span>
           </div>
         </div>
 
-        <TnsList>
-          <!-- Toggle dark / light -->
-          <div class="srow srow-theme">
-            <ion-icon :icon="theme === 'dark' ? moonOutline : sunnyOutline" class="theme-icon" />
-            <span class="srow-text">{{ t('settings.preferences.theme') }}</span>
-            <div class="theme-toggle" :class="theme" @click="theme = theme === 'dark' ? 'light' : 'dark'">
-              <span class="theme-toggle-knob" />
-              <span class="theme-toggle-label">
-                {{ theme === 'dark' ? t('settings.preferences.dark') : t('settings.preferences.light') }}
-              </span>
-            </div>
-          </div>
-
-          <!-- Swatches accent -->
-          <div class="srow srow-block">
-            <p class="block-label">{{ t('settings.preferences.accent') }}</p>
-            <div class="accent-swatches">
-              <button
+        <!-- Swatches accent -->
+        <div class="srow srow-block">
+          <p class="block-label">{{ t('settings.preferences.accent') }}</p>
+          <div class="accent-swatches">
+            <button
                 v-for="p in ACCENT_PRESETS"
                 :key="p.key"
                 class="swatch"
                 :style="{ background: p.value }"
                 :class="{ 'swatch--active': accent === p.value }"
                 @click="accent = p.value"
-              />
-            </div>
-          </div>
-        </TnsList>
-
-        <!-- ── Synchronisation ──────────────────────────────────── -->
-        <div class="tns-list-hdr tns-list-hdr--mt">
-          <div class="tns-section-header-row">
-            <ion-icon :icon="syncOutline" />
-            <span class="tns-list-hdr-title">{{ t('settings.sync.title') }}</span>
+            />
           </div>
         </div>
-        <p class="section-desc">{{ t('settings.sync.description') }}</p>
+      </TnsList>
 
-        <TnsList>
+      <!-- ── Synchronisation ──────────────────────────────────── -->
+      <div class="tns-list-hdr tns-list-hdr--mt">
+        <div class="tns-section-header-row">
+          <ion-icon :icon="syncOutline"/>
+          <span class="tns-list-hdr-title">{{ t('settings.sync.title') }}</span>
+        </div>
+      </div>
+      <p class="section-desc">{{ t('settings.sync.description') }}</p>
 
-          <!-- Statut -->
-          <div class="srow srow-status">
-            <span class="status-dot" :class="hasPeers ? 'connected' : 'searching'" />
-            <span class="srow-text">
-              {{ hasPeers
-                ? t('settings.sync.connected', peers.length)
-                : t('settings.sync.searching') }}
+      <TnsList>
+
+        <!-- Statut -->
+        <div class="srow srow-status">
+          <span class="status-dot" :class="hasPeers ? 'connected' : 'searching'"/>
+          <span class="srow-text">
+              {{
+              hasPeers
+                  ? t('settings.sync.connected', peers.length)
+                  : t('settings.sync.searching')
+            }}
             </span>
-          </div>
+        </div>
 
-          <!-- Mon appareil -->
-          <div class="srow srow-block">
-            <p class="block-label">{{ t('settings.sync.myDevice') }}</p>
-            <input
+        <!-- Mon appareil -->
+        <div class="srow srow-block">
+          <p class="block-label">{{ t('settings.sync.myDevice') }}</p>
+          <input
               v-model="localDeviceName"
               class="device-input"
               :class="{ 'device-input--required': deviceNameMissing }"
               :placeholder="t('settings.sync.myDevicePlaceholder')"
               @blur="saveDeviceName"
               @keydown.enter="saveDeviceName"
-            />
-          </div>
+          />
+        </div>
 
-          <!-- Mon code -->
-          <div class="srow srow-block">
-            <p class="block-label">{{ t('settings.sync.myCode') }}</p>
-            <div class="inline-row">
-              <span class="mono-box">{{ ownPassphrase }}</span>
-              <button class="btn-action" @click="copyPassphrase">
-                {{ copied ? t('settings.sync.copied') : t('settings.sync.copy') }}
-              </button>
-            </div>
+        <!-- Mon code -->
+        <div class="srow srow-block">
+          <p class="block-label">{{ t('settings.sync.myCode') }}</p>
+          <div class="inline-row">
+            <span class="mono-box">{{ ownPassphrase }}</span>
+            <button class="btn-action" @click="copyPassphrase">
+              {{ copied ? t('settings.sync.copied') : t('settings.sync.copy') }}
+            </button>
           </div>
+        </div>
 
-          <!-- Autre appareil -->
-          <div class="srow srow-block">
-            <p class="block-label">{{ t('settings.sync.otherDevice') }}</p>
-            <div class="inline-row">
-              <input
+        <!-- Autre appareil -->
+        <div class="srow srow-block">
+          <p class="block-label">{{ t('settings.sync.otherDevice') }}</p>
+          <div class="inline-row">
+            <input
                 v-model="remoteInput"
                 class="mono-input"
                 :placeholder="t('settings.sync.codePlaceholder')"
@@ -188,59 +286,61 @@ function resetTurn() {
                 autocapitalize="none"
                 spellcheck="false"
                 @keydown.enter="handleConnect"
-              />
-              <button class="btn-action" :disabled="!remoteInput.trim()" @click="handleConnect">
-                {{ t('settings.sync.connect') }}
-              </button>
+            />
+            <button class="btn-action" :disabled="!remoteInput.trim()" @click="handleConnect">
+              {{ t('settings.sync.connect') }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Appareils connectés -->
+        <div v-if="hasPeers" class="srow srow-block">
+          <p class="block-label">{{ t('settings.sync.peersSection') }}</p>
+          <div v-for="[peerId, info] in peerList" :key="peerId" class="peer-row">
+            <div class="device-ico">
+              <ion-icon :icon="phonePortraitOutline"/>
             </div>
+            <span class="peer-name">{{ info.name || '…' }}</span>
+            <span class="peer-dot"/>
           </div>
+        </div>
 
-          <!-- Appareils connectés -->
-          <div v-if="hasPeers" class="srow srow-block">
-            <p class="block-label">{{ t('settings.sync.peersSection') }}</p>
-            <div v-for="[peerId, info] in peerList" :key="peerId" class="peer-row">
-              <div class="device-ico">
-                <ion-icon :icon="phonePortraitOutline" />
-              </div>
-              <span class="peer-name">{{ info.name || '…' }}</span>
-              <span class="peer-dot" />
-            </div>
-          </div>
+        <!-- Avancé (collapsible) -->
+        <div class="srow srow-adv-toggle" @click="showAdvanced = !showAdvanced">
+          <ion-icon :icon="constructOutline" class="adv-toggle-icon"/>
+          <span class="srow-text adv-toggle-label">{{ t('settings.advanced.title') }}</span>
+          <ion-icon :icon="showAdvanced ? chevronDownOutline : chevronForwardOutline" class="adv-chevron"/>
+        </div>
 
-          <!-- Avancé (collapsible) -->
-          <div class="srow srow-adv-toggle" @click="showAdvanced = !showAdvanced">
-            <ion-icon :icon="constructOutline" class="adv-toggle-icon" />
-            <span class="srow-text adv-toggle-label">{{ t('settings.advanced.title') }}</span>
-            <ion-icon :icon="showAdvanced ? chevronDownOutline : chevronForwardOutline" class="adv-chevron" />
-          </div>
-
-          <template v-if="showAdvanced">
-            <div class="srow srow-block">
-              <p class="block-label">{{ t('settings.advanced.turn.title') }}</p>
-              <p class="turn-desc">{{ t('settings.advanced.turn.description') }}</p>
-              <a
+        <template v-if="showAdvanced">
+          <div class="srow srow-block">
+            <p class="block-label">{{ t('settings.advanced.turn.title') }}</p>
+            <p class="turn-desc">{{ t('settings.advanced.turn.description') }}</p>
+            <a
                 class="turn-link"
                 href="https://github.com/AxelReviron/Tunasse#self-hosting-a-turn-server"
                 target="_blank"
                 rel="noopener"
-              >
-                {{ t('settings.advanced.turn.link') }}
-              </a>
-              <div class="turn-status">
-                <span class="turn-status-dot" :class="turnConfig ? turnStatus : 'idle'" />
-                <span class="turn-status-text">
-                  {{ turnConfig ? `${turnConfig.host}:${turnConfig.port || 3478}` : t('settings.advanced.turn.noServer') }}
+            >
+              {{ t('settings.advanced.turn.link') }}
+            </a>
+            <div class="turn-status">
+              <span class="turn-status-dot" :class="turnConfig ? turnStatus : 'idle'"/>
+              <span class="turn-status-text">
+                  {{
+                  turnConfig ? `${turnConfig.host}:${turnConfig.port || 3478}` : t('settings.advanced.turn.noServer')
+                }}
                 </span>
-                <button v-if="turnConfig" class="btn-retest" :disabled="turnStatus === 'testing'" @click.stop="checkTurn">
-                  <ion-spinner v-if="turnStatus === 'testing'" name="crescent" class="retest-spinner" />
-                  <span v-else>↻</span>
-                </button>
-              </div>
+              <button v-if="turnConfig" class="btn-retest" :disabled="turnStatus === 'testing'" @click.stop="checkTurn">
+                <ion-spinner v-if="turnStatus === 'testing'" name="crescent" class="retest-spinner"/>
+                <span v-else>↻</span>
+              </button>
             </div>
+          </div>
 
-            <div class="srow srow-block">
-              <p class="block-label">{{ t('settings.advanced.turn.host') }}</p>
-              <input
+          <div class="srow srow-block">
+            <p class="block-label">{{ t('settings.advanced.turn.host') }}</p>
+            <input
                 v-model="turnHost"
                 class="device-input"
                 placeholder="192.168.1.100"
@@ -248,90 +348,165 @@ function resetTurn() {
                 autocorrect="off"
                 autocapitalize="none"
                 spellcheck="false"
-              />
-            </div>
+            />
+          </div>
 
-            <div class="srow srow-block">
-              <p class="block-label">{{ t('settings.advanced.turn.port') }}</p>
-              <input
+          <div class="srow srow-block">
+            <p class="block-label">{{ t('settings.advanced.turn.port') }}</p>
+            <input
                 v-model.number="turnPort"
                 class="device-input"
                 type="number"
                 placeholder="3478"
-              />
-            </div>
+            />
+          </div>
 
-            <div class="srow srow-block">
-              <p class="block-label">{{ t('settings.advanced.turn.username') }}</p>
-              <input
+          <div class="srow srow-block">
+            <p class="block-label">{{ t('settings.advanced.turn.username') }}</p>
+            <input
                 v-model="turnUsername"
                 class="device-input"
                 autocomplete="off"
                 autocorrect="off"
                 autocapitalize="none"
                 spellcheck="false"
-              />
-            </div>
+            />
+          </div>
 
-            <div class="srow srow-block">
-              <p class="block-label">{{ t('settings.advanced.turn.password') }}</p>
-              <input
+          <div class="srow srow-block">
+            <p class="block-label">{{ t('settings.advanced.turn.password') }}</p>
+            <input
                 v-model="turnCredential"
                 class="device-input"
                 type="password"
                 autocomplete="new-password"
-              />
-            </div>
+            />
+          </div>
 
-            <div class="srow srow-turn-actions">
-              <button class="btn-reset" :disabled="!turnConfig" @click="resetTurn">
-                {{ t('settings.advanced.turn.reset') }}
-              </button>
-              <button
+          <div class="srow srow-turn-actions">
+            <button class="btn-reset" :disabled="!turnConfig" @click="resetTurn">
+              {{ t('settings.advanced.turn.reset') }}
+            </button>
+            <button
                 class="btn-action"
                 :disabled="!turnHost.trim() || !turnUsername.trim() || !turnCredential"
                 @click="saveTurn"
-              >
-                {{ turnSaved ? t('settings.advanced.turn.saved') : t('settings.advanced.turn.save') }}
-              </button>
-            </div>
-          </template>
+            >
+              {{ turnSaved ? t('settings.advanced.turn.saved') : t('settings.advanced.turn.save') }}
+            </button>
+          </div>
+        </template>
 
-          <!-- Bouton sync -->
-          <div class="srow srow-sync-wrap">
-            <p v-if="deviceNameMissing" class="sync-required">
-              {{ t('settings.sync.myDeviceRequired') }}
-            </p>
-            <button
+        <!-- Bouton sync -->
+        <div class="srow srow-sync-wrap">
+          <p v-if="deviceNameMissing" class="sync-required">
+            {{ t('settings.sync.myDeviceRequired') }}
+          </p>
+          <button
               class="sync-btn"
               :disabled="!canSync()"
               @click="sync()"
-            >
-              <ion-spinner v-if="isSyncing" name="crescent" class="btn-spinner" />
-              <ion-icon v-else :icon="syncOutline" />
-              {{ isSyncing ? t('settings.sync.syncing') : t('settings.sync.syncButton') }}
-            </button>
-          </div>
-
-        </TnsList>
-
-        <!-- Feedback -->
-        <div v-if="syncSuccess" class="feedback success">
-          <ion-icon :icon="checkmarkCircleOutline" />
-          {{ t('settings.sync.success') }}
-        </div>
-        <div v-if="syncError" class="feedback error">
-          <ion-icon :icon="alertCircleOutline" />
-          {{ t('settings.sync.error', { msg: syncError }) }}
+          >
+            <ion-spinner v-if="isSyncing" name="crescent" class="btn-spinner"/>
+            <ion-icon v-else :icon="syncOutline"/>
+            {{ isSyncing ? t('settings.sync.syncing') : t('settings.sync.syncButton') }}
+          </button>
         </div>
 
+      </TnsList>
+
+      <!-- Feedback -->
+      <div v-if="syncSuccess" class="feedback success">
+        <ion-icon :icon="checkmarkCircleOutline"/>
+        {{ t('settings.sync.success') }}
       </div>
+      <div v-if="syncError" class="feedback error">
+        <ion-icon :icon="alertCircleOutline"/>
+        {{ t('settings.sync.error', {msg: syncError}) }}
+      </div>
+
+
+      <div class="tns-list-hdr tns-list-hdr--mt">
+        <div class="tns-section-header-row">
+          <ion-icon :icon="documentsOutline"/>
+          <span class="tns-list-hdr-title">{{ t('settings.data.data') }}</span>
+        </div>
+      </div>
+      <p class="section-desc">{{ t('settings.data.description') }}</p>
+
+      <TnsList>
+        <div class="srow srow-action">
+          <ion-icon :icon="arrowUpCircleOutline" class="action-icon"/>
+          <span class="srow-text">{{ t('settings.data.exportButton') }}</span>
+          <button class="btn-action" :disabled="isExporting" @click="handleExport">
+            <span>{{ t('settings.data.exportAction') }}</span>
+          </button>
+        </div>
+
+        <div class="srow srow-action">
+          <ion-icon :icon="arrowDownCircleOutline" class="action-icon"/>
+          <span class="srow-text">{{ t('settings.data.importButton') }}</span>
+          <button class="btn-action" :disabled="isImporting" @click="triggerImport">
+            <span>{{ t('settings.data.importAction') }}</span>
+          </button>
+          <input ref="fileInputRef" type="file" accept=".json" hidden @change="handleFileSelected"/>
+        </div>
+
+        <div class="srow srow-action">
+          <ion-icon :icon="trashOutline" class="action-icon action-icon--danger"/>
+          <span class="srow-text srow-text--danger">{{ t('settings.data.resetButton') }}</span>
+          <button class="btn-danger" :disabled="isResetting" @click="showResetConfirm = true">
+            <ion-spinner v-if="isResetting" name="crescent" class="btn-spinner--danger"/>
+            <span v-else>{{ t('settings.data.resetAction') }}</span>
+          </button>
+        </div>
+      </TnsList>
+
+      <div v-if="dataSuccess" class="feedback success">
+        <ion-icon :icon="checkmarkCircleOutline"/>
+        {{ dataSuccess }}
+      </div>
+      <div v-if="dataError" class="feedback error">
+        <ion-icon :icon="alertCircleOutline"/>
+        {{ dataError }}
+      </div>
+
+      <!-- Confirmation import -->
+      <TnsConfirmModal
+          v-model="showImportConfirm"
+          :title="t('settings.data.importConfirm')"
+          :body="t('settings.data.importConfirmMessage')"
+      >
+        <template #actions>
+          <button class="btn-reset" @click="cancelImport">{{ t('common.cancel') }}</button>
+          <button class="btn-action btn-action--auto" @click="confirmImport">{{ t('common.confirm') }}</button>
+        </template>
+      </TnsConfirmModal>
+
+      <!-- Confirmation reset -->
+      <TnsConfirmModal
+          v-model="showResetConfirm"
+          :title="t('settings.data.resetConfirm')"
+          :body="t('settings.data.resetConfirmMessage')"
+      >
+        <template #actions>
+          <button class="btn-reset" @click="showResetConfirm = false">{{ t('common.cancel') }}</button>
+          <button class="btn-danger btn-danger--auto" @click="confirmReset">{{
+              t('settings.data.resetAction')
+            }}
+          </button>
+        </template>
+      </TnsConfirmModal>
+
+    </div>
   </TnsPage>
 </template>
 
 <style scoped>
 /* ── Apparence ────────────────────────────────────────── */
-.srow-theme { gap: 10px; }
+.srow-theme {
+  gap: 10px;
+}
 
 .theme-icon {
   font-size: 18px;
@@ -372,19 +547,24 @@ function resetTurn() {
 .accent-swatches {
   display: flex;
   gap: 10px;
+  margin: 4px;
   flex-wrap: wrap;
 }
 
 .swatch {
-  width: 28px;
-  height: 28px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   border: none;
   cursor: pointer;
   flex-shrink: 0;
   transition: transform 0.15s, box-shadow 0.15s;
 }
-.swatch:hover { transform: scale(1.15); }
+
+.swatch:hover {
+  transform: scale(1.15);
+}
+
 .swatch--active {
   box-shadow: 0 0 0 2px var(--tns-card), 0 0 0 4px currentColor;
   transform: scale(1.1);
@@ -398,12 +578,14 @@ function resetTurn() {
   padding: 0 16px;
   margin-bottom: 6px;
 }
+
 .tns-section-header-row {
   display: flex;
   align-items: center;
   gap: 6px;
   color: var(--tns-fg2);
 }
+
 .tns-list-hdr-title {
   font-family: var(--tns-font);
   font-size: 18px;
@@ -412,7 +594,9 @@ function resetTurn() {
   letter-spacing: -0.2px;
 }
 
-.tns-list-hdr--mt { margin-top: 28px; }
+.tns-list-hdr--mt {
+  margin-top: 28px;
+}
 
 .section-desc {
   font-family: var(--tns-font);
@@ -431,28 +615,45 @@ function resetTurn() {
   background: var(--tns-card);
   font-family: var(--tns-font);
 }
-.srow + .srow { border-top: 0.5px solid var(--tns-sep); }
-.srow-text { font-size: 15px; color: var(--tns-fg); }
+
+.srow + .srow {
+  border-top: 0.5px solid var(--tns-sep);
+}
+
+.srow-text {
+  font-size: 15px;
+  color: var(--tns-fg);
+}
 
 /* ── Status ───────────────────────────────────────────── */
-.srow-status { gap: 10px; }
+.srow-status {
+  gap: 10px;
+}
+
 .status-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
 }
+
 .status-dot.connected {
   background: var(--tns-green);
   box-shadow: 0 0 0 3px rgb(34 197 94 / 0.18);
 }
+
 .status-dot.searching {
   background: var(--tns-fg3);
   animation: blink 1.8s ease-in-out infinite;
 }
+
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.25; }
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
 }
 
 /* ── Block rows ───────────────────────────────────────── */
@@ -485,7 +686,11 @@ function resetTurn() {
   box-sizing: border-box;
   transition: box-shadow 0.15s;
 }
-.device-input::placeholder { color: var(--tns-fg3); }
+
+.device-input::placeholder {
+  color: var(--tns-fg3);
+}
+
 .device-input--required {
   box-shadow: 0 0 0 1.5px var(--tns-red);
 }
@@ -512,7 +717,10 @@ function resetTurn() {
   white-space: nowrap;
   scrollbar-width: none;
 }
-.mono-box::-webkit-scrollbar { display: none; }
+
+.mono-box::-webkit-scrollbar {
+  display: none;
+}
 
 .mono-input {
   flex: 1;
@@ -526,7 +734,10 @@ function resetTurn() {
   padding: 8px 10px;
   min-width: 0;
 }
-.mono-input::placeholder { color: var(--tns-fg3); }
+
+.mono-input::placeholder {
+  color: var(--tns-fg3);
+}
 
 .btn-action {
   background: var(--tns-accent);
@@ -542,7 +753,11 @@ function resetTurn() {
   flex-shrink: 0;
   transition: opacity 0.15s;
 }
-.btn-action:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.btn-action:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
 
 /* ── Appareils connectés ──────────────────────────────── */
 .peer-row {
@@ -552,6 +767,7 @@ function resetTurn() {
   width: 100%;
   padding: 2px 0;
 }
+
 .peer-row + .peer-row {
   border-top: 0.5px solid var(--tns-sep);
   padding-top: 7px;
@@ -618,8 +834,17 @@ function resetTurn() {
   transition: opacity 0.15s;
   font-family: var(--tns-font);
 }
-.sync-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-.btn-spinner { width: 18px; height: 18px; --color: var(--tns-accent); }
+
+.sync-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-spinner {
+  width: 18px;
+  height: 18px;
+  --color: var(--tns-accent);
+}
 
 /* ── Feedback ─────────────────────────────────────────── */
 .feedback {
@@ -632,15 +857,26 @@ function resetTurn() {
   font-size: 13px;
   font-family: var(--tns-font);
 }
-.feedback.success { background: rgb(34 197 94 / 0.1); color: var(--tns-green); }
-.feedback.error   { background: rgb(244 63 94 / 0.1); color: var(--tns-red); }
+
+.feedback.success {
+  background: rgb(34 197 94 / 0.1);
+  color: var(--tns-green);
+}
+
+.feedback.error {
+  background: rgb(244 63 94 / 0.1);
+  color: var(--tns-red);
+}
 
 /* ── Avancé (toggle) ──────────────────────────────────── */
 .srow-adv-toggle {
   cursor: pointer;
   user-select: none;
 }
-.srow-adv-toggle:active { background: var(--tns-bg); }
+
+.srow-adv-toggle:active {
+  background: var(--tns-bg);
+}
 
 .adv-toggle-icon {
   font-size: 16px;
@@ -692,10 +928,23 @@ function resetTurn() {
   flex-shrink: 0;
   transition: background 0.3s;
 }
-.turn-status-dot.idle    { background: var(--tns-fg3); }
-.turn-status-dot.testing { background: #f59e0b; animation: blink 1s ease-in-out infinite; }
-.turn-status-dot.ok      { background: var(--tns-green); }
-.turn-status-dot.fail    { background: var(--tns-red); }
+
+.turn-status-dot.idle {
+  background: var(--tns-fg3);
+}
+
+.turn-status-dot.testing {
+  background: #f59e0b;
+  animation: blink 1s ease-in-out infinite;
+}
+
+.turn-status-dot.ok {
+  background: var(--tns-green);
+}
+
+.turn-status-dot.fail {
+  background: var(--tns-red);
+}
 
 .btn-retest {
   background: none;
@@ -708,8 +957,17 @@ function resetTurn() {
   display: flex;
   align-items: center;
 }
-.btn-retest:disabled { opacity: 0.4; cursor: not-allowed; }
-.retest-spinner { width: 13px; height: 13px; --color: var(--tns-fg2); }
+
+.btn-retest:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.retest-spinner {
+  width: 13px;
+  height: 13px;
+  --color: var(--tns-fg2);
+}
 
 .turn-status-text {
   font-size: 13px;
@@ -738,5 +996,65 @@ function resetTurn() {
   transition: opacity 0.15s;
   font-family: var(--tns-font);
 }
-.btn-reset:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.btn-reset:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ── Data rows ────────────────────────────────────────── */
+.action-icon {
+  font-size: 18px;
+  color: var(--tns-fg2);
+  flex-shrink: 0;
+}
+
+.srow-action .srow-text {
+  flex: 1;
+}
+
+.btn-action--auto {
+  width: auto;
+  padding: 8px 20px;
+}
+
+.action-icon--danger {
+  color: var(--tns-red);
+}
+
+.srow-text--danger {
+  color: var(--tns-red);
+}
+
+.btn-danger {
+  background: var(--tns-red);
+  color: #fff;
+  border: none;
+  border-radius: var(--tns-radius-lg);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 0;
+  width: 100px;
+  text-align: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+  font-family: var(--tns-font);
+}
+
+.btn-danger:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-danger--auto {
+  width: auto;
+  padding: 8px 20px;
+}
+
+.btn-spinner--danger {
+  width: 18px;
+  height: 18px;
+  --color: #fff;
+}
 </style>

@@ -16,7 +16,8 @@ import TnsFooter from '@/components/ui/TnsFooter.vue';
 
 <style>
 .separator {
-  margin-top: 2rem;
   border-top: 0.5px solid var(--tns-sep);
+  width: 80%;
+  margin: 2rem auto 0 auto;
 }
 </style>
