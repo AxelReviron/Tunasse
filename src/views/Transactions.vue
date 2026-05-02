@@ -24,7 +24,7 @@ const { t } = useI18n();
 
 const { accounts, getById: accountOf } = useAccounts();
 const { getById: budgetOf }  = useBudgets();
-const { transactions }       = useTransactions();
+const { transactions, today } = useTransactions();
 
 const { filter, dateRange, query, grouped } = useTransactionFilters(transactions);
 
@@ -117,6 +117,7 @@ function iconFor(tx: { type: string; icon?: string; is_recurring?: boolean; tran
                 :account-label="accountOf(tx.account_id)?.label || ''"
                 :to-account-label="tx.to_account_id ? accountOf(tx.to_account_id)?.label || '' : ''"
                 :show-date="false"
+                :future="tx.date > today"
                 @click="openEdit(tx)"
               >
                 <template #icon>

@@ -31,7 +31,7 @@ const { fmt, fmtShort } = useFormat();
 const router = useRouter();
 
 const { accounts, totalBalance, realBalances, getById: accountOf } = useAccounts();
-const { transactions, monthIncome, monthExpense, alreadyPaid, toPay, recent: recentTx } = useTransactions();
+const { transactions, today, monthIncome, monthExpense, alreadyPaid, toPay, recent: recentTx } = useTransactions();
 const { budgets, getById: budgetOf } = useBudgets();
 
 const ICON_MAP: Record<string, unknown> = {
@@ -70,6 +70,7 @@ const lineChart = computed(() => {
   const dailyMap: Record<string, number> = {};
   transactions.value.forEach(tx => {
     if (!tx.date.startsWith(prefix)) return
+    if (tx.date > today) return
     if (tx.type === 'income' && tx.transfer_peer_id !== undefined) return
     const currency = accountOf(tx.account_id)?.currency ?? 'EUR'
     const value    = tx.amount / (CURRENCY_SUBUNIT[currency] ?? 100)
@@ -221,6 +222,7 @@ const lineDatasets = computed(() => lineChart.value.datasets);
               :account-label="accountOf(tx.account_id)?.label || ''"
               :to-account-label="tx.to_account_id ? accountOf(tx.to_account_id)?.label || '' : ''"
               :show-date="true"
+              :future="tx.date > today"
             >
               <template #icon>
                 <ion-icon :icon="iconFor(tx)" />

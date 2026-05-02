@@ -21,10 +21,11 @@ export const BudgetService = {
   async withSpent(budget: Budget): Promise<BudgetWithSpent> {
     const now    = new Date()
     const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+    const today  = now.toISOString().slice(0, 10)
 
     const transactions = await db.transactions
       .where('budget_id').equals(budget.id)
-      .filter(tx => tx.date.startsWith(prefix))
+      .filter(tx => tx.date.startsWith(prefix) && tx.date <= today)
       .toArray()
 
     const spent = transactions.reduce((sum, tx) => sum + tx.amount, 0)

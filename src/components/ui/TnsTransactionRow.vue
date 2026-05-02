@@ -1,10 +1,31 @@
+<script setup>
+import { IonIcon } from '@ionic/vue';
+import { timeOutline } from 'ionicons/icons';
+import { useFormat } from '@/composables/useFormat.ts';
+
+const { fmt, fmtDateShort } = useFormat();
+
+defineProps({
+  transaction:    { type: Object,  required: true },
+  currency:       { type: String,  default: 'EUR' },
+  iconColor:      { type: String,  default: '#6B7280' },
+  accountLabel:   { type: String,  default: '' },
+  toAccountLabel: { type: String,  default: '' },
+  showDate:       { type: Boolean, default: true },
+  /** Transaction dont la date est dans le futur — opacité réduite + badge horloge. */
+  future:         { type: Boolean, default: false },
+});
+
+defineEmits(['click']);
+</script>
+
 <template>
-  <!-- TnsTransactionRow — single transaction row for grouped lists.
-       Handles coloured icon (from budget), title, meta (date · location),
-       and signed amount (green for income, red for expense). -->
-  <div class="tns-row" @click="$emit('click', transaction)">
+  <div class="tns-row" :class="{ 'tns-row--future': future }" @click="$emit('click', transaction)">
     <div class="tns-row-ico" :style="{ background: iconColor }">
       <slot name="icon"/>
+      <span v-if="future" class="tns-future-badge">
+        <ion-icon :icon="timeOutline" />
+      </span>
     </div>
     <div class="tns-row-main">
       <div class="tns-row-title">{{ transaction.label }}</div>
@@ -26,29 +47,6 @@
   </div>
 </template>
 
-<script setup>
-import { useFormat } from '@/composables/useFormat.ts';
-const { fmt, fmtDateShort } = useFormat();
-
-defineProps({
-  /** Transaction shape: { id, label, amount, type: 'income'|'expense',
-   *  date, location?, category?, budget_id?, account_id, is_recurring? }. */
-  transaction:  { type: Object, required: true },
-  /** Currency code of the parent account (EUR, USD, BTC…). */
-  currency:     { type: String, default: 'EUR' },
-  /** Hex/CSS colour for the round icon tile — usually budget.color. */
-  iconColor:    { type: String, default: '#6B7280' },
-  /** Account label shown when location/category are missing. */
-  accountLabel:   { type: String, default: '' },
-  toAccountLabel: { type: String, default: '' },
-  /** Show the short date in the sub-label (transactions list = true,
-   *  account detail where day is already a section header = false). */
-  showDate:     { type: Boolean, default: true },
-});
-
-defineEmits(['click']);
-</script>
-
 <style scoped>
 .tns-row {
   display: flex; align-items: center; gap: 12px;
@@ -57,12 +55,26 @@ defineEmits(['click']);
 }
 .tns-row + .tns-row { border-top: 0.5px solid var(--tns-sep); }
 
+.tns-row--future { opacity: 0.45; }
+
 .tns-row-ico {
+  position: relative;
   width: 36px; height: 36px; border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
   color: #fff; flex-shrink: 0;
 }
 .tns-row-ico :deep(svg) { width: 18px; height: 18px; }
+
+.tns-future-badge {
+  position: absolute;
+  bottom: -5px; right: -5px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--tns-bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  color: var(--tns-fg2);
+}
 
 .tns-row-main { flex: 1; min-width: 0; }
 .tns-row-title {

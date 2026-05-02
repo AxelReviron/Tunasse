@@ -15,20 +15,27 @@ export function useTransactions() {
 
   onUnmounted(() => subscription.unsubscribe())
 
+  const today = new Date().toISOString().slice(0, 10)
+
   const thisMonthTransactions = computed(() => {
     const now = new Date()
     const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
     return transactions.value.filter(tx => tx.date.startsWith(prefix))
   })
 
+  // Transactions du mois courant dont la date est <= aujourd'hui (exclut les futures)
+  const effectiveMonthTransactions = computed(() => {
+    return thisMonthTransactions.value.filter(tx => tx.date <= today)
+  })
+
   const monthIncome = computed(() =>
-    thisMonthTransactions.value
+    effectiveMonthTransactions.value
       .filter(tx => tx.type === 'income' && !tx.transfer_peer_id)
       .reduce((sum, tx) => sum + tx.amount, 0)
   )
 
   const monthExpense = computed(() =>
-    thisMonthTransactions.value
+    effectiveMonthTransactions.value
       .filter(tx => tx.type === 'expense' && !tx.transfer_peer_id)
       .reduce((sum, tx) => sum + tx.amount, 0)
   )
@@ -87,8 +94,8 @@ export function useTransactions() {
   }
 
   return {
-    transactions, isLoading,
-    thisMonthTransactions, monthIncome, monthExpense, alreadyPaid, toPay, recent,
+    transactions, isLoading, today,
+    thisMonthTransactions, effectiveMonthTransactions, monthIncome, monthExpense, alreadyPaid, toPay, recent,
     getByAccount, getByBudget,
     create, update, remove,
     createTransfer, updateTransfer, removeTransfer,

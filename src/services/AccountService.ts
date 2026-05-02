@@ -23,7 +23,11 @@ export const AccountService = {
     const account = await db.accounts.get(accountId)
     if (!account) return 0
 
-    const transactions = await db.transactions.where('account_id').equals(accountId).toArray()
+    const today = new Date().toISOString().slice(0, 10)
+    const transactions = await db.transactions
+      .where('account_id').equals(accountId)
+      .filter(tx => tx.date <= today)
+      .toArray()
     const delta = transactions.reduce((sum, tx) =>
       sum + (tx.type === 'income' ? tx.amount : -tx.amount), 0
     )
