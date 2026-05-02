@@ -4,16 +4,13 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
 import {
-  home,
-  reader,
-  pieChart,
   cardOutline,
   settingsOutline,
   homeOutline,
   readerOutline,
   pieChartOutline
 } from 'ionicons/icons';
-import logo from '@/assets/images/tunasse-logo.svg'
+import logo from '@/assets/images/tunasse-logo-only.svg'
 
 const { t } = useI18n();
 const route  = useRoute();
@@ -146,8 +143,8 @@ function isActive(path: string) {
 }
 
 .tns-sidebar-logo-img {
-  height: 40px;
-  width: 40px;
+  height: 35px;
+  width: 35px;
   display: block;
   flex-shrink: 0;
 }

@@ -137,6 +137,13 @@ export default {
 
   settings: {
     title: 'Settings',
+    preferences: {
+      title: 'Appearance',
+      theme: 'Theme',
+      dark: 'Dark',
+      light: 'Light',
+      accent: 'Accent color',
+    },
     sync: {
       title: 'Synchronization',
       description: 'Open this page on both devices. Share your code with the other device, or enter its code to connect.',

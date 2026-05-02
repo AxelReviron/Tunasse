@@ -137,6 +137,13 @@ export default {
 
   settings: {
     title: 'Paramètres',
+    preferences: {
+      title: 'Apparence',
+      theme: 'Thème',
+      dark: 'Sombre',
+      light: 'Clair',
+      accent: 'Couleur principale',
+    },
     sync: {
       title: 'Synchronisation',
       description: 'Ouvrez cette page sur les deux appareils. Partagez votre code avec l\'autre, ou entrez son code pour vous connecter.',

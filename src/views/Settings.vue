@@ -6,7 +6,9 @@ import {
   syncOutline, phonePortraitOutline,
   checkmarkCircleOutline, alertCircleOutline,
   constructOutline, chevronDownOutline, chevronForwardOutline,
+  moonOutline, sunnyOutline, colorPaletteOutline,
 } from 'ionicons/icons'
+import { useTheme, ACCENT_PRESETS } from '@/composables/useTheme'
 import type { TurnConfig } from '@/composables/useSync'
 import { useI18n } from 'vue-i18n'
 import TnsLargeTitle from '@/components/ui/TnsLargeTitle.vue'
@@ -14,6 +16,7 @@ import TnsList from '@/components/ui/TnsList.vue'
 import { useSync } from '@/composables/useSync'
 
 const { t } = useI18n()
+const { theme, accent } = useTheme()
 const {
   ownPassphrase, deviceName,
   peers, connectedPeers, isSyncing, syncError, syncSuccess,
@@ -90,8 +93,45 @@ function resetTurn() {
     <div class="tns-page">
         <TnsLargeTitle :title="t('settings.title')" />
 
-        <!-- ── En-tête section ──────────────────────────────────── -->
+        <!-- ── Apparence ────────────────────────────────────────── -->
         <div class="tns-list-hdr">
+          <div class="tns-section-header-row">
+            <ion-icon :icon="colorPaletteOutline" />
+            <span class="tns-list-hdr-title">{{ t('settings.preferences.title') }}</span>
+          </div>
+        </div>
+
+        <TnsList>
+          <!-- Toggle dark / light -->
+          <div class="srow srow-theme">
+            <ion-icon :icon="theme === 'dark' ? moonOutline : sunnyOutline" class="theme-icon" />
+            <span class="srow-text">{{ t('settings.preferences.theme') }}</span>
+            <div class="theme-toggle" :class="theme" @click="theme = theme === 'dark' ? 'light' : 'dark'">
+              <span class="theme-toggle-knob" />
+              <span class="theme-toggle-label">
+                {{ theme === 'dark' ? t('settings.preferences.dark') : t('settings.preferences.light') }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Swatches accent -->
+          <div class="srow srow-block">
+            <p class="block-label">{{ t('settings.preferences.accent') }}</p>
+            <div class="accent-swatches">
+              <button
+                v-for="p in ACCENT_PRESETS"
+                :key="p.key"
+                class="swatch"
+                :style="{ background: p.value }"
+                :class="{ 'swatch--active': accent === p.value }"
+                @click="accent = p.value"
+              />
+            </div>
+          </div>
+        </TnsList>
+
+        <!-- ── Synchronisation ──────────────────────────────────── -->
+        <div class="tns-list-hdr tns-list-hdr--mt">
           <div class="tns-section-header-row">
             <ion-icon :icon="syncOutline" />
             <span class="tns-list-hdr-title">{{ t('settings.sync.title') }}</span>
@@ -290,6 +330,66 @@ function resetTurn() {
 </template>
 
 <style scoped>
+/* ── Apparence ────────────────────────────────────────── */
+.srow-theme { gap: 10px; }
+
+.theme-icon {
+  font-size: 18px;
+  color: var(--tns-fg2);
+  flex-shrink: 0;
+}
+
+.theme-toggle {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--tns-bg);
+  border-radius: 20px;
+  padding: 4px 10px 4px 4px;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.theme-toggle-knob {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--tns-accent);
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.theme-toggle-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tns-fg2);
+  font-family: var(--tns-font);
+}
+
+.accent-swatches {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.swatch:hover { transform: scale(1.15); }
+.swatch--active {
+  box-shadow: 0 0 0 2px var(--tns-card), 0 0 0 4px currentColor;
+  transform: scale(1.1);
+}
+
 /* ── Section header ───────────────────────────────────── */
 .tns-list-hdr {
   display: flex;
@@ -311,6 +411,8 @@ function resetTurn() {
   color: var(--tns-fg);
   letter-spacing: -0.2px;
 }
+
+.tns-list-hdr--mt { margin-top: 28px; }
 
 .section-desc {
   font-family: var(--tns-font);

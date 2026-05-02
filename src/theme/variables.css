@@ -67,6 +67,34 @@ http://ionicframework.com/docs/theming/ */
     :root { --tns-sidebar-w: 220px; }
 }
 
+/* ── Light theme ──────────────────────────────────────────────────────────── */
+[data-theme="light"] {
+    color-scheme: light;
+
+    --tns-bg:   #F2F2F7;
+    --tns-card: #FFFFFF;
+    --tns-fg:   #1C1C1E;
+    --tns-fg2:  #6B6B78;
+    --tns-fg3:  #AEAEB2;
+    --tns-sep:  rgba(0, 0, 0, 0.08);
+
+    --ion-background-color:     var(--tns-bg);
+    --ion-background-color-rgb: 242, 242, 247;
+    --ion-text-color:           var(--tns-fg);
+    --ion-text-color-rgb:       28, 28, 30;
+
+    --ion-toolbar-background:   var(--tns-card);
+    --ion-toolbar-color:        var(--tns-fg);
+
+    --ion-tab-bar-background:   var(--tns-card);
+    --ion-tab-bar-border-color: var(--tns-sep);
+    --ion-tab-bar-color:        var(--tns-fg3);
+
+    --ion-item-background:      var(--tns-card);
+    --ion-item-border-color:    var(--tns-sep);
+    --ion-card-background:      var(--tns-card);
+}
+
 /* Optional compact density — add data-density="compact" on a parent. */
 [data-density="compact"] {
     --tns-pad: 12px;

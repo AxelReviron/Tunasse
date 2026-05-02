@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { IonIcon } from '@ionic/vue';
 import TnsPage from '@/components/ui/TnsPage.vue';
 import {
@@ -32,6 +32,7 @@ import type { Currency } from '@/types';
 const { t, locale } = useI18n();
 const { fmt, fmtShort } = useFormat();
 const router = useRouter();
+const route  = useRoute();
 
 const { accounts, totalBalance, realBalances, getById: accountOf } = useAccounts();
 const { transactions, today, recent: recentTx } = useTransactions();
@@ -44,6 +45,7 @@ const showHelp   = computed(() => helpTopic.value !== null)
 function openHelp(key: 'hero' | 'kpi' | 'balanceByAccount' | 'expenseBreakdown' | 'monthlyFlow') {
   helpTopic.value = { title: t(`dashboard.help.${key}.title`), body: t(`dashboard.help.${key}.body`) }
 }
+watch(() => route.path, () => { helpTopic.value = null })
 
 // ── Navigation par mois ────────────────────────────────────────────────────
 const _now = new Date();

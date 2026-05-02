@@ -10,7 +10,7 @@ defineEmits(['update:modelValue'])
 </script>
 
 <template>
-  <Teleport to=".tns-main">
+  <Teleport to="body">
     <Transition name="tns-info">
       <div v-if="modelValue" class="tns-info-backdrop" @click.self="$emit('update:modelValue', false)">
         <div class="tns-info-modal" role="dialog" :aria-label="title">
@@ -31,7 +31,7 @@ defineEmits(['update:modelValue'])
 
 <style scoped>
 .tns-info-backdrop {
-  position: absolute; inset: 0;
+  position: fixed; inset: 0;
   background: rgba(0, 0, 0, 0.45);
   z-index: 40;
   display: flex;

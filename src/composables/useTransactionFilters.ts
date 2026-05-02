@@ -2,7 +2,7 @@ import { computed, ref, type Ref } from 'vue'
 import type { Transaction } from '@/types'
 import { useFormat } from './useFormat'
 
-type FilterValue    = 'all' | 'income' | 'expense' | 'recurring' | 'transfer'
+type FilterValue    = 'all' | 'income' | 'expense' | 'transfer'
 type DateRangeValue = 'all' | 'thisMonth' | 'lastMonth' | 'thisYear'
 
 function prefixes() {
@@ -29,7 +29,7 @@ export function useTransactionFilters(transactions: Ref<Transaction[]>) {
     if (filter.value === 'income')    list = list.filter(t => t.type === 'income')
     if (filter.value === 'expense')   list = list.filter(t => t.type === 'expense' && !t.transfer_peer_id)
     if (filter.value === 'transfer')  list = list.filter(t => t.transfer_peer_id !== undefined)
-    if (filter.value === 'recurring') list = list.filter(t => t.is_recurring && !t.transfer_peer_id)
+
 
     if (dateRange.value !== 'all') {
       const { thisMonth, lastMonth, thisYear } = prefixes()

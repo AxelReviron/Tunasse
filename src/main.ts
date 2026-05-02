@@ -29,6 +29,12 @@ import './theme/styles.css'
 import { seed } from './db/seed'
 if (import.meta.env.VITE_SHOULD_SEED === 'true') seed()
 
+// Apply persisted theme immediately to avoid flash
+const _t = (localStorage.getItem('tns-theme') ?? 'dark')
+const _a = localStorage.getItem('tns-accent')
+document.documentElement.setAttribute('data-theme', _t)
+if (_a) document.documentElement.style.setProperty('--tns-accent', _a)
+
 const app = createApp(App)
   .use(IonicVue, { animated: window.innerWidth < 768 })
   .use(router)
