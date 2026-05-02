@@ -26,14 +26,36 @@ export default {
   dashboard: {
     title: 'Tableau de bord',
     totalBalance: 'Solde total',
-    alreadyPaid: 'Déjà payé',
-    toPay: 'À payer',
+    period: 'Période',
+    upcoming: 'À venir',
     recentTransactions: 'Transactions récentes',
-    monthlyOverview: 'Ce mois',
+    monthlyOverview: 'Aperçu',
     balanceByAccount: 'Balance par compte',
     expenseBreakdown: 'Répartition des dépenses',
     monthlyFlow: 'Flux du mois',
     cumulativeBalance: 'Balance cumulée',
+    help: {
+      hero: {
+        title: 'Solde & Période',
+        body: 'Le solde total reflète l\'état réel de vos comptes à aujourd\'hui — transactions passées uniquement. La période sélectionnée en bas détermine la plage analysée par les KPIs, les graphiques et les budgets. Naviguez avec les flèches, ou appuyez sur le mois pour revenir à aujourd\'hui.',
+      },
+      kpi: {
+        title: 'Aperçu de la période',
+        body: 'Revenus et Dépenses comptabilisent les transactions dont la date est passée ou égale à aujourd\'hui sur la période choisie. Les virements entre comptes sont exclus. À venir regroupe les dépenses planifiées dans le futur — elles n\'impactent pas encore les totaux.',
+      },
+      balanceByAccount: {
+        title: 'Balance par compte',
+        body: 'Solde de chaque compte à la fin de la période sélectionnée. Pour le mois en cours, il reflète l\'état à aujourd\'hui.',
+      },
+      expenseBreakdown: {
+        title: 'Répartition des dépenses',
+        body: 'Part de chaque budget dans les dépenses de la période sélectionnée. Seules les transactions passées rattachées à un budget sont comptabilisées.',
+      },
+      monthlyFlow: {
+        title: 'Flux de la période',
+        body: 'Courbe cumulative des flux nets (revenus moins dépenses) jour par jour sur la période sélectionnée. Seules les transactions passées sont prises en compte.',
+      },
+    },
   },
 
   transactions: {

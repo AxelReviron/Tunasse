@@ -26,14 +26,36 @@ export default {
   dashboard: {
     title: 'Dashboard',
     totalBalance: 'Total balance',
-    alreadyPaid: 'Already paid',
-    toPay: 'To pay',
+    period: 'Period',
+    upcoming: 'Upcoming',
     recentTransactions: 'Recent transactions',
-    monthlyOverview: 'This month',
+    monthlyOverview: 'Overview',
     balanceByAccount: 'Balance by account',
     expenseBreakdown: 'Expense breakdown',
     monthlyFlow: 'Monthly flow',
     cumulativeBalance: 'Cumulative balance',
+    help: {
+      hero: {
+        title: 'Balance & Period',
+        body: 'Total balance reflects the real state of your accounts as of today — past transactions only. The selected period below determines the range analysed by KPIs, charts and budgets. Use the arrows to navigate, or tap the month to jump back to today.',
+      },
+      kpi: {
+        title: 'Period overview',
+        body: 'Income and Expenses count transactions dated up to today within the selected period. Transfers between accounts are excluded. Upcoming groups future-dated expenses — they don\'t affect the totals yet.',
+      },
+      balanceByAccount: {
+        title: 'Balance by account',
+        body: 'Balance of each account at the end of the selected period. For the current month, it reflects today\'s state.',
+      },
+      expenseBreakdown: {
+        title: 'Expense breakdown',
+        body: 'Share of each budget in the expenses of the selected period. Only past transactions linked to a budget are counted.',
+      },
+      monthlyFlow: {
+        title: 'Period flow',
+        body: 'Cumulative net flow (income minus expenses) day by day over the selected period. Only past transactions are included.',
+      },
+    },
   },
 
   transactions: {

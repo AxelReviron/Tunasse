@@ -18,7 +18,7 @@ import { useTransactions } from '@/composables/useTransactions'
 import { DEFAULT_COLOR }   from '@/constants/colors'
 import { DEFAULT_ICON_INCOME, DEFAULT_ICON_EXPENSE } from '@/constants/icons'
 import { CURRENCY_SUBUNIT, toSubunits, fromSubunits } from '@/constants/currencies'
-import type { Transaction, TransactionType, RecurringUnit } from '@/types'
+import type { Transaction, TransactionType } from '@/types'
 
 const props = defineProps<{
   modelValue: boolean
@@ -46,9 +46,6 @@ const toAccountId       = ref<string | ''>('')
 const budgetId          = ref<string | ''>('')
 const color             = ref(DEFAULT_COLOR)
 const icon              = ref(DEFAULT_ICON_EXPENSE)
-const isRecurring       = ref(false)
-const recurringInterval = ref(1)
-const recurringUnit     = ref<RecurringUnit>('month')
 
 const isEditMode  = computed(() => !!props.transaction)
 const isTransfer  = computed(() => type.value === 'transfer')
@@ -86,9 +83,6 @@ function fill(tx: Transaction) {
   budgetId.value          = tx.budget_id ?? ''
   color.value             = tx.color ?? DEFAULT_COLOR
   icon.value              = tx.icon ?? (tx.type === 'income' ? DEFAULT_ICON_INCOME : DEFAULT_ICON_EXPENSE)
-  isRecurring.value       = tx.is_recurring ?? false
-  recurringInterval.value = tx.recurring_interval ?? 1
-  recurringUnit.value     = tx.recurring_unit ?? 'month'
 }
 
 const canSave = computed(() => {
@@ -109,9 +103,6 @@ function reset() {
   budgetId.value          = ''
   color.value             = DEFAULT_COLOR
   icon.value              = DEFAULT_ICON_EXPENSE
-  isRecurring.value       = false
-  recurringInterval.value = 1
-  recurringUnit.value     = 'month'
 }
 
 function close() {
@@ -145,9 +136,6 @@ async function save() {
       budget_id:          budgetId.value !== '' ? budgetId.value : undefined,
       color:              color.value,
       icon:               icon.value,
-      is_recurring:       isRecurring.value || undefined,
-      recurring_interval: isRecurring.value ? recurringInterval.value : undefined,
-      recurring_unit:     isRecurring.value ? recurringUnit.value : undefined,
     }
     if (isEditMode.value && props.transaction) {
       await update(props.transaction.id, payload)
@@ -236,26 +224,6 @@ async function handleDeleteConfirmed() {
         </select>
       </TnsFormField>
 
-      <TnsFormField :label="t('transactions.isRecurring')">
-        <label class="tns-toggle">
-          <input v-model="isRecurring" type="checkbox" />
-          <span>{{ t('transactions.isRecurring') }}</span>
-        </label>
-      </TnsFormField>
-
-      <template v-if="isRecurring">
-        <TnsFormField :label="t('transactions.period')">
-          <div class="tns-recurring-row">
-            <input v-model.number="recurringInterval" type="number" min="1" style="width:60px" />
-            <select v-model="recurringUnit">
-              <option v-for="u in ['day','week','month','year']" :key="u" :value="u">
-                {{ t(`transactions.recurringUnit.${u}`) }}
-              </option>
-            </select>
-          </div>
-        </TnsFormField>
-      </template>
-
       <TnsFormField :label="t('transactions.color')">
         <TnsColorPicker v-model="color" />
       </TnsFormField>
@@ -319,20 +287,6 @@ async function handleDeleteConfirmed() {
   font-weight: 600;
   font-family: var(--tns-font);
   cursor: pointer;
-}
-.tns-toggle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 15px;
-  color: var(--tns-fg);
-  padding: 4px 0;
-  cursor: pointer;
-}
-.tns-recurring-row {
-  display: flex;
-  gap: 10px;
-  padding-top: 4px;
 }
 .tns-currency-warn {
   font-size: 13px;
